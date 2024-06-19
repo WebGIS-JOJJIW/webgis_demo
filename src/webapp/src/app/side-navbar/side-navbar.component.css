@@ -1,0 +1,16 @@
+#sidebar {
+  width: 60px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+}
+
+.nav-link i {
+  font-size: 1.5rem;
+  width: 30px; /* Add a fixed width to align the text properly */
+  text-align: center; /* Center align the icon within the width */
+}
