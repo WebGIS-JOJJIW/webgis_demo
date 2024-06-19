@@ -26,12 +26,6 @@ jobs:
           command: echo Deployment is not available for now.
 
 workflows:
-  example:
+  all_tests:
     jobs:
       - test
-      - build:
-          requires:
-            - test
-      - deploy:
-          requires:
-            - test
