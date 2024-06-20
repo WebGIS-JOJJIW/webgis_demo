@@ -7,9 +7,6 @@ html, body, #app {
   .d-flex {
     height: 100%;
   }
-<<<<<<< HEAD
-  
-=======
   
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
@@ -19,4 +16,3 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     transform: none !important;
     padding: 16px !important;
 }
->>>>>>> webgis_ui_frank_01

@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
-<<<<<<< HEAD
-=======
 import { SharedService } from '../services/shared.service';
->>>>>>> webgis_ui_frank_01
 
 @Component({
   selector: 'app-root',
@@ -10,10 +7,6 @@ import { SharedService } from '../services/shared.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-<<<<<<< HEAD
-  title = 'webGIS-UI';
-  PageShow = 'livemotion'
-=======
   
   PageShow = 'livemonitor'
 
@@ -27,5 +20,4 @@ export class AppComponent {
   }
 
 
->>>>>>> webgis_ui_frank_01
 }
