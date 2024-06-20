@@ -1,0 +1,10 @@
+networks:
+  webgis_net:
+    name: webgis_net
+    driver: bridge
+
+include:
+  - ./geoserver/geoserver.yml
+  - ./postgresql/postgresql.yml
+  - ./redis/redis.yml
+  - ./rabbitmq/rabbitmq.yml

@@ -1,0 +1,22 @@
+# ========== Note ==========
+#
+# 1. The argument '--hostname' is required to make RabbitMQ metadata persistent
+#   References:
+#   - https://stackoverflow.com/questions/41330514/docker-rabbitmq-persistency
+#   - https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
+#
+# 2. The management UI is listening at port 15672. The default user and password are 'guest' and 'guest'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - ./data/:/var/lib/rabbitmq
+    networks:
+      - webgis_net
+    ports:
+      - 5672:5672
+      - 8083:15672
+    restart: always
