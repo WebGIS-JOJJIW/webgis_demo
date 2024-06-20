@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-top-navbar',
@@ -7,4 +8,11 @@ import { Component } from '@angular/core';
 })
 export class TopNavbarComponent {
 
+  constructor(private sharedService: SharedService){}
+
+  changePage(page:string){
+    this.sharedService.changeMessage(page);
+    // console.log(page);
+    
+  }
 }

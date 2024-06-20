@@ -9,6 +9,8 @@ import { DroneMotionComponent } from './drone-motion/drone-motion.component';
 import { EditorMappingComponent } from './editor-mapping/editor-mapping.component';
 import { TopNavbarComponent } from './top-navbar/top-navbar.component';
 import { SideNavbarComponent } from './side-navbar/side-navbar.component';
+import { SensorDialogComponent } from './sensor-dialog/sensor-dialog.component';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 @NgModule({
   declarations: [
@@ -18,13 +20,16 @@ import { SideNavbarComponent } from './side-navbar/side-navbar.component';
     DroneMotionComponent,
     EditorMappingComponent,
     TopNavbarComponent,
-    SideNavbarComponent
+    SideNavbarComponent,
+    SensorDialogComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [
+    provideAnimationsAsync()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
