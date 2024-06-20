@@ -8,3 +8,11 @@ html, body, #app {
     height: 100%;
   }
   
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mdc-dialog--open .mat-mdc-dialog-surface, 
+.mdc-dialog--closing .mat-mdc-dialog-surface {
+    transform: none !important;
+    padding: 16px !important;
+}

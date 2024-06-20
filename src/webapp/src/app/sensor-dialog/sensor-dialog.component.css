@@ -1,0 +1,44 @@
+mat-dialog-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  h2, h3 {
+    margin: 0;
+  }
+  
+  .photo-item {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .photo {
+    width: 100%; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px;
+  }
+
+  .photo-item img {
+    width: 200px;
+    height: auto;
+  }
+  .photo-text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .health-status {
+    color: green;
+  }
+  
+  .photo-gallery {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .summary-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
