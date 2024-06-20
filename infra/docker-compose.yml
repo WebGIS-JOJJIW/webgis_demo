@@ -7,3 +7,4 @@ include:
   - ./geoserver/geoserver.yml
   - ./postgresql/postgresql.yml
   - ./redis/redis.yml
+  - ./rabbitmq/rabbitmq.yml
