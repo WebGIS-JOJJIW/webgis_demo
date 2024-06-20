@@ -1,0 +1,31 @@
+services:
+  gis-db:
+    image: postgis/postgis:13-master
+    container_name: gis-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=geoserver
+      - POSTGRES_DB=gis-db
+    volumes:
+      - ./data/postgresql/:/var/lib/postgresql/data/
+    networks:
+      - webgis_net
+    ports:
+      - 5432:5432
+    restart: always
+
+  db-admin:
+    image: dpage/pgadmin4
+    container_name: db-admin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=geoserver
+    volumes:
+      - ./data/pgadmin4/servers.json:/pgadmin4/servers.json
+    networks:
+      - webgis_net
+    ports:
+      - 8081:80
+    depends_on:
+      - gis-db
+    restart: always
