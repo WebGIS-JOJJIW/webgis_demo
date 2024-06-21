@@ -1,3 +1,11 @@
 .end-font{
     font-size: 25px;
+    /* padding: 0 20px;
+    margin: 0 -20px; */
+}
+
+.navbar-expand-lg .navbar-collaps-2 {
+    display: flex !important;
+    flex-basis: auto;
+    justify-content: flex-start;
 }
