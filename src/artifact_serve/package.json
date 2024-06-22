@@ -1,0 +1,14 @@
+{
+  "name": "artifact_serve",
+  "version": "1.0.0",
+  "description": "Simple HTTP server for serving artifacts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
