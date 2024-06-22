@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+enum SourceType {
+    CAMERA_SENSOR = 0;
+}
+
+message SourceInfo {
+    // Type of source generating response
+    SourceType type = 1;
+
+    // ID of the source generating response
+    string id = 2;
+}
+
+message Response {
+    // Unique identifier of the message
+    string messageUuid = 1;
+
+    // Information of the sender
+    SourceInfo sourceInfo = 2;
+
+    // ImageData
+    bytes imageData = 3;
+}
