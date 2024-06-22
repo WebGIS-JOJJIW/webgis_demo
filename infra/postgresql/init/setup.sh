@@ -21,6 +21,5 @@ CREATE TABLE still_images (
 
 set -x
 # set -e
-docker exec -it gis-db $PSQL $USER $GEOSERVER_DATABASE -c "CREATE DATABASE image_db"
 docker exec -it gis-db $PSQL $USER $POSTGRES_DATABASE -c "CREATE DATABASE image_db"
 docker exec -it gis-db $PSQL $USER $IMAGE_DATABASE -c "$SQL_CREATE_IMAGE_TABLE"

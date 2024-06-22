@@ -31,7 +31,7 @@
           },
           {
             "@key": "database",
-            "$": "geoserver"
+            "$": "gis_db"
           },
           {
             "@key": "host",

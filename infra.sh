@@ -10,6 +10,25 @@ function up {
 
 function setup {
     up
+    set -x
+    # Wait for the services to finish initialization
+    echo Wait 90 seconds to wait for services to finish initialization
+    sleep 1m
+
+    # Setup PostgreSQL
+    infra/postgresql/init/setup.sh
+
+    # Setup GeoServer
+    infra/geoserver/init/setup.sh
+    set +x
+}
+
+function reset {
+    down
+    set -x
+    sudo git clean -Xfd
+    sudo docker rmi artifact_serve:latest
+    set +x
 }
 
 function down {
@@ -19,7 +38,7 @@ function down {
 }
 
 if [ -z "$1" ]; then
-    echo "Usage: $0 {up|down|setup}"
+    echo "Usage: $0 {up|down|setup|reset}"
     exit 1
 fi
 
@@ -33,8 +52,11 @@ case $1 in
     setup)
         setup
         ;;
+    reset)
+        reset
+        ;;
     *)
-        echo "Invalid argument. Usage: $0 {up|down|setup}"
+        echo "Invalid argument. Usage: $0 {up|down|setup|reset}"
         exit 1
         ;;
 esac
