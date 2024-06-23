@@ -13,7 +13,7 @@ function setup {
     set -x
     # Wait for the services to finish initialization
     echo Wait 90 seconds to wait for services to finish initialization
-    sleep 1m
+    sleep 90
 
     # Setup PostgreSQL
     infra/postgresql/init/setup.sh
