@@ -8,3 +8,4 @@ include:
   - ./postgresql/postgresql.yml
   - ./redis/redis.yml
   - ./rabbitmq/rabbitmq.yml
+  - ./artifact_serve/artifact_serve.yml

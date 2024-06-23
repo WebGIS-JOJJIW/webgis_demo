@@ -1,0 +1,14 @@
+services:
+  artifact_serve:
+    image: artifact_serve
+    build: 
+      context: ../../src/artifact_serve
+      dockerfile: ../../src/artifact_serve/Dockerfile
+    container_name: artifact_serve
+    volumes:
+      - ./data/:/data
+    networks:
+      - webgis_net
+    ports:
+      - 51515:8080
+    restart: always
