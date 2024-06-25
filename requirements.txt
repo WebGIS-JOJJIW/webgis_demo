@@ -1,0 +1,5 @@
+click==8.1.7
+psycopg2-binary==2.9.9
+redis==5.0.6
+setuptools==70.0.0
+wheel==0.43.0
