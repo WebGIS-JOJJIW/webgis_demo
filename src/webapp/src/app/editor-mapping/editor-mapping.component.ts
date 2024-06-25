@@ -114,10 +114,12 @@ export class EditorMappingComponent {
   }
 
   setMultiLayersOnMap() {
-    var workspaceLayer = [['topp', 'states'], ['topp', 'tasmania_water_bodies']];
+    var workspaceLayer = [['frvk', 'pois_state']];
     workspaceLayer.forEach(element => {
       const wfsUrl = `http://139.59.221.224:8080/geoserver/${element[0]}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${element[1]}&outputFormat=application/json`;
       var index = element[0] + '-' + element[1];
+      console.log(wfsUrl);
+      
       fetch(wfsUrl)
         .then(response => response.json())
         .then(data => {
@@ -141,6 +143,16 @@ export class EditorMappingComponent {
                 '#00f' // Blue as a default color
               ],
               'fill-opacity': 0.5 // Set the fill opacity
+            }
+          });
+
+          this.map.addLayer({
+            'id': `wfs-layer-circle-${index}`,
+            'type': 'circle',
+            'source': `wfs-layer-${index}`,
+            'paint': {
+              'circle-radius': 10,
+              'circle-color': '#FB0303'
             }
           });
 
@@ -187,22 +199,16 @@ export class EditorMappingComponent {
       if (result) {// User clicked Yes
         const wfsTransactionXml = this.convertGeoJSONToWFST(features);
         const wfsUrl = 'http://139.59.221.224:8080/geoserver/wfs';
-        // const wfsUrl = '/geoserver/wfs'; // Proxy path
-        console.log('wfsTransactionXml : ', wfsTransactionXml);
-        const username = 'admin';
-        const password = 'geoserver'
+        
         fetch(wfsUrl, {
           method: 'POST',
-          headers: {
-            'Origin' : 'http://localhost:4200',
-            'Content-Type': 'application/xml',
-            // 'Authorization': 'Basic ' + btoa(`${username}:${password}`)
-          },
+          headers: {},
           body: wfsTransactionXml
         })
           .then(response => response.text())
           .then(data => {
             console.log(`${type} data saved to GeoServer:`, data);
+            window.location.reload();
           })
           .catch(error => {
             console.error(`Error saving ${type} data to GeoServer:`, error);
@@ -215,18 +221,18 @@ export class EditorMappingComponent {
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features']): string {
-    const featureType = 'frvk:roads_papaya'; // replace with your feature type
+    const featureType = 'frvk:pois_state'; // replace with your feature type
     const typeName = 'frvk'; // replace with your type name
     const srsName = 'urn:ogc:def:crs:EPSG::4326'; // replace with your SRS name
 
     let transactionXml = `
-      <wfs:Transaction service="WFS" version="1.0.0"
+      <wfs:Transaction service="WFS" version="1.1.0"
                        xmlns:wfs="http://www.opengis.net/wfs"
                        xmlns:gml="http://www.opengis.net/gml"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xmlns:ogc="http://www.opengis.net/ogc"
                        xsi:schemaLocation="http://www.opengis.net/wfs
-                       http://schemas.opengis.net/wfs/1.0.0/wfs.xsd">
+                       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
         <wfs:Insert>
           <${featureType} xmlns:${typeName}="${typeName}">
     `;
@@ -248,9 +254,7 @@ export class EditorMappingComponent {
       } else {
         transactionXml += `
         <${featureType}>
-              <gml:geometryProperty>
                 ${this.geometryToGml(feature.geometry, srsName)}
-              </gml:geometryProperty>
         </${featureType}>
       `;
       }
@@ -269,7 +273,7 @@ export class EditorMappingComponent {
     if (geometry.type === 'Point') {
       const [x, y] = geometry.coordinates;
       return `<gml:Point srsName="${srsName}">
-      <gml:coordinates>${x},${y}</gml:coordinates>
+      <gml:coordinates>${y},${x}</gml:coordinates>
       </gml:Point>`;
     } else if (geometry.type === 'LineString') {
       const coordinates = geometry.coordinates.map(coord => coord.join(',')).join(' ');

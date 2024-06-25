@@ -15,7 +15,7 @@ import { DrawToolbarComponent } from './editor-mapping/draw-toolbar/draw-toolbar
 import { DialogWarningComponent } from './dialog-warning/dialog-warning.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-
+import { HttpClientModule } from '@angular/common/http';
 @NgModule({
   declarations: [
     AppComponent,
@@ -33,7 +33,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     BrowserModule,
     AppRoutingModule,
     MatButtonModule,
-    MatDialogModule
+    MatDialogModule,
+    HttpClientModule
   ],
   providers: [
     provideAnimationsAsync()
