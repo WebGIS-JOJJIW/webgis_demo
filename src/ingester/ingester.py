@@ -39,7 +39,7 @@ class Ingester:
         shutil.copy(str(image_path), str(artifact_path))
         return artifact_path.relative_to(ARTIFACTORY_PATH)
 
-    def _save_image_metadata_to_db(self, sensor: str, image_url: str, timestamp: int):
+    def _save_image_metadata_to_db(self, sensor: str, image_url: str, timestamp: int) -> int:
         captured_ts = datetime.fromtimestamp(
             timestamp).strftime("%Y-%m-%d %H:%M:%S")
         connection_params = {
@@ -53,16 +53,19 @@ class Ingester:
         conn.autocommit = True
 
         insert_query = """
-            INSERT INTO still_images (sensor_id, image_url, captured_ts) VALUES (%s, %s, %s)
+            INSERT INTO still_images (sensor_id, image_url, captured_ts) VALUES (%s, %s, %s) RETURNING id;
         """
         with conn.cursor() as cursor:
             cursor.execute(insert_query, (sensor, image_url, captured_ts))
+            db_primary_key = cursor.fetchone()[0]
         conn.commit()
         conn.close()
+        return db_primary_key
 
-    def _publish_image_metadata_to_channel(self, sensor: str, image_url: str, timestamp: int):
+    def _publish_image_metadata_to_channel(self, db_primary_key: int, sensor: str, image_url: str, timestamp: int):
         r = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
         image_meta = {
+            "id": db_primary_key,
             "sensor_id": sensor,
             "image_url": image_url,
             "timestamp": timestamp
@@ -74,9 +77,10 @@ class Ingester:
         artifact_relpath = self._save_image_to_artifactory(
             self._image_path, self._sensor, self._timestamp
         )
-        self._save_image_metadata_to_db(
+        db_primary_key = self._save_image_metadata_to_db(
             self._sensor, str(artifact_relpath), self._timestamp
         )
         self._publish_image_metadata_to_channel(
-            self._sensor, str(artifact_relpath), self._timestamp
+            db_primary_key, self._sensor, str(
+                artifact_relpath), self._timestamp
         )
