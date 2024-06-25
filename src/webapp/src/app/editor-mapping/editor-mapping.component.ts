@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import maplibregl, { MapLayerMouseEvent, Marker, NavigationControl } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
 
 @Component({
   selector: 'app-editor-mapping',
@@ -15,12 +16,12 @@ export class EditorMappingComponent {
   markers: Marker[] = [];
   private draw!: MapboxDraw;
 
-  ngOnInit(): void { 
+  ngOnInit(): void {
 
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [-74.3100039,40.697538], // starting position [lng, lat]
+      center: [-74.3100039, 40.697538], // starting position [lng, lat]
       zoom: 3 // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right')
@@ -35,19 +36,20 @@ export class EditorMappingComponent {
       controls: {
         line_string: true,
         polygon: true,
+        point: true,
         trash: true
       },
-      defaultMode: 'draw_line_string'//'draw_polygon' 
+      defaultMode: 'draw_point'//'draw_polygon' , 'draw_line_string'
     });
 
     (this.map as any).addControl(this.draw as any);
-
     this.map.on('draw.create', this.onDrawCreate.bind(this));
     this.map.on('draw.update', this.onDrawUpdate.bind(this));
+    this.map.on('draw.delete', this.onDrawUpdate.bind(this));
   }
 
   onDrawCreate(event: any): void {
-    console.log('Draw create:', event);
+    // console.log('Draw create:', event);
     this.saveFeatureToApi(event)
   }
 
@@ -55,58 +57,23 @@ export class EditorMappingComponent {
     console.log('Draw update:', event);
   }
 
-  // addEventListeners(): void {
-  //   this.map.on('click', this.onMapClick.bind(this));
-  //   document.addEventListener('keydown', this.onKeyDown.bind(this));
-  // }
-
-  // onMapClick(event: MapLayerMouseEvent): void {
-  //   const features = this.map.queryRenderedFeatures(event.point);
-  //   if (features.length > 0) {
-  //     this.selectedLayerId = features[0].layer.id;
-  //     console.log('Selected layer ID:', this.selectedLayerId);
-  //   } else {
-  //     this.selectedLayerId = null;
-  //   }
-  // }
-
-  // onKeyDown(event: KeyboardEvent): void {
-  //   if (event.key === 'Backspace' && this.selectedLayerId) {
-  //     this.map.removeLayer(this.selectedLayerId);
-  //     this.map.removeSource(this.selectedLayerId);
-  //     this.selectedLayerId = null;
-  //     console.log('Layer deleted');
-  //   }
-  // }
-
   setLayerOnMaps() {
     const workspace = 'tiger';
     const layer = 'tiger_roads';
-    const wfsUrl = `http://139.59.221.224:8080/geoserver/${workspace}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${layer}&outputFormat=application/json`;
-    
+    const wfsUrl = `http://139.59.221.224:8080/geoserver/${workspace}/ows?service=WFS&version=1.0.0&request=GetFeature` +
+      `&typeName=${layer}&outputFormat=application/json`;
+
     fetch(wfsUrl)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        // console.log(data);
         // Add the GeoJSON data as a new source
         this.map.addSource('wfs-layer', {
           'type': 'geojson',
           'data': data
         });
 
-        // Add a layer to use the new source
-        // this.map.addLayer({
-        //   'id': 'wfs-layer',
-        //   'type': 'circle', // Change to 'line' or 'symbol' depending on your data
-        //   'source': 'wfs-layer',
-        //   'paint': {
-        //     'circle-color': 'hsla(0,0%,0%,0.75)',
-        //     'circle-stroke-width': 1.5,
-        //     'circle-stroke-color': 'white'
-        //   }
-        // });
 
-        
         this.map.addLayer({
           'id': 'wfs-layer-fill',
           'type': 'fill',
@@ -114,7 +81,7 @@ export class EditorMappingComponent {
           'paint': {
             'fill-color': [
               'match',
-              ['get', 'urn:ogc:def:crs:EPSG::4326'], // Property name in your GeoJSON data to match
+              ['get', 'EPSG::4326'], // Property name in your GeoJSON data to match
               'value1', '#f00', // Red for value1
               'value2', '#0f0', // Green for value2
               '#00f' // Blue as a default color
@@ -198,36 +165,53 @@ export class EditorMappingComponent {
     const data = this.draw.getAll() as FeatureCollection<Geometry, GeoJsonProperties>;
     const lines = data.features.filter((feature) => feature.geometry.type === 'LineString');
     const polygons = data.features.filter((feature) => feature.geometry.type === 'Polygon');
-    
+    const point = data.features.filter((feature) => feature.geometry.type === 'Point');
+
     if (lines.length > 0) {
       this.sendFeatureDataToGeoServer(lines, 'LineString');
     }
     if (polygons.length > 0) {
       this.sendFeatureDataToGeoServer(polygons, 'Polygon');
     }
+    if (point.length > 0) {
+      this.sendFeatureDataToGeoServer(point, 'Point');
+    }
   }
 
 
   sendFeatureDataToGeoServer(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], type: string): void {
-    const wfsTransactionXml = this.convertGeoJSONToWFST(features);
-    const wfsUrl = 'YOUR_GEOSERVER_WFS_URL_HERE';
 
-    console.log('wfsTransactionXml : ',wfsTransactionXml);
-    
-    // fetch(wfsUrl, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/xml'
-    //   },
-    //   body: wfsTransactionXml
-    // })
-    // .then(response => response.text())
-    // .then(data => {
-    //   console.log(`${type} data saved to GeoServer:`, data);
-    // })
-    // .catch(error => {
-    //   console.error(`Error saving ${type} data to GeoServer:`, error);
-    // });
+    const dialogRef = this.dialog.open(DialogWarningComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {// User clicked Yes
+        const wfsTransactionXml = this.convertGeoJSONToWFST(features);
+        const wfsUrl = 'http://139.59.221.224:8080/geoserver/wfs';
+        // const wfsUrl = '/geoserver/wfs'; // Proxy path
+        console.log('wfsTransactionXml : ', wfsTransactionXml);
+        const username = 'admin';
+        const password = 'geoserver'
+        fetch(wfsUrl, {
+          method: 'POST',
+          headers: {
+            'Origin' : 'http://localhost:4200',
+            'Content-Type': 'application/xml',
+            // 'Authorization': 'Basic ' + btoa(`${username}:${password}`)
+          },
+          body: wfsTransactionXml
+        })
+          .then(response => response.text())
+          .then(data => {
+            console.log(`${type} data saved to GeoServer:`, data);
+          })
+          .catch(error => {
+            console.error(`Error saving ${type} data to GeoServer:`, error);
+          });
+
+      } else {// User clicked No
+        console.log('User chose not to save.');
+      }
+    });
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features']): string {
@@ -244,21 +228,33 @@ export class EditorMappingComponent {
                        xsi:schemaLocation="http://www.opengis.net/wfs
                        http://schemas.opengis.net/wfs/1.0.0/wfs.xsd">
         <wfs:Insert>
-          <${featureType}>
+          <${featureType} xmlns:${typeName}="${typeName}">
     `;
 
     features.forEach((feature) => {
-      transactionXml += `
-        <${typeName}>
+
+      if (feature.geometry.type === 'Polygon') {
+        transactionXml += `
+        <${featureType}>
           <gml:featureMember>
-            <${typeName} fid="${feature.id}">
+            <${featureType}>
               <gml:geometryProperty>
-                ${this.geometryToGml(feature.geometry)}
+                ${this.geometryToGml(feature.geometry, srsName)}
               </gml:geometryProperty>
-            </${typeName}>
+            </${featureType}>
           </gml:featureMember>
-        </${typeName}>
+        </${featureType}>
       `;
+      } else {
+        transactionXml += `
+        <${featureType}>
+              <gml:geometryProperty>
+                ${this.geometryToGml(feature.geometry, srsName)}
+              </gml:geometryProperty>
+        </${featureType}>
+      `;
+      }
+
     });
 
     transactionXml += `</${featureType}>
@@ -269,16 +265,27 @@ export class EditorMappingComponent {
     return transactionXml;
   }
 
-  geometryToGml(geometry: Geometry): string {
+  geometryToGml(geometry: Geometry, srsName: string): string {
     if (geometry.type === 'Point') {
       const [x, y] = geometry.coordinates;
-      return `<gml:Point srsName="urn:ogc:def:crs:EPSG::4326"><gml:coordinates>${x},${y}</gml:coordinates></gml:Point>`;
+      return `<gml:Point srsName="${srsName}">
+      <gml:coordinates>${x},${y}</gml:coordinates>
+      </gml:Point>`;
     } else if (geometry.type === 'LineString') {
       const coordinates = geometry.coordinates.map(coord => coord.join(',')).join(' ');
-      return `<gml:LineString srsName="urn:ogc:def:crs:EPSG::4326"><gml:coordinates>${coordinates}</gml:coordinates></gml:LineString>`;
+      return `<gml:LineString srsName="${srsName}">
+        <gml:coordinates>${coordinates}
+        </gml:coordinates>
+      </gml:LineString>`;
     } else if (geometry.type === 'Polygon') {
       const coordinates = geometry.coordinates[0].map(coord => coord.join(',')).join(' ');
-      return `<gml:Polygon srsName="urn:ogc:def:crs:EPSG::4326"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>${coordinates}</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>`;
+      return `<gml:Polygon srsName="${srsName}">
+        <gml:outerBoundaryIs>
+        <gml:LinearRing>
+          <gml:coordinates>${coordinates}</gml:coordinates>
+        </gml:LinearRing>
+        </gml:outerBoundaryIs>
+        </gml:Polygon>`;
     }
     return '';
   }

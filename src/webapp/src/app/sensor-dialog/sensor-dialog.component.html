@@ -1,4 +1,4 @@
-<div mat-dialog-content >
+<div mat-dialog-content *ngIf="dialogMode=='sensor'">
   <h2>Sensor 001</h2>
   <p>
     Human: <span>{{ data.humanCount }}</span> Vehicle:
@@ -42,4 +42,9 @@
     <h3>Trigger Summary</h3>
     <a href="#">Log</a>
   </div>
+</div>
+
+
+<div  *ngIf="dialogMode=='popup'">
+  
 </div>

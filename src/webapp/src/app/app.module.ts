@@ -11,6 +11,10 @@ import { TopNavbarComponent } from './top-navbar/top-navbar.component';
 import { SideNavbarComponent } from './side-navbar/side-navbar.component';
 import { SensorDialogComponent } from './sensor-dialog/sensor-dialog.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { DrawToolbarComponent } from './editor-mapping/draw-toolbar/draw-toolbar.component';
+import { DialogWarningComponent } from './dialog-warning/dialog-warning.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -21,11 +25,15 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     EditorMappingComponent,
     TopNavbarComponent,
     SideNavbarComponent,
-    SensorDialogComponent
+    SensorDialogComponent,
+    DrawToolbarComponent,
+    DialogWarningComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatButtonModule,
+    MatDialogModule
   ],
   providers: [
     provideAnimationsAsync()

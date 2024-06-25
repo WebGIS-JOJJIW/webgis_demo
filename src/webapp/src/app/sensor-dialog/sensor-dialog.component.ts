@@ -20,6 +20,7 @@ export interface MarkerDetailsData {
   styleUrl: './sensor-dialog.component.css'
 })
 export class SensorDialogComponent {
+  dialogMode = 'sensor';
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: MarkerDetailsData
   ) {}

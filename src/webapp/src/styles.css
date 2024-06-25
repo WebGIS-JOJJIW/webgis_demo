@@ -16,3 +16,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     transform: none !important;
     padding: 16px !important;
 }
+
+Demo Did you try to add
+
+.mat-dialog-container {
+  border-radius: 0px !important;
+}
