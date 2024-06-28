@@ -32,7 +32,10 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/assets/img/*",
+              "src/assets/img",
+              "src/assets/"
             ],
             "styles": [
               "src/custom-theme.scss",

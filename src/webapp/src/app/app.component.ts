@@ -11,7 +11,7 @@ export class AppComponent {
   PageShow = 'livemonitor'
 
   constructor(private sharedService: SharedService) {
-    console.log(this.PageShow);
+    // console.log(this.PageShow);
     
    }
 

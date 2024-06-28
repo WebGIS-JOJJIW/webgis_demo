@@ -9,3 +9,7 @@
     flex-basis: auto;
     justify-content: flex-start;
 }
+
+.navbar-expand-lg .navbar-nav .nav-link {
+    color: white;
+  }
