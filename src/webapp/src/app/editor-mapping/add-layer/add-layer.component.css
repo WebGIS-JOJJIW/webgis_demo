@@ -1,0 +1,22 @@
+mat-form-field{
+    padding-top: 15px;
+}
+
+.form-group{
+    padding-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.form-control{
+    width: 200px;
+}
+
+.form-select{
+    width: 200px;
+}
+
+.form-wd-3{
+    width: 300px;
+}

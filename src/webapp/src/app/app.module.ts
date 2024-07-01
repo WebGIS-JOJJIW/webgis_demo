@@ -17,6 +17,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon'
 import { HttpClientModule } from '@angular/common/http';
+import { AddLayerComponent } from './editor-mapping/add-layer/add-layer.component';
+import { MatSelectModule } from '@angular/material/select';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatRadioModule } from '@angular/material/radio';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,7 +34,8 @@ import { HttpClientModule } from '@angular/common/http';
     SideNavbarComponent,
     SensorDialogComponent,
     DrawToolbarComponent,
-    DialogWarningComponent
+    DialogWarningComponent,
+    AddLayerComponent
   ],
   imports: [
     BrowserModule,
@@ -36,7 +43,7 @@ import { HttpClientModule } from '@angular/common/http';
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
-    HttpClientModule
+    HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule
   ],
   providers: [
     provideAnimationsAsync()

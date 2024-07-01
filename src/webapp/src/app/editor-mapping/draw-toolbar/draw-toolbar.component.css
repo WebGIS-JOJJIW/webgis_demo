@@ -23,3 +23,10 @@
   padding-left: var(--bs-navbar-nav-link-padding-x) !important;
   color: white;
 }
+
+.custom-dialog-panel {
+  background-color: #1d1a1a; /* Set your desired background color */
+  color: #f2f0f0; /* Optional: Set text color */
+  padding: 20px; /* Optional: Set padding */
+  border-radius: 8px; /* Optional: Set border radius */
+}

@@ -1,41 +1,39 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, ObservableInput } from 'rxjs';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { DialogWarningComponent } from '../app/dialog-warning/dialog-warning.component';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from './shared.service';
+import { InsertLayer, attr } from '../models/geomodel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GeoServerService {
-  
-    private ipAddr = `139.59.221.224:8080`
-    private wfsUrl = `http://${this.ipAddr}/geoserver/wfs`;
 
-    constructor(private http: HttpClient,
-      private dialog: MatDialog,private shareService: SharedService) { }
+  private ipAddr = `139.59.221.224:8080`
+  private wfsUrl = `http://${this.ipAddr}/geoserver/wfs`;
 
-    pushData(payload: string): Observable<any> {
-        const headers = new HttpHeaders({ });
-        return this.http.post(this.wfsUrl, payload, { headers, responseType: 'text' });
-    }
+  constructor(private http: HttpClient,
+    private dialog: MatDialog, private shareService: SharedService) { }
 
-    fetchData(element:['','']): Observable<any> {
-    // Replace with the actual URL to fetch your data
-        const fetchUrl = `http://139.59.221.224:8080/geoserver/${element[0]}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${element[1]}&outputFormat=application/json`;
-        return this.http.get(fetchUrl);
-    }
-  
-    convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'],dict : string[]): string {
-      // const featureType = 'frvk:ply_frv'; // replace with your feature type
-      // const xmlns = 'frvk'; // replace with your type name
-      // const typeSource = 'frvk:ply_frv'
-      // const srsName = 'urn:ogc:def:crs:EPSG::4326'; // replace with your SRS name
-  
-      let transactionXml = `
+  pushData(payload: string): Observable<any> {
+    const headers = new HttpHeaders({});
+    return this.http.post(this.wfsUrl, payload, { headers, responseType: 'text' });
+  }
+
+  insertLayer(payload: string, workspace: string, db: string): Observable<any> {
+    const url = `http://${this.ipAddr}/geoserver/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
+    return this.http.post(url, payload, { responseType: 'text' });
+  }
+
+  convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
+    // const featureType = 'frvk:ply_frv'; // replace with your feature type
+    // const xmlns = 'frvk'; // replace with your type name
+    // const typeSource = 'frvk:ply_frv'
+    // const srsName = 'urn:ogc:def:crs:EPSG::4326'; // replace with your SRS name
+
+    let transactionXml = `
        <wfs:Transaction service="WFS" version="1.1.0"
        xmlns:wfs="http://www.opengis.net/wfs"
        xmlns:ogc="http://www.opengis.net/ogc"
@@ -45,48 +43,48 @@ export class GeoServerService {
                            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
   
           <wfs:Insert>
-           <${dict[0]+':'+dict[1]} xmlns:${dict[0]}="${dict[0]}">
+           <${dict[0] + ':' + dict[1]} xmlns:${dict[0]}="${dict[0]}">
       `;
-  
-      features.forEach((feature) => {
-  
-        if (feature.geometry.type === 'Polygon') {
-          transactionXml += `
-          <${dict[0]+':'+dict[2]}>
+
+    features.forEach((feature) => {
+
+      if (feature.geometry.type === 'Polygon') {
+        transactionXml += `
+          <${dict[0] + ':' + dict[2]}>
                   ${this.geometryToGml(feature.geometry, dict[3])}
-          </${dict[0]+':'+dict[2]}>
+          </${dict[0] + ':' + dict[2]}>
         `;
-        } else {
-          transactionXml += `<${dict[0]+':'+dict[2]}>
+      } else {
+        transactionXml += `<${dict[0] + ':' + dict[2]}>
           ${this.geometryToGml(feature.geometry, dict[3])}
-          </${dict[0]+':'+dict[2]}>`;
-        }
-      });
-  
-      transactionXml += `
-      </${dict[0]+':'+dict[1]}>
+          </${dict[0] + ':' + dict[2]}>`;
+      }
+    });
+
+    transactionXml += `
+      </${dict[0] + ':' + dict[1]}>
           </wfs:Insert>
         </wfs:Transaction>
       `;
-  
-      return transactionXml;
-    }
-  
-    geometryToGml(geometry: Geometry, srsName: string): string {
-      if (geometry.type === 'Point') {
-        const [x, y] = geometry.coordinates;
-        return `<gml:Point srsName="${srsName}">
+
+    return transactionXml;
+  }
+
+  geometryToGml(geometry: Geometry, srsName: string): string {
+    if (geometry.type === 'Point') {
+      const [x, y] = geometry.coordinates;
+      return `<gml:Point srsName="${srsName}">
         <gml:coordinates>${y},${x}</gml:coordinates>
         </gml:Point>`;
-      } else if (geometry.type === 'LineString') {
-        const coordinates = geometry.coordinates.map(coord => coord.reverse().join(',')).join(' ');
-        return `<gml:LineString srsName="${srsName}">
+    } else if (geometry.type === 'LineString') {
+      const coordinates = geometry.coordinates.map(coord => coord.reverse().join(',')).join(' ');
+      return `<gml:LineString srsName="${srsName}">
           <gml:coordinates>${coordinates}
           </gml:coordinates>
         </gml:LineString>`;
-      } else if (geometry.type === 'Polygon') {
-        const coordinates = geometry.coordinates[0].map(coord => coord.reverse().join(',')).join(' ');
-        return `<gml:Polygon srsName="${srsName}">
+    } else if (geometry.type === 'Polygon') {
+      const coordinates = geometry.coordinates[0].map(coord => coord.reverse().join(',')).join(' ');
+      return `<gml:Polygon srsName="${srsName}">
              <gml:exterior>
               <gml:LinearRing>
                 <gml:coordinates>${coordinates}
@@ -94,9 +92,94 @@ export class GeoServerService {
               </gml:LinearRing>
              </gml:exterior>
           </gml:Polygon>`;
-      }
-      return '';
     }
+    return '';
+  }
 
-    
+  xmlInsertLayerToPayload(response : InsertLayer) {
+    var res = `{
+      "featureType": {
+        "name": "${response.layerName}",
+        "nativeName": "${response.layerName}",
+        "namespace": {
+          "name": "${response.workspace}",
+          "href": "http://${this.ipAddr}/geoserver/rest/namespaces/${response.workspace}.json"
+        },
+        "title": "${response.layerName}",
+        "keywords": {
+          "string": [
+            "features",
+            "${response.layerName}"
+          ]
+        },
+        "nativeCRS": "GEOGCS[\"WGS 84\", \n  DATUM[\"World Geodetic System 1984\", \n    SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], \n    AUTHORITY[\"EPSG\",\"6326\"]], \n  PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n  UNIT[\"degree\", 0.017453292519943295], \n  AXIS[\"Geodetic longitude\", EAST], \n  AXIS[\"Geodetic latitude\", NORTH], \n  AUTHORITY[\"EPSG\",\"4326\"]]",
+        "srs": "EPSG:4326",
+        "nativeBoundingBox": {
+          "minx": -180,
+          "maxx": 180,
+          "miny": -90,
+          "maxy": 90,
+          "crs": "EPSG:4326"
+        },
+        "latLonBoundingBox": {
+          "minx": -180,
+          "maxx": 180,
+          "miny": -90,
+          "maxy": 90,
+          "crs": "EPSG:4326"
+        },
+        "projectionPolicy": "FORCE_DECLARED",
+        "enabled": true,
+        "store": {
+          "@class": "dataStore",
+          "name": "${response.workspace}:${response.dbName}",
+          "href": "http://${this.ipAddr}/geoserver/rest/workspaces/${response.workspace}/datastores/${response.dbName}.json"
+        },
+        "serviceConfiguration": false,
+        "simpleConversionEnabled": false,
+        "internationalTitle": "",
+        "internationalAbstract": "",
+        "maxFeatures": 0,
+        "numDecimals": 0,
+        "padWithZeros": false,
+        "forcedDecimal": false,
+        "overridingServiceSRS": false,
+        "skipNumberMatched": false,
+        "circularArcPresent": false,`
+        
+        res+= this.addAttr(response.attr);
+        res+= ` ]
+                }
+              }
+            }`
+  }
+
+  addAttr(attr : attr[]): string{
+    var text = `"attributes": {
+          "attribute": [`
+    attr.forEach( res=> {
+      var type = '"binding": "java.lang.String"'
+      if(res.type == 'polygon'){
+        type =`"binding": "org.locationtech.jts.geom.Polygon"`
+      }else if(res.type == 'point'){
+        type =`"binding": "org.locationtech.jts.geom.Point"`
+      }else if(res.type == 'line_string'){
+        type =`"binding": "org.locationtech.jts.geom.LineString"`
+      }
+      text+=`
+      {
+        "name": "${res.name}",
+        "minOccurs": 0,
+        "maxOccurs": 1,
+        "nillable": true,
+        ${type}
+      } `
+      if( !attr.findIndex(x=> attr[attr.length-1].name == res.name) ){
+        text += `,`
+      }
+    });
+      return text;
+  }
+
+
 }

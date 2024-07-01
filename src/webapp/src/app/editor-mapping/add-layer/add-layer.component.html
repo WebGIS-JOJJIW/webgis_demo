@@ -1,0 +1,106 @@
+<h3>Create Layer</h3>
+<form>
+  <!-- <div class="form-group">
+    <label for="featureName">Workspace Name:</label>
+    <input
+      type="text"
+      class="form-control"
+      id="featureName"
+      value="frvk"
+      placeholder="Enter Workspace name"
+      [disabled]="true"
+    />
+  </div>
+  <div class="form-group">
+    <label for="featureName">Db Name:</label>
+    <input
+      type="text"
+      class="form-control"
+      id="dbName"
+      value="frvk_roads"
+      placeholder="Enter Db name"
+      [disabled]="true"
+    />
+  </div> -->
+  <div class="form-group">
+    <label for="layerName">Layer Name:</label>
+    <input
+      type="text"
+      class="form-control"
+      id="layerName"
+      placeholder="Enter layer name"
+    />
+  </div>
+  <div class="form-group">
+    <label for="exampleFormControlTextarea1">Desciption</label>
+    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="exampleFormControlTextarea1">Secret Level</label>
+    <select class="form-select" aria-label="Default select example">
+    <option value="1" selected>Normal</option>
+    <option value="2">High</option>
+    <option value="3">Very High</option>
+  </select></div>
+  <br>
+  <h4>Layer Type</h4>
+  <div class="form-group">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="radioStatic" id="radioStatic" checked>
+        <label class="form-check-label" for="radioStatic">
+          Static Point
+        </label>
+      </div>
+  </div>
+  <div class="form-group">
+    <label for="exampleFormControlTextarea1"></label>
+    <select class="form-select form-wd-3" aria-label="Default select example">
+    <option value="1" selected>Standard POI</option>
+  </select></div>
+  <div class="form-group">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="radioDynamic" id="radioDynamic" >
+        <label class="form-check-label" for="radioDynamic">
+          Dynamic Point
+        </label>
+      </div>
+  </div>
+  <div class="form-group">
+    <label for="exampleFormControlTextarea1"></label>
+    <select class="form-select form-wd-3" aria-label="Default select example">
+    <option value="1" selected>Mobile Device</option>
+  </select></div>
+  <div class="form-group">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="radioPolygon" id="radioPolygon" >
+        <label class="form-check-label" for="radioPolygon">
+          Polygon
+        </label>
+      </div>
+  </div>
+  <div class="form-group">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="radioPolyline" id="radioPolyline" >
+        <label class="form-check-label" for="radioPolyline">
+          Polyline
+        </label>
+      </div>
+  </div>
+</form>
+<!-- <mat-form-field>
+  <mat-label>Select type:</mat-label>
+  <mat-select [formControl]="typeControl" required>
+    <mat-option>--</mat-option>
+    @for (type of typeMap; track type) {
+    <mat-option [value]="type">{{ type.name }}</mat-option>
+    }
+  </mat-select>
+  @if (typeControl.hasError('required')) {
+  <mat-error>Please choose an type</mat-error>
+  }
+  <mat-hint>{{typeControl.value?.desc}}</mat-hint>
+</mat-form-field> -->
+<mat-dialog-actions>
+  <button mat-button (click)="onSaveClick()">Save</button>
+  <button mat-button (click)="onNoClick()">Close</button>
+</mat-dialog-actions>
