@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChatApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.3-4"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cable = ActionCable.createConsumer('ws://localhost:1337/cable');
+      // const cable = ActionCable.createConsumer('ws://localhost:3001/cable');
+      const sensor_id = 1; // This is the sensor_id that we want to subscribe to
+      const sensorDataChannel = cable.subscriptions.create({ channel:"SensorDataChannel", sensor_id: sensor_id }, {
+        connected() {
+          ch = "sensor:" + sensor_id + ":sensor_data";
+          console.log("Connected to the " + ch + " channel");
+        },
+
+        disconnected() {
+          ch = "sensor:" + sensor_id + ":sensor_data";
+          console.log("Disconnected from the " + ch + " channel");
+        },
+
+        received(data) {
+          console.log(data);
+          const messages = document.getElementById("sensor_data");
+          const message = document.createElement("div");
+          message.textContent = data;
+          messages.appendChild(message);
+        },
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Sensor Data</h1>
+  <div id="sensor_data"></div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+services:
+
+  api: 
+    build: ./streamer-api/
+    image: streamer-api:0.1
+    container_name: api
+    ports: 
+      - "3001:3001"
+    volumes:
+      - ./streamer-api:/usr/src/app/
+    networks:
+      - webgis_net
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    command:
+      ["bin/rails","s","-b","0.0.0.0","-p","3001"]
+
+  subscriber:
+    image: streamer-api:0.1
+    container_name: subscriber
+    depends_on:
+      - api
+    networks:
+      - webgis_net
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    command:
+      ["bin/rails","content_subscriber:subscribe"]
+
+  ws_server:
+    image: streamer-api:0.1
+    container_name: ws_server
+    depends_on:
+      - api
+    networks:
+      - webgis_net
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    ports:
+      - "1337:1337"
+    command:
+      ["bundle","exec","puma","-p","1337","cable/config.ru"]

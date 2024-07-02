@@ -1,0 +1,37 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sensor: one
+  sensor_name: MyString
+  lat: 1.5
+  lon: 1.5
+  sensor_type: one
+  sensor_type_name: MyString
+  region: one
+  region_name: MyString
+  data_type: one
+  data_type_name: MyString
+  value: MyString
+  dt: 2024-06-27 11:18:58
+  dt_year: MyString
+  dt_yearmon: MyString
+  dt_epoch: 
+  partition_yearmon: MyString
+
+two:
+  sensor: two
+  sensor_name: MyString
+  lat: 1.5
+  lon: 1.5
+  sensor_type: two
+  sensor_type_name: MyString
+  region: two
+  region_name: MyString
+  data_type: two
+  data_type_name: MyString
+  value: MyString
+  dt: 2024-06-27 11:18:58
+  dt_year: MyString
+  dt_yearmon: MyString
+  dt_epoch: 
+  partition_yearmon: MyString

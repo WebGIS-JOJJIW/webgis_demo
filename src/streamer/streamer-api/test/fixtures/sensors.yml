@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  sensor_type: one
+  lat: 1.5
+  lon: 1.5
+  region: one
+  poi_id: MyString
+
+two:
+  name: MyString
+  sensor_type: two
+  lat: 1.5
+  lon: 1.5
+  region: two
+  poi_id: MyString

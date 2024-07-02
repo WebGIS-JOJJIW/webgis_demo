@@ -16,7 +16,9 @@ function setup {
     sleep 90
 
     # Setup PostgreSQL
-    infra/postgresql/init/setup.sh
+    # infra/postgresql/init/setup.sh # Previous used
+    infra/streamer/init/setup.sh
+
 
     # Setup GeoServer
     infra/geoserver/init/setup.sh

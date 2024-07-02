@@ -1,0 +1,4 @@
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=geoserver
+POSTGRES_DB=artifact-db
+POSTGRES_TEST_DB=artifact-db-test
