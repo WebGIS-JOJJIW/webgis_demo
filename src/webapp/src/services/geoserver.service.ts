@@ -18,13 +18,28 @@ export class GeoServerService {
     private dialog: MatDialog, private shareService: SharedService) { }
 
   pushData(payload: string): Observable<any> {
-    const headers = new HttpHeaders({});
-    return this.http.post(this.wfsUrl, payload, { headers, responseType: 'text' });
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa('admin:geoserver')
+      })
+    };
+
+    console.log(httpOptions);
+    console.log('Basic ' + btoa('admin:geoserver'));
+    return this.http.post(this.wfsUrl, payload,httpOptions);
   }
 
-  insertLayer(payload: string, workspace: string, db: string): Observable<any> {
+  InsertLayer(payload: string, workspace: string, db: string): Observable<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa('admin:geoserver')
+      })
+    };
+    console.log('Basic ' + btoa('admin:geoserver'));
     const url = `http://${this.ipAddr}/geoserver/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
-    return this.http.post(url, payload, { responseType: 'text' });
+    return this.http.post(url, payload);
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
@@ -96,7 +111,7 @@ export class GeoServerService {
     return '';
   }
 
-  xmlInsertLayerToPayload(response : InsertLayer) {
+  xmlInsertLayerToPayload(response: InsertLayer): string {
     var res = `{
       "featureType": {
         "name": "${response.layerName}",
@@ -106,13 +121,14 @@ export class GeoServerService {
           "href": "http://${this.ipAddr}/geoserver/rest/namespaces/${response.workspace}.json"
         },
         "title": "${response.layerName}",
+        "abstract": "${response.description}",
         "keywords": {
           "string": [
             "features",
             "${response.layerName}"
           ]
         },
-        "nativeCRS": "GEOGCS[\"WGS 84\", \n  DATUM[\"World Geodetic System 1984\", \n    SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], \n    AUTHORITY[\"EPSG\",\"6326\"]], \n  PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n  UNIT[\"degree\", 0.017453292519943295], \n  AXIS[\"Geodetic longitude\", EAST], \n  AXIS[\"Geodetic latitude\", NORTH], \n  AUTHORITY[\"EPSG\",\"4326\"]]",
+        "nativeCRS": "GEOGCS[\\"WGS 84\\", \\n  DATUM[\\"World Geodetic System 1984\\", \\n    SPHEROID[\\"WGS 84\\", 6378137.0, 298.257223563, AUTHORITY[\\"EPSG\\",\\"7030\\"]], \\n    AUTHORITY[\\"EPSG\\",\\"6326\\"]], \\n  PRIMEM[\\"Greenwich\\", 0.0, AUTHORITY[\\"EPSG\\",\\"8901\\"]], \\n  UNIT[\\"degree\\", 0.017453292519943295], \\n  AXIS[\\"Geodetic longitude\\", EAST], \\n  AXIS[\\"Geodetic latitude\\", NORTH], \\n  AUTHORITY[\\"EPSG\\",\\"4326\\"]]",
         "srs": "EPSG:4326",
         "nativeBoundingBox": {
           "minx": -180,
@@ -146,27 +162,29 @@ export class GeoServerService {
         "overridingServiceSRS": false,
         "skipNumberMatched": false,
         "circularArcPresent": false,`
-        
-        res+= this.addAttr(response.attr);
-        res+= ` ]
+
+    res += this.addAttr(response.attr);
+    res += ` ]
                 }
               }
             }`
+
+    return res;
   }
 
-  addAttr(attr : attr[]): string{
+  addAttr(attr: attr[]): string {
     var text = `"attributes": {
           "attribute": [`
-    attr.forEach( res=> {
+    attr.forEach(res => {
       var type = '"binding": "java.lang.String"'
-      if(res.type == 'polygon'){
-        type =`"binding": "org.locationtech.jts.geom.Polygon"`
-      }else if(res.type == 'point'){
-        type =`"binding": "org.locationtech.jts.geom.Point"`
-      }else if(res.type == 'line_string'){
-        type =`"binding": "org.locationtech.jts.geom.LineString"`
+      if (res.type?.toLowerCase() == 'polygon') {
+        type = `"binding": "org.locationtech.jts.geom.Polygon"`
+      } else if (res.type?.toLowerCase() == 'point') {
+        type = `"binding": "org.locationtech.jts.geom.Point"`
+      } else if (res.type?.toLowerCase() == 'linestring') {
+        type = `"binding": "org.locationtech.jts.geom.LineString"`
       }
-      text+=`
+      text += `
       {
         "name": "${res.name}",
         "minOccurs": 0,
@@ -174,11 +192,12 @@ export class GeoServerService {
         "nillable": true,
         ${type}
       } `
-      if( !attr.findIndex(x=> attr[attr.length-1].name == res.name) ){
+      
+      if (!(attr[attr.length - 1].name==res.name)) {
         text += `,`
       }
     });
-      return text;
+    return text;
   }
 
 

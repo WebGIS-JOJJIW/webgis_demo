@@ -9,33 +9,35 @@ import { AddLayerComponent } from '../add-layer/add-layer.component';
   styleUrl: './draw-toolbar.component.css'
 })
 export class DrawToolbarComponent {
-  constructor(private sharedService: SharedService,private dialog :MatDialog){
+  constructor(private sharedService: SharedService, private dialog: MatDialog) {
 
   }
-  inputSearch =""
+  inputSearch = ""
 
-  changeMode(mode: 'draw_polygon' |'draw_line_string'|'draw_point'){
+  changeMode(mode: 'draw_polygon' | 'draw_line_string' | 'draw_point') {
     this.sharedService.changeMode(mode);
   }
 
-  onClickAddlayer(){
+  onClickAddlayer() {
+    this.dialog.closeAll();
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.height='90%';
-    dialogConfig.width='450px';
+    dialogConfig.height = '90%';
+    dialogConfig.width = '450px';
     dialogConfig.position = {
       top: '110px',
       right: '10px'
-    };  
+    };
     dialogConfig.hasBackdrop = false;
-    dialogConfig.panelClass = 'custom-dialog-panel';
-    const dialogRef = this.dialog.open(AddLayerComponent,dialogConfig);
+    dialogConfig.panelClass = 'custom-modalbox';
+
+    const dialogRef = this.dialog.open(AddLayerComponent, dialogConfig);
 
     // dialogRef.afterClosed().subscribe(result => {
     //   if (result) {
-        
+
     //   } else {
     //     console.log('User chose not to save.');
-        
+
     //   }
     // });
   }

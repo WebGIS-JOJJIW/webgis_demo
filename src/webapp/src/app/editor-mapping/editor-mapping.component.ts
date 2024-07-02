@@ -132,7 +132,7 @@ export class EditorMappingComponent implements OnInit {
   private addLayerToMap(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
     const paint: { [key: string]: any } = {};
     paint[colorProperty] = ['get', 'color'];
-    console.log(type);
+    // console.log(type);
 
     if (type === 'fill') {
       paint['fill-opacity'] = opacityOrRadius;
@@ -214,7 +214,7 @@ export class EditorMappingComponent implements OnInit {
           .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
       } else {
         console.log('User chose not to save.');
-        this.cancelDrawing();
+        // this.cancelDrawing();
       }
     });
   }
@@ -255,8 +255,8 @@ export class EditorMappingComponent implements OnInit {
       this.cancelDrawing();
     }
     if (event.key === 'Backspace') {
-      console.log(event);
-      console.log(this.draw);
+      // console.log(event);
+      // console.log(this.draw);
     }
   }
   //#endregion

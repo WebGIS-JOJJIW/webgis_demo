@@ -1,106 +1,104 @@
 <h3>Create Layer</h3>
-<form>
-  <!-- <div class="form-group">
-    <label for="featureName">Workspace Name:</label>
-    <input
-      type="text"
-      class="form-control"
-      id="featureName"
-      value="frvk"
-      placeholder="Enter Workspace name"
-      [disabled]="true"
-    />
-  </div>
-  <div class="form-group">
-    <label for="featureName">Db Name:</label>
-    <input
-      type="text"
-      class="form-control"
-      id="dbName"
-      value="frvk_roads"
-      placeholder="Enter Db name"
-      [disabled]="true"
-    />
-  </div> -->
+<form [formGroup]="formGroup" (ngSubmit)="onSaveClick()">
   <div class="form-group">
     <label for="layerName">Layer Name:</label>
     <input
       type="text"
       class="form-control"
-      id="layerName"
+      formControlName="layerName"
       placeholder="Enter layer name"
+      [ngClass]="{'is-invalid': formGroup.get('layerName')?.invalid && formGroup.get('layerName')?.touched}"
     />
+    <div *ngIf="formGroup.get('layerName')?.invalid && formGroup.get('layerName')?.touched" class="invalid-feedback">
+      Layer name is required.
+    </div>
   </div>
   <div class="form-group">
-    <label for="exampleFormControlTextarea1">Desciption</label>
-    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+    <label for="description">Description:</label>
+    <textarea class="form-control" formControlName="description" rows="3"></textarea>
   </div>
   <div class="form-group">
-    <label for="exampleFormControlTextarea1">Secret Level</label>
-    <select class="form-select" aria-label="Default select example">
-    <option value="1" selected>Normal</option>
-    <option value="2">High</option>
-    <option value="3">Very High</option>
-  </select></div>
+    <label for="secretLevel">Secret Level</label>
+    <select class="form-select" id="secretLevel" formControlName="secretLevel">
+      <option value="Normal">Normal</option>
+      <option value="High">High</option>
+      <option value="Very High">Very High</option>
+    </select>
+  </div>
   <br>
   <h4>Layer Type</h4>
   <div class="form-group">
     <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioStatic" id="radioStatic" checked>
-        <label class="form-check-label" for="radioStatic">
-          Static Point
-        </label>
-      </div>
+      <input
+        class="form-check-input"
+        type="radio"
+        id="radioStatic"
+        formControlName="layerType"
+        value="Point"
+        name="layerType"
+        (change)="onChange('Point')"
+      />
+      <label class="form-check-label" for="radioStatic"> Static Point </label>
+    </div>
   </div>
   <div class="form-group">
-    <label for="exampleFormControlTextarea1"></label>
-    <select class="form-select form-wd-3" aria-label="Default select example">
-    <option value="1" selected>Standard POI</option>
-  </select></div>
-  <div class="form-group">
-    <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioDynamic" id="radioDynamic" >
-        <label class="form-check-label" for="radioDynamic">
-          Dynamic Point
-        </label>
-      </div>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlTextarea1"></label>
-    <select class="form-select form-wd-3" aria-label="Default select example">
-    <option value="1" selected>Mobile Device</option>
-  </select></div>
-  <div class="form-group">
-    <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioPolygon" id="radioPolygon" >
-        <label class="form-check-label" for="radioPolygon">
-          Polygon
-        </label>
-      </div>
+    <label for="poiType"></label>
+    <select class="form-select form-wd-3" formControlName="poiType">
+      <option value="standard-poi">Standard POI</option>
+    </select>
   </div>
   <div class="form-group">
     <div class="form-check">
-        <input class="form-check-input" type="radio" name="radioPolyline" id="radioPolyline" >
-        <label class="form-check-label" for="radioPolyline">
-          Polyline
-        </label>
-      </div>
+      <input
+        class="form-check-input"
+        type="radio"
+        id="radioDynamic"
+        formControlName="dynamic"
+        value="Dynamic"
+        name="layerType"
+        
+        (change)="onChange('Dynamic')"
+      />
+      <label class="form-check-label" for="radioDynamic"> Dynamic Point </label>
+    </div>
   </div>
+  <div class="form-group">
+    <label for="poiType"></label>
+    <select class="form-select form-wd-3" formControlName="poiType" >
+      <option value="mobile-device">Mobile Device</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        id="radioPolygon"
+        formControlName="layerType"
+        value="Polygon"
+        name="layerType"
+        (change)="onChange('Polygon')"
+      />
+      <label class="form-check-label" for="radioPolygon"> Polygon </label>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        id="radioPolyline"
+        formControlName="layerType"
+        value="LineString"
+        name="layerType"
+        (change)="onChange('LineString')"
+      />
+      <label class="form-check-label" for="radioPolyline"> Polyline </label>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary" [disabled]="formGroup.invalid">Save</button>
 </form>
-<!-- <mat-form-field>
-  <mat-label>Select type:</mat-label>
-  <mat-select [formControl]="typeControl" required>
-    <mat-option>--</mat-option>
-    @for (type of typeMap; track type) {
-    <mat-option [value]="type">{{ type.name }}</mat-option>
-    }
-  </mat-select>
-  @if (typeControl.hasError('required')) {
-  <mat-error>Please choose an type</mat-error>
-  }
-  <mat-hint>{{typeControl.value?.desc}}</mat-hint>
-</mat-form-field> -->
+
 <mat-dialog-actions>
-  <button mat-button (click)="onSaveClick()">Save</button>
   <button mat-button (click)="onNoClick()">Close</button>
 </mat-dialog-actions>
