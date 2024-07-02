@@ -1,0 +1,51 @@
+services:
+
+  api: 
+    build: ./streamer-api/
+    image: streamer-api:0.1
+    ports: 
+      - "3001:3001"
+    volumes:
+      - ./streamer-api:/usr/src/app/
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    command:
+      ["bin/rails","s","-b","0.0.0.0","-p","3001"]
+
+  subscriber:
+    image: streamer-api:0.1
+    depends_on:
+      - api
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    command:
+      ["bin/rails","content_subscriber:subscribe"]
+
+  ws_server:
+    image: streamer-api:0.1
+    depends_on:
+      - api
+    env_file:
+      - .env/dev/web
+      - .env/dev/db
+    ports:
+      - "1337:1337"
+    command:
+      ["bundle","exec","puma","-p","1337","cable/config.ru"]
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  database:
+    image: postgres
+    env_file:
+      - .env/dev/db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      
+volumes:
+     db_data:

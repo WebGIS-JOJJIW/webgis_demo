@@ -1,0 +1,6 @@
+DATABASE_HOST=gis-db
+DATABASE_PORT=5432
+RAILS_ENV=development
+REDIS_URL=redis://redis:6379/1
+WS_URL=ws://ws_server:1337
+INGESTER_REDIS_CHANNEL=ingester

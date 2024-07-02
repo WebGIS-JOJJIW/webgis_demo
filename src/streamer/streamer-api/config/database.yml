@@ -1,0 +1,19 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>
+  host: <%= ENV.fetch('DATABASE_HOST') { 'gis-db' } %>
+  port: <%= ENV.fetch('DATABASE_PORT') { 5432 } %>
+  username: <%= ENV.fetch('POSTGRES_USER') { 'admin' } %>
+  password: <%= ENV.fetch('POSTGRES_PASSWORD') { 'geoserver' } %>
+  database: <%= ENV.fetch('POSTGRES_DB') { 'artifact-db' } %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  database: <%= ENV.fetch('POSTGRES_TEST_DB') { 'artifact-db-test' } %>
+
+production:
+  <<: *default
