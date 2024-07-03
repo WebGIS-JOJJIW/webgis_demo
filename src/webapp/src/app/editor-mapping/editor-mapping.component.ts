@@ -30,8 +30,8 @@ export class EditorMappingComponent implements OnInit {
     this.initializeMap();
     // this.initializeDraw();
     this.subscribeToModeChanges();
-  
-    
+
+
   }
 
   //#region Initialization
@@ -46,6 +46,7 @@ export class EditorMappingComponent implements OnInit {
     this.map.addControl(new NavigationControl(), 'bottom-right');
     this.setMultiLayersOnMap();
     this.map.on('load', () => {
+      this.addCustomImages();
       this.initializeDraw();
     });
   }
@@ -111,7 +112,7 @@ export class EditorMappingComponent implements OnInit {
 
     const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
     const index = `${wrk}-${ly}`;
-    console.log(wfsUrl);
+    // console.log(wfsUrl);
 
     fetch(wfsUrl)
       .then(response => response.json())
@@ -128,7 +129,12 @@ export class EditorMappingComponent implements OnInit {
         if (this.mode == 'draw_polygon') {
           this.addLayerToMap(index, 'fill', 'fill-color', 0.5);
         }
-        this.addLayerToMap(index, 'circle', 'circle-color', 3);
+
+        if (this.mode == 'draw_point') {
+          this.addLayerToMap(index, 'circle', 'circle-color', 6);
+        } else {
+          this.addLayerToMap(index, 'circle', 'circle-color', 3);
+        }
         this.addLayerToMap(index, 'line', 'line-color', 2);
       })
       .catch(error => console.error('Error fetching WFS data:', error));
@@ -138,31 +144,45 @@ export class EditorMappingComponent implements OnInit {
     const paint: { [key: string]: any } = {};
     paint[colorProperty] = ['get', 'color'];
     // console.log(type);
-
-    if (type === 'fill') {
-      paint['fill-opacity'] = opacityOrRadius;
+    if (this.mode == 'draw_point') {
       this.map.addLayer({
         'id': `wfs-laye-${type}-${index}`,
-        'type': 'fill',
+        type: 'symbol',
         'source': `wfs-layer-${index}`,
-        paint: paint
+        layout: {
+          'icon-image': 'custom-marker', // Change this to your preferred marker icon
+          'icon-size': 1.5,
+          'text-field': '{title}',
+          'text-offset': [0, 1.25],
+          'text-anchor': 'top'
+        }
       });
-    } else if (type === 'circle') {
-      paint['circle-radius'] = opacityOrRadius;
-      this.map.addLayer({
-        'id': `wfs-laye-${type}-${index}`,
-        'type': 'circle',
-        'source': `wfs-layer-${index}`,
-        paint: paint
-      });
-    } else if (type === 'line') {
-      paint['line-width'] = opacityOrRadius;
-      this.map.addLayer({
-        'id': `wfs-laye-${type}-${index}`,
-        'type': 'line',
-        'source': `wfs-layer-${index}`,
-        paint: paint
-      });
+    } else {
+      if (type === 'fill') {
+        paint['fill-opacity'] = opacityOrRadius;
+        this.map.addLayer({
+          'id': `wfs-laye-${type}-${index}`,
+          'type': 'fill',
+          'source': `wfs-layer-${index}`,
+          paint: paint
+        });
+      } else if (type === 'circle') {
+        paint['circle-radius'] = opacityOrRadius;
+        this.map.addLayer({
+          'id': `wfs-laye-${type}-${index}`,
+          'type': 'circle',
+          'source': `wfs-layer-${index}`,
+          paint: paint
+        });
+      } else if (type === 'line') {
+        paint['line-width'] = opacityOrRadius;
+        this.map.addLayer({
+          'id': `wfs-laye-${type}-${index}`,
+          'type': 'line',
+          'source': `wfs-layer-${index}`,
+          paint: paint
+        });
+      }
     }
     // console.log(paint);
 
@@ -192,11 +212,11 @@ export class EditorMappingComponent implements OnInit {
     var ly = 'layer'
     var type = 'type'
     if (this.mode == 'draw_point') {
-      wrk = 'gis'; ly = 'poi'; type='the_geom';
+      wrk = 'gis'; ly = 'poi'; type = 'the_geom';
     } else if (this.mode == 'draw_line_string') {
-      wrk = 'gis'; ly = 'test_polyline'; type='the_geom';
+      wrk = 'gis'; ly = 'test_polyline'; type = 'the_geom';
     } else {
-      wrk = 'frvk'; ly = 'ply_frv'; type='ply_frv'; 
+      wrk = 'frvk'; ly = 'ply_frv'; type = 'ply_frv';
     }
     const dict = [wrk, ly, type, 'urn:ogc:def:crs:EPSG::4326'];
     const dialogRef = this.dialog.open(DialogWarningComponent);
@@ -265,4 +285,16 @@ export class EditorMappingComponent implements OnInit {
     }
   }
   //#endregion
+
+  addCustomImages(): void {
+    // Add your custom marker image
+    const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
+    const img = new Image(30, 30); // Adjust the size as needed
+    img.onload = () => {
+      if (!this.map.hasImage('custom-marker')) {
+        this.map.addImage('custom-marker', img);
+      }
+    };
+    img.src = imgUrl;
+  }
 }
