@@ -22,6 +22,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
+import { LayersListComponent } from './side-navbar/layers-list/layers-list.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { MatRadioModule } from '@angular/material/radio';
     SensorDialogComponent,
     DrawToolbarComponent,
     DialogWarningComponent,
-    AddLayerComponent
+    AddLayerComponent,
+    LayersListComponent
   ],
   imports: [
     BrowserModule,

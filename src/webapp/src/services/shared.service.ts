@@ -5,11 +5,12 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class SharedService {
-  [x: string]: any;
   private messagePageChange = new BehaviorSubject<string>('livemonitor');
   private messageMode = new BehaviorSubject<string>('draw_point');
+  private pageEditorOn = new BehaviorSubject<boolean>(false);
   currentMessage = this.messagePageChange.asObservable();
   currentMode = this.messageMode.asObservable();
+  currentPageOn = this.pageEditorOn.asObservable();
 
   changeMessage(message: string) {
     this.messagePageChange.next(message);
@@ -17,13 +18,13 @@ export class SharedService {
 
   changeMode(mode: string){
     this.messageMode.next(mode);
-    // console.log(mode);
-    
+  }
+
+  TurnOnOrOff(sw : boolean){
+    this.pageEditorOn.next(sw);
   }
 
   getRandomColor(): string {
-    // console.log('random color');
-    
     const letters = '0123456789ABCDEF';
     let color = '#';
     for (let i = 0; i < 6; i++) {

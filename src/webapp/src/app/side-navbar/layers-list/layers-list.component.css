@@ -1,0 +1,37 @@
+.dialog-container {
+    position: relative;
+    /* background-color: #2b2b2b; */
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.layer-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #fff;
+    padding: 20px 10px;
+}
+
+.layer-image {
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+}
+
+.layer-details p {
+    margin: 0;
+    color: white;
+    font-size: 20px;
+}
+
+span{
+    color: rgba(255, 255, 255, 0.7); 
+    padding-top: 10px;
+}

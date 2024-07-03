@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import maplibregl, { Marker, NavigationControl, Popup } from 'maplibre-gl';
 import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-live-motion',
@@ -9,7 +10,10 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrl: './live-motion.component.css'
 })
 export class LiveMotionComponent {
-  constructor(public dialog: MatDialog) { }
+  constructor(private dialog: MatDialog,private sharedService:SharedService) {
+    this.dialog.closeAll();
+    this.sharedService.TurnOnOrOff(false);
+   }
   private map!: maplibregl.Map;
   markers: Marker[] = [];
 

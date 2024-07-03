@@ -1,0 +1,22 @@
+<div class="dialog-container">
+    <div class="rows">
+        <div class="cl-10" >
+            <h3 >Layer List</h3>
+        </div>
+        <div class="cl-2">
+            <button mat-icon-button class="close-button" (click)="closeDialog()">
+                <mat-icon>close</mat-icon>
+              </button>
+        </div>
+    </div>
+    <div mat-dialog-content>
+        <div class="layer-item" *ngFor="let layer of layers">
+          <img src="assets/img/mt.jpeg" alt="Layer Image" class="layer-image">
+          <div class="layer-details">
+            <p>Name: {{ layer.name }}</p><br>
+            <span>Description: {{layer.abs}}</span>
+          </div>
+        </div>
+      </div>
+  </div>
+  

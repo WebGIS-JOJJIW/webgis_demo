@@ -25,6 +25,7 @@ export class EditorMappingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.sharedService.TurnOnOrOff(true);
     this.proxy = this.geoServerService.GetProxy();
     // console.log(this.proxy);
     this.initializeMap();
@@ -40,7 +41,7 @@ export class EditorMappingComponent implements OnInit {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [-74.3100039, 40.697538],
-      zoom: 3
+      zoom: 3,
     });
 
     this.map.addControl(new NavigationControl(), 'bottom-right');
