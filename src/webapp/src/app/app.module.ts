@@ -9,6 +9,19 @@ import { DroneMotionComponent } from './drone-motion/drone-motion.component';
 import { EditorMappingComponent } from './editor-mapping/editor-mapping.component';
 import { TopNavbarComponent } from './top-navbar/top-navbar.component';
 import { SideNavbarComponent } from './side-navbar/side-navbar.component';
+import { SensorDialogComponent } from './sensor-dialog/sensor-dialog.component';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { DrawToolbarComponent } from './editor-mapping/draw-toolbar/draw-toolbar.component';
+import { DialogWarningComponent } from './dialog-warning/dialog-warning.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon'
+import { HttpClientModule } from '@angular/common/http';
+import { AddLayerComponent } from './editor-mapping/add-layer/add-layer.component';
+import { MatSelectModule } from '@angular/material/select';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatRadioModule } from '@angular/material/radio';
 
 @NgModule({
   declarations: [
@@ -18,13 +31,23 @@ import { SideNavbarComponent } from './side-navbar/side-navbar.component';
     DroneMotionComponent,
     EditorMappingComponent,
     TopNavbarComponent,
-    SideNavbarComponent
+    SideNavbarComponent,
+    SensorDialogComponent,
+    DrawToolbarComponent,
+    DialogWarningComponent,
+    AddLayerComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatIconModule,
+    HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule
   ],
-  providers: [],
+  providers: [
+    provideAnimationsAsync()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

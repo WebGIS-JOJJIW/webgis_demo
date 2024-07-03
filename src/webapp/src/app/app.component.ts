@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SharedService } from '../services/shared.service';
 
 @Component({
   selector: 'app-root',
@@ -6,6 +7,17 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'webGIS-UI';
-  PageShow = 'livemotion'
+  
+  PageShow = 'livemonitor'
+
+  constructor(private sharedService: SharedService) {
+    // console.log(this.PageShow);
+    
+   }
+
+  ngOnInit() {
+    this.sharedService.currentMessage.subscribe(message => this.PageShow = message);
+  }
+
+
 }

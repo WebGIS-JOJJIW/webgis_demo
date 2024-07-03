@@ -1,0 +1,25 @@
+.end-font{
+  font-size: 18px;
+  /* padding: 0 20px;
+  margin: 0 -20px; */
+}
+
+.navbar-expand-lg .navbar-collaps-2 {
+  display: flex !important;
+  flex-basis: auto;
+  justify-content: flex-start;
+}
+
+.navbar-expand-lg .navbar-nav .nav-link {
+  padding-right: var(--bs-navbar-nav-link-padding-x) !important;
+  padding-left: var(--bs-navbar-nav-link-padding-x) !important;
+  padding-top: 15px !important;
+  color: white;
+}
+
+
+.navbar-expand-lg .navbar-nav .nav-link2 {
+  padding-right: var(--bs-navbar-nav-link-padding-x) !important;
+  padding-left: var(--bs-navbar-nav-link-padding-x) !important;
+  color: white;
+}

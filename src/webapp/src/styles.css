@@ -1,10 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
-html, body, #app {
-    height: 100%;
-    margin: 0;
-  }
-  
-  .d-flex {
-    height: 100%;
-  }
-  
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mdc-dialog--open .mat-mdc-dialog-surface,
+.mdc-dialog--closing .mat-mdc-dialog-surface {
+  transform: none !important;
+  padding: 16px !important;
+  background-color: #162528;
+  color: white;
+}

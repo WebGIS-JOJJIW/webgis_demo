@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import maplibregl, { Marker, NavigationControl, Popup } from 'maplibre-gl';
+import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-live-motion',
@@ -7,7 +9,7 @@ import maplibregl, { Marker, NavigationControl, Popup } from 'maplibre-gl';
   styleUrl: './live-motion.component.css'
 })
 export class LiveMotionComponent {
-  constructor() { }
+  constructor(public dialog: MatDialog) { }
   private map!: maplibregl.Map;
   markers: Marker[] = [];
 
@@ -80,44 +82,28 @@ export class LiveMotionComponent {
 
     markers.forEach(markerData => {
 
-      // const el = document.createElement('div');
-      // el.className = 'custom-marker';
-      // el.style.backgroundImage = 'url(https://placekitten.com/g/50/50)'; // URL to your custom icon
-      // el.style.width = '50px';
-      // el.style.height = '50px';
-      // el.style.backgroundSize = '100%';
-
-      // const marker = new maplibregl.Marker()
-      //   .setLngLat([12.550343, 55.665957])
-      //   .addTo(map);
-
       const marker = new Marker({
-        color: 'red', // optional color property if you are using custom colored marker images
+        color: 'red', // optional color property if you are using custom colored marker imagesxs
         draggable: true
       })
       marker.setLngLat(markerData.coordinates)
       marker.addTo(this.map);
       this.markers.push(marker);
-      // console.log('marker');
-      
 
+      marker.getElement().addEventListener('click', () => {
+        this.openDialog(markerData as MarkerDetailsData);
+      });
     });
   }
 
-  private setMarkerImageSize(imgElement: HTMLImageElement, zoomLevel: number): void {
-    const size = Math.max(30, 50 * (zoomLevel / 7));
-    imgElement.style.width = `${size}px`;
-    imgElement.style.height = `${size}px`;
+  openDialog(data: MarkerDetailsData): void {
+    this.dialog.open(SensorDialogComponent, {
+      width: '450px',
+      height: '100%',
+      data: data,
+      position: { top: '80px', right: '0' }
+    });
   }
-
-  // openDialog(data: MarkerDetailsData): void {
-  //   this.dialog.open(MarkerDetailsDialogComponent, {
-  //     width: '400px',
-  //     height: '600px',
-  //     data: data,
-  //     position: { top: '60px', right: '0' }
-  //   });
-  // }
 
   ngOnDestroy(): void {
     if (this.map) {
@@ -125,4 +111,6 @@ export class LiveMotionComponent {
     }
   }
   //#endregion
+
+  
 }

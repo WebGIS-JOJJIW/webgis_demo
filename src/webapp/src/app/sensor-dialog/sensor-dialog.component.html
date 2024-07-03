@@ -1,0 +1,38 @@
+<div mat-dialog-content *ngIf="dialogMode=='sensor'">
+  <h2>Sensor 001</h2>
+  <p>
+    Human: <span>{{ data.humanCount }}</span> Vehicle:
+    <span>{{ data.vehicleCount }}</span> Other:
+    <span>{{ data.otherCount }}</span>
+  </p>
+  <p>
+    <strong>Health:</strong> <span class="health-status">{{ data.healthStatus }}</span> {{ data.healthTime }}
+  </p>
+
+  <hr />
+  <h3>Photo</h3>
+  <p>{{data.latestPhotoTime}}</p>
+  <img src="{{data.latestPhoto}}" alt="Latest Photo" class="photo">
+  
+  <div class="photo-gallery row" >
+    <div class="photo-item" *ngFor="let photo of data.previousPhotos">
+      <img [src]="photo.url"  alt="Photo 1">
+      <div class="photo-text">
+        <p>{{ photo.time }}</p>
+        <p>By: {{ photo.by }}</p>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="summary-container">
+    <h3>Trigger Summary</h3>
+    <a href="#">Log</a>
+  </div>
+</div>
+
+
+<div  *ngIf="dialogMode=='popup'">
+  
+</div>
