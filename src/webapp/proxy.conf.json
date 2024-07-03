@@ -1,9 +1,0 @@
-{
-    "/geoserver": {
-      "target": "http://139.59.221.224:8080",
-      "secure": false,
-      "changeOrigin": true,
-      "logLevel": "debug"
-    }
-  }
-  

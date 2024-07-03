@@ -11,8 +11,8 @@ import { InsertLayer, attr } from '../models/geomodel';
 })
 export class GeoServerService {
 
-  private ipAddr = `139.59.221.224:8080`
-  private wfsUrl = `http://${this.ipAddr}/geoserver/wfs`;
+
+  private proxy = `http://139.59.221.224:8080/geoserver`;
 
   constructor(private http: HttpClient,
     private dialog: MatDialog, private shareService: SharedService) { }
@@ -27,7 +27,7 @@ export class GeoServerService {
 
     console.log(httpOptions);
     console.log('Basic ' + btoa('admin:geoserver'));
-    return this.http.post(this.wfsUrl, payload,httpOptions);
+    return this.http.post(this.proxy+'/wfs', payload,httpOptions);
   }
 
   InsertLayer(payload: string, workspace: string, db: string): Observable<any> {
@@ -38,7 +38,7 @@ export class GeoServerService {
       })
     };
     console.log('Basic ' + btoa('admin:geoserver'));
-    const url = `http://${this.ipAddr}/geoserver/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
+    const url = `${this.proxy}/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
     return this.http.post(url, payload);
   }
 
@@ -118,7 +118,7 @@ export class GeoServerService {
         "nativeName": "${response.layerName}",
         "namespace": {
           "name": "${response.workspace}",
-          "href": "http://${this.ipAddr}/geoserver/rest/namespaces/${response.workspace}.json"
+          "href": "${this.proxy}/rest/namespaces/${response.workspace}.json"
         },
         "title": "${response.layerName}",
         "abstract": "${response.description}",
@@ -149,7 +149,7 @@ export class GeoServerService {
         "store": {
           "@class": "dataStore",
           "name": "${response.workspace}:${response.dbName}",
-          "href": "http://${this.ipAddr}/geoserver/rest/workspaces/${response.workspace}/datastores/${response.dbName}.json"
+          "href": "${this.proxy}/rest/workspaces/${response.workspace}/datastores/${response.dbName}.json"
         },
         "serviceConfiguration": false,
         "simpleConversionEnabled": false,
@@ -198,6 +198,10 @@ export class GeoServerService {
       }
     });
     return text;
+  }
+
+  GetProxy():string{
+    return this.proxy;
   }
 
 

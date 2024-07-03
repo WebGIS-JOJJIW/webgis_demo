@@ -11,7 +11,7 @@ import { InsertLayer, attr } from '../../../models/geomodel';
 })
 export class AddLayerComponent {
   formGroup!: FormGroup;
-
+  private proxy = ''  
   constructor(
     public dialogRef: MatDialogRef<AddLayerComponent>,
     private geoService: GeoServerService,
@@ -19,6 +19,7 @@ export class AddLayerComponent {
   ) { }
 
   ngOnInit(): void {
+    this.proxy = this.geoService.GetProxy();
     this.formGroup = this.fb.group({
       layerName: ['', Validators.required],
       description: [''],
@@ -59,7 +60,7 @@ export class AddLayerComponent {
         console.log('err', err);
       });
 
-      const url = `http://139.59.221.224:8080/geoserver/rest/workspaces/${response.workspace}/datastores/${response.dbName}/featuretypes/`
+      const url = `${this.proxy}/rest/workspaces/${response.workspace}/datastores/${response.dbName}/featuretypes/`
       // fetch(url, {
       //   mode: "no-cors",
       //   method: 'POST',

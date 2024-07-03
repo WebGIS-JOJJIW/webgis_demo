@@ -17,7 +17,7 @@ export class EditorMappingComponent implements OnInit {
   private draw!: MapboxDraw;
   private mode: string = 'draw_point';
   markers: Marker[] = [];
-
+  private proxy = ''
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -25,9 +25,13 @@ export class EditorMappingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.proxy = this.geoServerService.GetProxy();
+    // console.log(this.proxy);
     this.initializeMap();
     // this.initializeDraw();
     this.subscribeToModeChanges();
+  
+    
   }
 
   //#region Initialization
@@ -104,9 +108,10 @@ export class EditorMappingComponent implements OnInit {
     } else {
       wrk = 'frvk'; ly = 'ply_frv';
     }
-    const wfsUrl = `http://139.59.221.224:8080/geoserver/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
+
+    const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
     const index = `${wrk}-${ly}`;
-    // console.log(wfsUrl);
+    console.log(wfsUrl);
 
     fetch(wfsUrl)
       .then(response => response.json())
@@ -199,7 +204,7 @@ export class EditorMappingComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
-        const wfsUrl = 'http://139.59.221.224:8080/geoserver/wfs';
+        const wfsUrl = `${this.proxy}/wfs`;
 
         fetch(wfsUrl, {
           method: 'POST',
