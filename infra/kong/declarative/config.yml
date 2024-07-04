@@ -26,7 +26,6 @@
             - /geoserver
           methods:
             - OPTIONS
-          # priority: 10
           plugins:
             - name: request-termination
               config:
@@ -38,17 +37,3 @@
                     - "Access-Control-Allow-Origin:*"
                     - "Access-Control-Allow-Headers:*"
                     - "Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD"
-
-#  services:
-#   - name: geoserver-rest
-#     url: http://geoserver:8080/geoserver/rest
-#     routes:
-#       - name: geoserver-rest-route
-#         paths:
-#           - /geoserver/rest
-#   - name: geoserver-web
-#     url: http://geoserver:8080/geoserver/web
-#     routes:
-#       - name: geoserver-web-route
-#         paths:
-#           - /geoserver/web
