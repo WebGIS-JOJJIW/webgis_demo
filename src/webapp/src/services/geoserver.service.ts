@@ -12,7 +12,7 @@ import { InsertLayer, attr } from '../models/geomodel';
 export class GeoServerService {
 
 
-  private proxy = `http://139.59.221.224:8080/geoserver`;
+  private proxy = `http://${window.location.hostname}:8000/geoserver`;
 
   constructor(private http: HttpClient,
     private dialog: MatDialog, private shareService: SharedService) { }
@@ -39,7 +39,7 @@ export class GeoServerService {
     };
     console.log('Basic ' + btoa('admin:geoserver'));
     const url = `${this.proxy}/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
-    return this.http.post(url, payload);
+    return this.http.post(url, payload, httpOptions);
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {

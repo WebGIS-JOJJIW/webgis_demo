@@ -10,3 +10,4 @@ include:
   - ./rabbitmq/rabbitmq.yml
   - ./artifact_serve/artifact_serve.yml
   - ./streamer/streamer.yml
+  - ./kong/kong.yml
