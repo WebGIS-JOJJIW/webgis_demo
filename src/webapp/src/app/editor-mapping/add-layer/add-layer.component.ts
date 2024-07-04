@@ -42,8 +42,8 @@ export class AddLayerComponent {
       // console.log(this.formGroup.value);
       // this.dialogRef.close(true);
       const response = new InsertLayer()
-      response.workspace = 'frvk';
-      response.dbName = 'frvk_roads';
+      response.workspace = 'gis';
+      response.dbName = 'gis_db';
       response.layerName = this.formGroup.controls['layerName'].value;
       response.description = this.formGroup.controls['description'].value;
       response.attr.push({
