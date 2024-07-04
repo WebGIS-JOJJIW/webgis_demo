@@ -1,0 +1,54 @@
+ _format_version: "3.0"
+# _transform: true
+
+ services:
+    - name: geoserver
+      url: http://geoserver:8080/geoserver
+      routes:
+        - name: geoserver-route
+          paths:
+            - /geoserver
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+          plugins:
+            - name: response-transformer
+              config:
+                add:
+                  headers:
+                    - "Access-Control-Allow-Origin:*"
+                    - "Access-Control-Allow-Headers:*"
+                    - "Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD"
+        - name: geoserver-option-route
+          paths:
+            - /geoserver
+          methods:
+            - OPTIONS
+          # priority: 10
+          plugins:
+            - name: request-termination
+              config:
+                status_code: 200
+            - name: response-transformer
+              config:
+                add:
+                  headers:
+                    - "Access-Control-Allow-Origin:*"
+                    - "Access-Control-Allow-Headers:*"
+                    - "Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD"
+
+#  services:
+#   - name: geoserver-rest
+#     url: http://geoserver:8080/geoserver/rest
+#     routes:
+#       - name: geoserver-rest-route
+#         paths:
+#           - /geoserver/rest
+#   - name: geoserver-web
+#     url: http://geoserver:8080/geoserver/web
+#     routes:
+#       - name: geoserver-web-route
+#         paths:
+#           - /geoserver/web
