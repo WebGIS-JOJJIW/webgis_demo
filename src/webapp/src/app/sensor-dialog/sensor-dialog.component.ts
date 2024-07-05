@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { SharedService } from '../../services/shared.service';
 
 export interface MarkerDetailsData {
   title: string;
@@ -22,6 +23,11 @@ export interface MarkerDetailsData {
 export class SensorDialogComponent {
   dialogMode = 'sensor';
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: MarkerDetailsData
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: MarkerDetailsData,
+    private dialog : MatDialog,
+    private sharedService:SharedService
+  ) {
+    this.dialog.closeAll();
+    this.sharedService.TurnOnOrOff(false);
+  }
 }

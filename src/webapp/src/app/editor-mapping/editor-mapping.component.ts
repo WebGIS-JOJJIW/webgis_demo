@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import maplibregl, { MapLayerMouseEvent, Marker, NavigationControl } from 'maplibre-gl';
+import maplibregl, {  Marker, NavigationControl } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
@@ -15,9 +15,10 @@ import { GeoServerService } from '../../services/geoserver.service';
 export class EditorMappingComponent implements OnInit {
   private map!: maplibregl.Map;
   private draw!: MapboxDraw;
-  private mode: string = 'draw_point';
-  markers: Marker[] = [];
+  private mode = 'draw_point';
+  private markers: Marker[] = [];
   private proxy = ''
+  activeFlag = false;
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -25,6 +26,7 @@ export class EditorMappingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.sharedService.TurnOnOrOff(true);
     this.proxy = this.geoServerService.GetProxy();
     // console.log(this.proxy);
     this.initializeMap();
@@ -40,7 +42,7 @@ export class EditorMappingComponent implements OnInit {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [-74.3100039, 40.697538],
-      zoom: 3
+      zoom: 3,
     });
 
     this.map.addControl(new NavigationControl(), 'bottom-right');
@@ -72,6 +74,12 @@ export class EditorMappingComponent implements OnInit {
       }
 
     });
+
+    this.sharedService.currentShowLayerComp.subscribe(flag =>{
+      if(flag != this.activeFlag){
+        this.activeFlag = flag
+      }
+    })
     // console.log(this.mode);
 
   }
@@ -92,7 +100,7 @@ export class EditorMappingComponent implements OnInit {
   }
 
   private logFeatureIds(event: any): void {
-    const featureIds = event.features.map((feature: any) => feature.id);
+    // const featureIds = event.features.map((feature: any) => feature.id);
     // console.log('Feature IDs:', featureIds);
   }
   //#endregion

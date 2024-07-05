@@ -1,5 +1,22 @@
 
-.map-content {
-    width: 100% !important; 
-    height: calc(100vh - 105px) !important;
-}
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    flex: 1;
+  }
+  
+  #map {
+    flex: 1;
+    position: relative;
+  }
+  
+  .map-content {
+    width: calc(100% - 300px); /* Adjust width based on sidebar */
+    height: calc(100vh - 105px); /* Adjust height based on toolbar */
+  }
+  

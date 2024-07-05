@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, ObservableInput } from 'rxjs';
+import { Observable, ObservableInput, map } from 'rxjs';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from './shared.service';
 import { InsertLayer, attr } from '../models/geomodel';
+import { Layer, LayerResponse } from '../models/layer.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,7 @@ export class GeoServerService {
     console.log('Basic ' + btoa('admin:geoserver'));
     return this.http.post(this.proxy+'/wfs', payload,httpOptions);
   }
+  
 
   InsertLayer(payload: string, workspace: string, db: string): Observable<any> {
     const httpOptions = {
@@ -40,6 +42,23 @@ export class GeoServerService {
     console.log('Basic ' + btoa('admin:geoserver'));
     const url = `${this.proxy}/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
     return this.http.post(url, payload, httpOptions);
+  }
+
+  getLayerListApi(): Observable<LayerResponse> {
+    const url = `${this.proxy}/rest/layers?Accept=application/json`
+    return this.http.get<LayerResponse>(url);
+  }
+
+  getLayerDetails(url: string): Observable<any>{
+    // const url = `${this.proxy}/rest/layers?Accept=application/json`
+    return this.http.get<any>(url);
+  }
+
+  getAbstract(layerName: string): Observable<string> {
+    const url = `${this.proxy}/rest/workspaces/gis/datastores/gis_db/featuretypes/${layerName}.json`;
+    return this.http.get<any>(url).pipe(
+      map((res: any) => res.featureType.abstract)
+    );
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {

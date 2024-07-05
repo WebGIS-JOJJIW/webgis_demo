@@ -1,0 +1,78 @@
+<div class="layers-display">
+  <div class="sidebar">
+    <div class="header">Layers Display</div>
+    <div class="section">
+      <div class="section-title" (click)="toggleSection('vectors')">
+        <mat-icon>{{
+          sections.vectors ? "keyboard_arrow_down" : "keyboard_arrow_right"
+        }}</mat-icon>
+        VECTORS
+      </div>
+      <div class="layer-group" *ngIf="sections.vectors">
+        <div *ngIf="standard_list.length > 0">
+          <div class="group-title">+ Standard POI</div>
+          <div class="layer-item" *ngFor="let item of standard_list">
+            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+          </div>
+        </div>
+
+        <div *ngIf="camera_list.length > 0">
+          <div class="group-title">+ Camera POI</div>
+          <div class="layer-item" *ngFor="let item of camera_list">
+            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+          </div>
+        </div>
+        
+        <div *ngIf="communication_list.length > 0">
+          <div class="group-title">+ Communication POI</div>
+          <div class="layer-item" *ngFor="let item of communication_list">
+            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+          </div>
+        </div>
+
+        <div *ngIf="polygon_list.length > 0">
+          <div class="group-title">+ Polygon</div>
+          <div class="layer-item" *ngFor="let item of polygon_list">
+            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+          </div>
+        </div>
+
+        <div *ngIf="polyline_list.length > 0">
+          <div class="group-title">+ Polyline</div>
+          <div class="layer-item" *ngFor="let item of polygon_list">
+            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" (click)="toggleSection('rasters')">
+        <mat-icon>{{
+          sections.rasters ? "keyboard_arrow_down" : "keyboard_arrow_right"
+        }}</mat-icon>
+        RASTERS
+      </div>
+      <div class="layer-item" *ngIf="sections.rasters" style="word-wrap: break-word;">
+        <mat-checkbox *ngFor="let item of raster_list"  [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+      </div>
+    </div>
+    <div class="footer">
+      <button mat-button color="primary">Save</button>
+      <button mat-button color="warn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="selected-layers container">
+    <div class="header">Selected Layers</div>
+    <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+      <div *ngFor="let layer of selectedLayers" class="example-box" cdkDrag>
+        <div class="col-1"><i class="fa-solid fa-bars"></i></div>
+        <div class="col-8">{{ layer }}</div>
+        <div class="col-1"><span></span></div>
+        <div class="col-1"><i class="fa-solid fa-eraser" (click)="removeLayer(layer)"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
