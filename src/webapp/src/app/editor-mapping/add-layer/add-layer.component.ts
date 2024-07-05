@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormGroup, RequiredValidator, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GeoServerService } from '../../../services/geoserver.service';
-import { InsertLayer, attr } from '../../../models/geomodel';
+import { InsertLayer } from '../../../models/geomodel';
 
 @Component({
   selector: 'app-add-layer',
@@ -52,7 +52,7 @@ export class AddLayerComponent {
         'type': this.formGroup.controls['layerType'].value
       })
 
-      var payload = this.geoService.xmlInsertLayerToPayload(response);
+      let payload = this.geoService.xmlInsertLayerToPayload(response);
       console.log('payload :',payload);
       this.geoService.InsertLayer(payload,response.workspace,response.dbName).subscribe(res=>{
         console.log('res:', res);
@@ -60,7 +60,7 @@ export class AddLayerComponent {
         console.log('err', err);
       });
 
-      const url = `${this.proxy}/rest/workspaces/${response.workspace}/datastores/${response.dbName}/featuretypes/`
+      // const url = `${this.proxy}/rest/workspaces/${response.workspace}/datastores/${response.dbName}/featuretypes/`
       // fetch(url, {
       //   mode: "no-cors",
       //   method: 'POST',

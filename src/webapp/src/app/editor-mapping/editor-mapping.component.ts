@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import maplibregl, { MapLayerMouseEvent, Marker, NavigationControl } from 'maplibre-gl';
+import maplibregl, {  Marker, NavigationControl } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
@@ -15,9 +15,10 @@ import { GeoServerService } from '../../services/geoserver.service';
 export class EditorMappingComponent implements OnInit {
   private map!: maplibregl.Map;
   private draw!: MapboxDraw;
-  private mode: string = 'draw_point';
-  markers: Marker[] = [];
+  private mode = 'draw_point';
+  private markers: Marker[] = [];
   private proxy = ''
+  activeFlag = false;
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -73,6 +74,12 @@ export class EditorMappingComponent implements OnInit {
       }
 
     });
+
+    this.sharedService.currentShowLayerComp.subscribe(flag =>{
+      if(flag != this.activeFlag){
+        this.activeFlag = flag
+      }
+    })
     // console.log(this.mode);
 
   }
@@ -93,7 +100,7 @@ export class EditorMappingComponent implements OnInit {
   }
 
   private logFeatureIds(event: any): void {
-    const featureIds = event.features.map((feature: any) => feature.id);
+    // const featureIds = event.features.map((feature: any) => feature.id);
     // console.log('Feature IDs:', featureIds);
   }
   //#endregion

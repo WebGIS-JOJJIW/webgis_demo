@@ -24,7 +24,8 @@ export class LayersListComponent {
           ele.abs = abstract??''; // Assign the abstract to the 'abs' property of 'ele'
         },
         error => {
-          console.error('Error fetching abstract:', error);
+          // console.error('Error fetching abstract:', error);
+          this.layers = this.layers.filter(item => item !== ele);
         }
       );
     });

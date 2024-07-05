@@ -49,6 +49,11 @@ export class GeoServerService {
     return this.http.get<LayerResponse>(url);
   }
 
+  getLayerDetails(url: string): Observable<any>{
+    // const url = `${this.proxy}/rest/layers?Accept=application/json`
+    return this.http.get<any>(url);
+  }
+
   getAbstract(layerName: string): Observable<string> {
     const url = `${this.proxy}/rest/workspaces/gis/datastores/gis_db/featuretypes/${layerName}.json`;
     return this.http.get<any>(url).pipe(

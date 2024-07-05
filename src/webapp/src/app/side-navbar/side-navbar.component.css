@@ -11,6 +11,13 @@
 
 .nav-link i {
   font-size: 1.5rem;
-  width: 30px; /* Add a fixed width to align the text properly */
-  text-align: center; /* Center align the icon within the width */
+  width: 30px;
+  /* Add a fixed width to align the text properly */
+  text-align: center;
+  /* Center align the icon within the width */
+}
+
+.bg-g {
+  background-color: #162528;
+
 }

@@ -30,7 +30,7 @@ export class DrawToolbarComponent {
     dialogConfig.hasBackdrop = false;
     dialogConfig.panelClass = 'custom-modalbox';
 
-    const dialogRef = this.dialog.open(AddLayerComponent, dialogConfig);
+    this.dialog.open(AddLayerComponent, dialogConfig);
 
     // dialogRef.afterClosed().subscribe(result => {
     //   if (result) {

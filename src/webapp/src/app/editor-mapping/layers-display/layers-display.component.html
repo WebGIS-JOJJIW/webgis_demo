@@ -1,0 +1,53 @@
+<div class="layers-display">
+  <div class="sidebar">
+    <div class="header">Layers Display</div>
+    <div class="section">
+      <div class="section-title" (click)="toggleSection('vectors')">
+        <mat-icon>{{
+          sections.vectors ? "keyboard_arrow_down" : "keyboard_arrow_right"
+        }}</mat-icon>
+        VECTORS
+      </div>
+      <div class="layer-group" *ngIf="sections.vectors">
+        <div class="group-title">+ Camera POI</div>
+        <div class="layer-item">
+          <mat-checkbox>SENSOR CAM1</mat-checkbox>
+        </div>
+        <div class="group-title">+ Communication POI</div>
+        <div class="layer-item">
+          <mat-checkbox>SENSOR COMM1</mat-checkbox>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" (click)="toggleSection('rasters')">
+        <mat-icon>{{
+          sections.rasters ? "keyboard_arrow_down" : "keyboard_arrow_right"
+        }}</mat-icon>
+        RASTERS
+      </div>
+      <div class="layer-item" *ngIf="sections.rasters">
+        <mat-checkbox>SENSOR COMM1</mat-checkbox>
+      </div>
+    </div>
+    <div class="footer">
+      <button mat-button color="primary">Save</button>
+      <button mat-button color="warn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="selected-layers container">
+    <div class="header">Selected Layers</div>
+    <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+        @for (layer of layers; track layer) {
+          <div class="example-box" cdkDrag>
+            <div class="col-1"><i class="fa-solid fa-bars"></i></div>
+            <div class="col-8">{{layer}}</div>
+            <div class="col-1"><span>V</span></div>
+            <div class="col-1"><span>🖌️</span></div>
+          </div>
+        }
+      </div>
+  </div>
+</div>

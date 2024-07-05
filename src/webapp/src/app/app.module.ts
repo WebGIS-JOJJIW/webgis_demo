@@ -23,6 +23,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { LayersListComponent } from './side-navbar/layers-list/layers-list.component';
+import { LayersDisplayComponent } from './editor-mapping/layers-display/layers-display.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -37,7 +40,8 @@ import { LayersListComponent } from './side-navbar/layers-list/layers-list.compo
     DrawToolbarComponent,
     DialogWarningComponent,
     AddLayerComponent,
-    LayersListComponent
+    LayersListComponent,
+    LayersDisplayComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +49,8 @@ import { LayersListComponent } from './side-navbar/layers-list/layers-list.compo
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
-    HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule
+    HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule,MatCheckboxModule,
+    DragDropModule
   ],
   providers: [
     provideAnimationsAsync()

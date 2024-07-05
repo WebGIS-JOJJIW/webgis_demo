@@ -1,7 +1,5 @@
 import { IControl, Map as MapboxMap } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { AddLayerComponent } from '../add-layer/add-layer.component';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 class MapboxDrawControl implements IControl {
   private draw: MapboxDraw;

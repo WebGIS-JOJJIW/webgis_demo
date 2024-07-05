@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-table',
@@ -10,7 +10,4 @@ export class TableComponent {
   @Input() columns: string[] = [];
   @Input() columnHeaders: { [key: string]: string } = {};
   
-  constructor() { }
-
-  ngOnInit(): void { }
 }

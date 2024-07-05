@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import maplibregl, { Marker, NavigationControl, Popup } from 'maplibre-gl';
+import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
 import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from '../../services/shared.service';

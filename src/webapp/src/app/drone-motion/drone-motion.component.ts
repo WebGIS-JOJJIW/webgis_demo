@@ -80,13 +80,13 @@ export class DroneMotionComponent {
     ]
 
     markers.forEach(markerData => {
-      const popupContent = `
-      <div class="popup-card">
-        <h3>${markerData.title}</h3>
-        <p>${1}</p>
-        <img src="${markerData.latestPhoto}" alt="${markerData.title}" style="width: 100%;">
-      </div>
-    `;
+    //   const popupContent = `
+    //   <div class="popup-card">
+    //     <h3>${markerData.title}</h3>
+    //     <p>${1}</p>
+    //     <img src="${markerData.latestPhoto}" alt="${markerData.title}" style="width: 100%;">
+    //   </div>
+    // `;
 
       // const popup = new Popup({ offset: 25 }).setHTML(popupContent);
 
