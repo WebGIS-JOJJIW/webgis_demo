@@ -11,11 +11,11 @@ SCRIPT_PATH = Path(__file__).absolute()
 ARTIFACTORY_PATH = SCRIPT_PATH.parent / ".." / \
     ".." / "infra" / "artifact_serve/data"
 
-# IMAGE_DB
+# ARTIFACT_DB
 IMAGE_DB_HOST = "gis-db"
 IMAGE_DB_USER = "admin"
 IMAGE_DB_PASSWD = "geoserver"
-IMAGE_DB = "image_db"
+IMAGE_DB = "artifact-db"
 
 
 # REDIS
@@ -53,10 +53,10 @@ class Ingester:
         conn.autocommit = True
 
         insert_query = """
-            INSERT INTO still_images (sensor_id, image_url, captured_ts) VALUES (%s, %s, %s) RETURNING id;
+            INSERT INTO sensor_data (sensor_name, value, created_at, updated_at) VALUES (%s, %s, %s, %s) RETURNING id;
         """
         with conn.cursor() as cursor:
-            cursor.execute(insert_query, (sensor, image_url, captured_ts))
+            cursor.execute(insert_query, (sensor, image_url, captured_ts, captured_ts))
             db_primary_key = cursor.fetchone()[0]
         conn.commit()
         conn.close()
