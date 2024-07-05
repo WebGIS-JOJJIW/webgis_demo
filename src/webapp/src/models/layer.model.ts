@@ -4,6 +4,7 @@ export interface Layer {
     abs: string;
     type: string;
     vector_type: string;
+    checked: boolean ;
   }
   
   export interface Layers {

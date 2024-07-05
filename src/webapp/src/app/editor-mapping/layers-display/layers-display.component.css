@@ -1,16 +1,33 @@
 .layers-display {
     display: flex;
-    height: calc(100vh - 64px);
+    height: calc(100vh - 109px);
     color: white;
     /* font-family: 'Arial, sans-serif'; */
 }
-
+.layer-item mat-checkbox {
+    white-space: normal;
+  }
+  
+  .layer-item .mat-checkbox-label {
+    flex: 0 0 260px;
+    max-width: 260px;
+    white-space: normal; /* Allow text wrapping */
+    overflow-wrap: break-word; /* Break words that are too long */
+    word-wrap: break-word; /* Ensure compatibility with older browsers */
+    white-space: normal;
+  }
+  
+  .layer-item .mat-checkbox-layout {
+    align-items: flex-start;
+  }
+  
 .sidebar {
     background-color: #2c3e50;
     width: 300px;
     padding: 10px;
     /* display: flex; */
     flex-direction: column;
+    overflow-y: auto;
     justify-content: space-between;
 }
 
@@ -97,6 +114,7 @@
     /* Set the font color to white */
 }
 
+
 .example-list {
     width: 500px;
     max-width: 100%;
@@ -118,7 +136,7 @@
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
-    cursor: move;
+    /* cursor: move; */
     background: #34495e;
     font-size: 14px;
   }
@@ -147,3 +165,10 @@
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
   }
   
+  .col-8 {
+    flex: 0 0 66.66667%;
+    max-width: 66.66667%;
+    white-space: normal; /* Allow text wrapping */
+    overflow-wrap: break-word; /* Break words that are too long */
+    word-wrap: break-word; /* Ensure compatibility with older browsers */
+  }
