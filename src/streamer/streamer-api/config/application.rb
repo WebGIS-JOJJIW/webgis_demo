@@ -52,6 +52,12 @@ module StreamerApi
 
     # disable active_record belongs_to required by default
     config.active_record.belongs_to_required_by_default = false
+
+    # redis cache store
+    config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] { "redis://localhost:6379/1" } }
+    config.public_file_server.headers = {
+      "Cache-Control" => "public, max-age=#{2.days.to_i}"
+    }
   end
 
   # redis connection pool

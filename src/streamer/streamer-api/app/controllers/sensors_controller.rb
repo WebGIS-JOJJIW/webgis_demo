@@ -1,16 +1,16 @@
 class SensorsController < ApplicationController
-  before_action :set_sensor, only: %i[ show update destroy ]
+  before_action :set_sensor, only: %i[ update destroy ]
 
   # GET /sensors
   def index
-    @sensors = Sensor.all
+    @sensors = Sensor.fetch_all params
 
     render json: @sensors
   end
 
   # GET /sensors/1
   def show
-    render json: @sensor
+    render json: Sensor.fetch(params[:id])
   end
 
   # POST /sensors
