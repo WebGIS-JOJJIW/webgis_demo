@@ -2,4 +2,4 @@
 
 SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 
-${SCRIPT_DIR}/../../py3.sh /data/src/device/recv_pic.py
+${SCRIPT_DIR}/../../py3.sh recv_pic.py
