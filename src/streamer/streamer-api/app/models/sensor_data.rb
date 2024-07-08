@@ -14,24 +14,21 @@ class SensorData < ApplicationRecord
   IS_FETCH_FROM_CACHE = false
 
   def init_attrs
-    self.sensor_id = Sensor.find_or_create_by(name: sensor_name).id if sensor_name.present?
-    self.sensor_type_id = SensorType.find_or_create_by(name: sensor_type_name).id if sensor_type_name.present?
-    self.region_id = Region.find_or_create_by(name: region_name).id if region_name.present?
-    self.data_type_id = DataType.find_or_create_by(name: data_type_name).id if data_type_name.present?
+    self.sensor_id ||= Sensor.find_or_create_by(name: sensor_name).id if sensor_name.present?
+    self.sensor_type_id ||= SensorType.find_or_create_by(name: sensor_type_name).id if sensor_type_name.present?
+    self.region_id ||= Region.find_or_create_by(name: region_name).id if region_name.present?
+    self.data_type_id ||= DataType.find_or_create_by(name: data_type_name).id if data_type_name.present?
 
-    if dt
-      self.dt_year = dt.strftime('%Y') if dt_year.blank?
-      self.dt_yearmon = dt.strftime('%Y-%m') if dt_yearmon.blank?
-      self.dt_epoch = dt.to_i if dt_epoch.blank?
-      self.partition_yearmon = dt.strftime('%Y-%m') if partition_yearmon.blank?
-    end
+    self.dt ||= Time.current
+    self.dt_year ||= dt.strftime('%Y')
+    self.dt_yearmon ||= dt.strftime('%Y-%m')
+    self.dt_epoch ||= dt.to_i
+    self.partition_yearmon ||= dt.strftime('%Y-%m')
   end
 
   def as_json(options = {})
     hsh = super().merge!({
-      sensor_type: sensor_type.as_json,
-      region: region.as_json,
-      data_type: data_type.as_json
+
     })
     hsh
   end
@@ -40,11 +37,7 @@ class SensorData < ApplicationRecord
     data = all
 
     data = data.select %(
-      sensor_data.*,
-      sensors.name as sensor_name,
-      sensor_types.name as sensor_type_name,
-      regions.name as region_name,
-      data_types.name as data_type_name
+      sensor_data.*
     )
 
     params[:inner_joins] = []
