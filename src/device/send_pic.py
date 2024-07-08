@@ -14,8 +14,9 @@ def get_datetime_from_timestamp(timestamp: int) -> str:
 
 
 @click.command
+@click.option("--broker", "-b", help="The AMQP broker to which the image is sent", default="rabbitmq")
 @click.option("--image", "-i", help="File name of the image to send", required=True)
-def main(image: str):
+def main(broker: str, image: str):
     image_file = Path(image)
     file_size = image_file.stat().st_size
     if not image_file.is_file():
@@ -26,7 +27,7 @@ def main(image: str):
         bin_content = f.read()
 
     # Create publish channel
-    channel = Channel("rabbitmq", "image")
+    channel = Channel(broker, "image")
 
     # Create a new message
     response = Response()
