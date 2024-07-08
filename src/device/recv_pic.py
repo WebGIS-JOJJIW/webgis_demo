@@ -1,8 +1,6 @@
 import io
 from datetime import datetime
 
-from PIL import Image
-
 from channel import Channel
 from pb.response_pb2 import Response
 
@@ -27,9 +25,6 @@ class ImageChannel(Channel):
         # Write the collected binary parts when we receive all the expected parts
         with open(filename, "wb") as f:
             f.write(response.imageData)
-        image_stream = io.BytesIO(response.imageData)
-        img = Image.open(image_stream)
-        img.show()
         print(
             f"""
 Successfully received image
