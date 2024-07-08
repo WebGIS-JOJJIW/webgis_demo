@@ -40,10 +40,13 @@ class SensorData < ApplicationRecord
       sensor_data.*
     )
 
+    data = data.where('sensor_data.dt >= ?', params[:start_dt]) if params[:start_dt].present?
+    data = data.where('sensor_data.dt <= ?', params[:end_dt]) if params[:end_dt].present?
+
     params[:inner_joins] = []
     params[:left_joins] = [:sensors, :sensor_types, :regions, :data_types]
     params[:keywords_columns] = ['sensor_name', 'sensor_type_name', 'region_name', 'data_type_name']
-    params[:order] = params[:order] || 'sensor_data.dt DESC'
+    params[:order] ||= 'sensor_data.dt DESC'
     params[:use_as_json] = false
 
     super(params.merge!(data: data))

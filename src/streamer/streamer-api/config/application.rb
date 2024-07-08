@@ -29,6 +29,11 @@ module StreamerApi
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # local time zone
+    config.time_zone = 'Bangkok'
+    config.active_record.default_timezone = :local
+    config.active_record.time_zone_aware_attributes = false
+
     # Action Cable configuration
     # config.action_cable.mount_path = '/cable'
     config.action_cable.mount_path = nil
