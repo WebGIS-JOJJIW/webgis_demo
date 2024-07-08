@@ -19,6 +19,9 @@ message Response {
     // Information of the sender
     SourceInfo sourceInfo = 2;
 
+    // Timestamp in epoch at which the message is created
+    int32 timestamp = 3;
+
     // ImageData
-    bytes imageData = 3;
+    bytes imageData = 4;
 }
