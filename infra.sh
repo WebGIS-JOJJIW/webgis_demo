@@ -3,8 +3,8 @@ set -e
 
 function up {
     set -x
-    docker compose -f infra/docker-compose.yml build
-    docker compose -f infra/docker-compose.yml up -d
+    sudo docker compose -f infra/docker-compose.yml build
+    sudo docker compose -f infra/docker-compose.yml up -d
     set +x
 }
 
@@ -35,7 +35,7 @@ function reset {
 
 function down {
     set -x
-    docker compose -f infra/docker-compose.yml down
+    sudo docker compose -f infra/docker-compose.yml down
     set +x
 }
 
