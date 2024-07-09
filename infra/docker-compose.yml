@@ -11,3 +11,4 @@ include:
   - ./artifact_serve/artifact_serve.yml
   - ./streamer/streamer.yml
   - ./kong/kong.yml
+  - ./ingester/ingester.yml
