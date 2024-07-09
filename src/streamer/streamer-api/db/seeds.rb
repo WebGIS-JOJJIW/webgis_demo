@@ -8,8 +8,14 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-["sensor1","sensor2","sensor3","sensor4","sensor5"].each do |sensor_name|
-  Sensor.find_or_create_by!(name: sensor_name)
+[
+  {name: "sensor1", poi_id: "sensor1"},
+  {name: "sensor2", poi_id: "sensor2"},
+  {name: "sensor3", poi_id: "sensor3"}
+].each do |hsh|
+  sensor = Sensor.find_or_initialize_by(poi_id: hsh[:poi_id])
+  sensor.name = hsh[:name]
+  sensor.save
 end
 
 ["sensor_type1","sensor_type2","sensor_type3","sensor_type4","sensor_type5"].each do |sensor_type_name|

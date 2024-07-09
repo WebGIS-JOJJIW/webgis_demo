@@ -9,12 +9,18 @@ class SensorData < ApplicationRecord
   before_create :init_attrs
   after_create :publish_ws
 
-  validates :sensor_name, presence: true
+  validates :sensor_poi_id, presence: true
 
   IS_FETCH_FROM_CACHE = false
 
   def init_attrs
-    self.sensor_id ||= Sensor.find_or_create_by(name: sensor_name).id if sensor_name.present?
+    if sensor_poi_id.present?
+      ss = Sensor.find_or_initialize_by(poi_id: sensor_poi_id)
+      ss.name = sensor_name if sensor_name.present?
+      ss.save
+      self.sensor_id = ss.id
+    end
+
     self.sensor_type_id ||= SensorType.find_or_create_by(name: sensor_type_name).id if sensor_type_name.present?
     self.region_id ||= Region.find_or_create_by(name: region_name).id if region_name.present?
     self.data_type_id ||= DataType.find_or_create_by(name: data_type_name).id if data_type_name.present?
