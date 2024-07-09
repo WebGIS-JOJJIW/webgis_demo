@@ -1,5 +1,4 @@
 import json
-import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -15,17 +14,18 @@ STREAMER_ENDPOINT = "http://{}:3001/sensor_data"
 
 
 class Ingester:
-    def __init__(self, image_path: Path, sensor: str, timestamp: int):
-        self._image_path = image_path
+    def __init__(self, image_bin: bytes, sensor: str, timestamp: int):
+        self._image_bin = image_bin
         self._sensor = sensor
         self._timestamp = timestamp
         self._streamer_host = "api"
 
-    def _save_image_to_artifactory(self, image_path: Path, sensor: str, timestamp: int) -> Path:
+    def _save_image_to_artifactory(self, image_bin: bytes, sensor: str, timestamp: int) -> Path:
         artifact_name = f"{sensor}_{str(timestamp)}.jpg"
         artifact_path = ARTIFACTORY_PATH / artifact_name
-        print(f"Copying '{str(image_path)}' to '{str(artifact_path)}'")
-        shutil.copy(str(image_path), str(artifact_path))
+        print(f"Saving image binary to '{str(artifact_path)}'")
+        with open(artifact_path, "wb") as f:
+            f.write(image_bin)
         return artifact_path.relative_to(ARTIFACTORY_PATH)
 
     def _notify_streamer(self, sensor: str, image_url: str, timestamp: int) -> int:
@@ -53,7 +53,7 @@ class Ingester:
 
     def publish(self):
         artifact_relpath = self._save_image_to_artifactory(
-            self._image_path, self._sensor, self._timestamp
+            self._image_bin, self._sensor, self._timestamp
         )
         self._notify_streamer(
             self._sensor, str(artifact_relpath), self._timestamp

@@ -34,7 +34,9 @@ def main(image: str, sensor: str, timestamp: int, host: str):
     print(f"Sensor        : {sensor}")
     print(f"Captured time : {timestamp}")
 
-    ingester = Ingester(image_path, sensor, timestamp)
+    with open(image_path, "rb") as f:
+        image_bin = f.read()
+    ingester = Ingester(image_bin, sensor, timestamp)
     if host:
         ingester._streamer_host = host
     ingester.publish()

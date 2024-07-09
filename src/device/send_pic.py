@@ -16,7 +16,8 @@ def get_datetime_from_timestamp(timestamp: int) -> str:
 @click.command
 @click.option("--broker", "-b", help="The AMQP broker to which the image is sent", default="rabbitmq")
 @click.option("--image", "-i", help="File name of the image to send", required=True)
-def main(broker: str, image: str):
+@click.option("--sensor", "-s", help="ID of the sensor", required=True)
+def main(broker: str, image: str, sensor: str):
     image_file = Path(image)
     file_size = image_file.stat().st_size
     if not image_file.is_file():
@@ -35,7 +36,8 @@ def main(broker: str, image: str):
     # Add UUID for the message
     response.messageUuid = str(uuid.uuid4())
 
-    # Set the type of the sensor to camera sensor
+    # Set sensor information
+    response.sourceInfo.id = sensor
     response.sourceInfo.type = SourceType.CAMERA_SENSOR
 
     # Set timestamp (epoch time)
@@ -52,6 +54,7 @@ def main(broker: str, image: str):
         f"""
 Successfully sent message
     uuid:     {response.messageUuid}
+    sensor:   {response.sourceInfo.id}
     datetime: {dt.strftime('%Y-%m-%d %H:%M:%S')}
 """)
 
