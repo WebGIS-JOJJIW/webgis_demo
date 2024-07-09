@@ -1,16 +1,16 @@
 class SensorDataController < ApplicationController
-  before_action :set_sensor_data, only: %i[ show update destroy ]
+  before_action :set_sensor_data, only: %i[ update destroy ]
 
   # GET /sensor_data
   def index
-    @sensor_data = SensorData.all
+    @sensor_data = SensorData.fetch_all params
 
     render json: @sensor_data
   end
 
   # GET /sensor_data/1
   def show
-    render json: @sensor_data
+    render json: SensorData.fetch(params[:id])
   end
 
   # POST /sensor_data
@@ -46,6 +46,6 @@ class SensorDataController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def sensor_data_params
-      params.require(:sensor_data).permit(:sensor_id, :sensor_name, :lat, :lon, :sensor_type_id, :sensor_type_name, :region_id, :region_name, :data_type_id, :data_type_name, :value, :dt, :dt_year, :dt_yearmon, :dt_epoch, :partition_yearmon)
+      params.require(:sensor_data).permit(:sensor_id, :sensor_name, :sensor_poi_id, :lat, :lon, :sensor_type_id, :sensor_type_name, :region_id, :region_name, :data_type_id, :data_type_name, :value, :dt, :dt_year, :dt_yearmon, :dt_epoch, :partition_yearmon)
     end
 end

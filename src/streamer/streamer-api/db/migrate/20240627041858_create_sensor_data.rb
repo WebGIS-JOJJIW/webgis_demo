@@ -3,6 +3,7 @@ class CreateSensorData < ActiveRecord::Migration[7.1]
     create_table :sensor_data do |t|
       t.references :sensor, foreign_key: {on_delete: :cascade}
       t.string :sensor_name, index: true
+      t.string :sensor_poi_id, index: true
       t.float :lat
       t.float :lon
       t.references :sensor_type, foreign_key: {on_delete: :nullify}

@@ -29,6 +29,11 @@ module StreamerApi
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # local time zone
+    config.time_zone = 'Bangkok'
+    config.active_record.default_timezone = :local
+    config.active_record.time_zone_aware_attributes = false
+
     # Action Cable configuration
     # config.action_cable.mount_path = '/cable'
     config.action_cable.mount_path = nil
@@ -52,6 +57,12 @@ module StreamerApi
 
     # disable active_record belongs_to required by default
     config.active_record.belongs_to_required_by_default = false
+
+    # redis cache store
+    config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] { "redis://localhost:6379/1" } }
+    config.public_file_server.headers = {
+      "Cache-Control" => "public, max-age=#{2.days.to_i}"
+    }
   end
 
   # redis connection pool

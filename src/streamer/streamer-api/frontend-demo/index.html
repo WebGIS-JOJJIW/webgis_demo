@@ -8,8 +8,31 @@
     document.addEventListener("DOMContentLoaded", () => {
       const cable = ActionCable.createConsumer('ws://localhost:1337/cable');
       // const cable = ActionCable.createConsumer('ws://localhost:3001/cable');
+      
+      // main channel
+      const sensorDataMainChannel = cable.subscriptions.create({ channel:"SensorDataChannel" }, {
+        connected() {
+          ch = "sensor_data";
+          console.log("Connected to the " + ch + " channel");
+        },
+
+        disconnected() {
+          ch = "sensor_data";
+          console.log("Disconnected from the " + ch + " channel");
+        },
+
+        received(data) {
+          console.log(data);
+          const messages = document.getElementById("sensor_data");
+          const message = document.createElement("div");
+          message.textContent = JSON.stringify(data);
+          messages.appendChild(message);
+        },
+      });
+
+      // sensor channel
       const sensor_id = 1; // This is the sensor_id that we want to subscribe to
-      const sensorDataChannel = cable.subscriptions.create({ channel:"SensorDataChannel", sensor_id: sensor_id }, {
+      const sensorDataChannel1 = cable.subscriptions.create({ channel:"SensorDataChannel", sensor_id: sensor_id }, {
         connected() {
           ch = "sensor:" + sensor_id + ":sensor_data";
           console.log("Connected to the " + ch + " channel");
@@ -22,17 +45,30 @@
 
         received(data) {
           console.log(data);
-          const messages = document.getElementById("sensor_data");
+          const messages = document.getElementById("sensor:" + sensor_id + ":sensor_data");
           const message = document.createElement("div");
-          message.textContent = data;
+          message.textContent = JSON.stringify(data);
           messages.appendChild(message);
         },
       });
+
     });
   </script>
 </head>
 <body>
-  <h1>Sensor Data</h1>
-  <div id="sensor_data"></div>
+
+  <table border="1px" width="600px">
+    <tr>
+      <td width="50%" style="word-wrap: break-word">
+        <h2>Channel: sensor_data</h2>
+        <div id="sensor_data"></div>
+      </td>
+      <td style="word-wrap: break-word">
+        <h2>Channel: sensor:1:sensor_data</h2>
+        <div id="sensor:1:sensor_data"></div>
+      </td>
+    </tr>
+  </table>
+
 </body>
 </html>
