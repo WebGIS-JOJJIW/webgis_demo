@@ -14,6 +14,7 @@ export class GeoServerService {
 
 
   private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  // private proxy = `http://139.59.221.224:8080/geoserver`;
 
   constructor(private http: HttpClient,
     private dialog: MatDialog, private shareService: SharedService) { }
@@ -26,8 +27,8 @@ export class GeoServerService {
       })
     };
 
-    console.log(httpOptions);
-    console.log('Basic ' + btoa('admin:geoserver'));
+    // console.log(httpOptions);
+    // console.log('Basic ' + btoa('admin:geoserver'));
     return this.http.post(this.proxy+'/wfs', payload,httpOptions);
   }
   
@@ -39,7 +40,7 @@ export class GeoServerService {
         'Authorization': 'Basic ' + btoa('admin:geoserver')
       })
     };
-    console.log('Basic ' + btoa('admin:geoserver'));
+    // console.log('Basic ' + btoa('admin:geoserver'));
     const url = `${this.proxy}/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
     return this.http.post(url, payload, httpOptions);
   }

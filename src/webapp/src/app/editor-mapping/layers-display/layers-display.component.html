@@ -39,7 +39,7 @@
 
         <div *ngIf="polyline_list.length > 0">
           <div class="group-title">+ Polyline</div>
-          <div class="layer-item" *ngFor="let item of polygon_list">
+          <div class="layer-item" *ngFor="let item of polyline_list">
             <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
           </div>
         </div>
@@ -59,8 +59,8 @@
       </div>
     </div>
     <div class="footer">
-      <button mat-button color="primary">Save</button>
-      <button mat-button color="warn">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="onSaveChange()">Save</button>
+      <button type="button" class="btn btn-danger" (click)="onCancel()">Cancel</button>
     </div>
   </div>
 

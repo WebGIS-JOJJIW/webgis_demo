@@ -1,3 +1,8 @@
-<div id="map" class="map-content"></div>
-
-
+<div class="main-container">
+    <div class="content-wrapper">
+      <app-layers-display *ngIf="activeFlag"></app-layers-display>
+      <nav id="filter-group" class="filter-group"></nav>
+      <div id="map" class="map-content"></div>
+      <!-- <nav></nav> -->
+    </div>
+  </div>
