@@ -34,16 +34,16 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.map.addControl(new NavigationControl({}), 'bottom-right')
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
-      if(this.layersDisplay.length > 0 && res.length == 0){
+      if (this.layersDisplay.length > 0 && res.length == 0) {
         this.removeLayersFromMap();
-      }else{
+      } else {
         this.layersDisplay = res;
         this.showLayerDataOnMap(this.layersDisplay, 'VECTOR');
       }
-      
-      
+
+
     });
-    
+
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
         this.activeFlag = flag
@@ -51,15 +51,14 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     })
   }
 
-  showLayerDataOnMap(layersName: Array<string>, type: 'VECTOR' | 'RASTER') {
-    // console.log('showLayerDataOnMap : ', layersName.length);
+  showLayerDataOnMap(layersName: Array<string>, type: 'VECTOR' | 'RASTER'): void {
     if (layersName.length > 0) {
       const filterGroup = document.getElementById('filter-group');
       if (!filterGroup) {
         console.error('Filter group element not found');
         return;
       }
-  
+
       layersName.forEach(name => {
         let url = `${this.geoService.GetProxy()}`;
         if (type === 'VECTOR') {
@@ -67,50 +66,44 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         } else {
           // Add RASTER URL logic if needed
         }
-  
-        // console.log('url :', url);
-  
+
         this.geoService.getLayerDetails(url).subscribe(
           data => {
-            const layerId = `id-${name}`;
-            this.layersId.push(layerId);
-  
-            this.map.addSource(layerId, {
-              type: 'geojson',
-              data: data
+            data.features.forEach((feature: any) => {
+              feature.properties.color = this.sharedService.getRandomColor();
             });
-  
-            if (!this.map.getLayer(layerId)) {
-              if (data.features[0].geometry.type === 'Point') {
-                this.addPoint(layerId);
-              } else {
-                if (data.features[0].geometry.type === 'Polygon') {
-                  this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5);
-                }
-                this.addPolylineAndPolygon(layerId, 'circle', 'circle-color', 3);
-                this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2);
-              }
-  
-              // Add checkbox and label elements for the layer
-              const input = document.createElement('input');
-              input.type = 'checkbox';
-              input.id = layerId;
-              input.checked = true;
-              filterGroup.appendChild(input);
-  
-              const label = document.createElement('label');
-              label.setAttribute('for', layerId);
-              label.textContent = name;
-              filterGroup.appendChild(label);
-  
-              input.addEventListener('change', (e) => {
-                const target = e.target as HTMLInputElement;
-                this.map.setLayoutProperty(
-                  layerId,
-                  'visibility',
-                  target.checked ? 'visible' : 'none'
-                );
+            const layerId = `id-${name}`;
+
+            if (!this.map.getSource(layerId)) {
+              this.map.addSource(layerId, {
+                type: 'geojson',
+                data: data
               });
+            }
+
+            if (!this.map.getLayer(layerId)) {
+              this.layersId.push(layerId);
+
+              if (data.features[0].geometry.type === 'Point') {
+                this.addPoint(layerId).then(() => {
+                  this.addFilterCheckbox(filterGroup, layerId, name);
+                });
+              }
+              else if (data.features[0].geometry.type === 'Polygon') {
+                this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5).then(() => {
+                  this.addFilterCheckbox(filterGroup, layerId, name);
+                });
+              }
+              else {
+                this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2).then(() => {
+                  this.addFilterCheckbox(filterGroup, layerId, name);
+                });
+              }
+
+
+            } else {
+              console.warn(`Layer with ID ${layerId} already exists.`);
+              this.addFilterCheckbox(filterGroup, layerId, name);
             }
           },
           error => {
@@ -121,53 +114,141 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     }
   }
 
+  addPoint(layerId: string): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.map.getLayer(layerId)) {
+        this.map.addLayer({
+          id: layerId,
+          type: 'symbol',
+          source: layerId,
+          layout: {
+            'icon-image': 'custom-marker',
+            'icon-size': 1.5,
+            'text-field': '{title}',
+            'text-offset': [0, 1.25],
+            'text-anchor': 'top'
+          }
+        });
 
-  addPoint(name: string) {
-    this.map.addLayer({
-      'id': name,
-      type: 'symbol',
-      'source': name,
-      layout: {
-        'icon-image': 'custom-marker', // Change this to your preferred marker icon
-        'icon-size': 1.5,
-        'text-field': '{title}',
-        'text-offset': [0, 1.25],
-        'text-anchor': 'top'
+        this.map.once('idle', () => {
+          resolve();
+        });
+      } else {
+        console.warn(`Point layer with ID ${layerId} already exists.`);
+        resolve();
       }
     });
-
   }
 
-  addPolylineAndPolygon(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
-    const paint: { [key: string]: any } = {};
-    paint[colorProperty] = ['get', 'color'];
-    // console.log(type);
-    if (type === 'fill') {
-      paint['fill-opacity'] = opacityOrRadius;
-      this.map.addLayer({
-        'id': `${index}`,
-        'type': 'fill',
-        'source': `${index}`,
-        paint: paint
-      });
-    } else if (type === 'circle') {
-      paint['circle-radius'] = opacityOrRadius;
-      this.map.addLayer({
-        'id': `${index}`,
-        'type': 'circle',
-        'source': `${index}`,
-        paint: paint
-      });
-    } else if (type === 'line') {
-      paint['line-width'] = opacityOrRadius;
-      this.map.addLayer({
-        'id': `${index}`,
-        'type': 'line',
-        'source': `${index}`,
-        paint: paint
-      });
-    }
+  addPolylineAndPolygon(layerId: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): Promise<void> {
+    return new Promise((resolve) => {
+      const paint: { [key: string]: any } = {};
+      paint[colorProperty] = ['get', 'color'];
+
+      if (!this.map.getLayer(`${layerId}`)) {
+        if (type === 'fill') {
+          paint['fill-opacity'] = opacityOrRadius;
+          this.map.addLayer({
+            id: `${layerId}`,
+            type: 'fill',
+            source: layerId,
+            paint: paint
+          });
+
+          this.map.once('idle', () => {
+            resolve();
+          });
+        } else if (type === 'circle') {
+          paint['circle-radius'] = opacityOrRadius;
+          this.map.addLayer({
+            id: `${layerId}`,
+            type: 'circle',
+            source: layerId,
+            paint: paint
+          });
+
+          this.map.once('idle', () => {
+            resolve();
+          });
+        } else if (type === 'line') {
+          paint['line-width'] = opacityOrRadius;
+          this.map.addLayer({
+            id: `${layerId}`,
+            type: 'line',
+            source: layerId,
+            paint: paint
+          });
+
+          this.map.once('idle', () => {
+            resolve();
+          });
+        }
+      } else {
+        console.warn(`Layer with ID ${layerId} already exists.`);
+        resolve();
+      }
+    });
   }
+
+  addFilterCheckbox(filterGroup: HTMLElement, layerId: string, name: string): void {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = layerId;
+    input.checked = true;
+    filterGroup.appendChild(input);
+
+    const label = document.createElement('label');
+    label.setAttribute('for', layerId);
+    label.textContent = name;
+    filterGroup.appendChild(label);
+
+    input.addEventListener('change', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (this.map.getLayer(layerId)) {
+        this.map.setLayoutProperty(
+          layerId,
+          'visibility',
+          target.checked ? 'visible' : 'none'
+        );
+      } else {
+        console.error(`Layer with ID ${layerId} does not exist.`);
+      }
+    });
+  }
+
+
+
+
+  // addPolylineAndPolygon(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
+  //   const paint: { [key: string]: any } = {};
+  //   paint[colorProperty] = ['get', 'color'];
+  //   // console.log(type);
+  //   if (type === 'fill') {
+  //     paint['fill-opacity'] = opacityOrRadius;
+  //     this.map.addLayer({
+  //       'id': `${index}-${type}`,
+  //       'type': 'fill',
+  //       'source': `${index}`,
+  //       paint: paint
+  //     });
+  //   } else if (type === 'circle') {
+  //     paint['circle-radius'] = opacityOrRadius;
+  //     this.map.addLayer({
+  //       'id': `${index}-${type}`,
+  //       'type': 'circle',
+  //       'source': `${index}`,
+  //       paint: paint
+  //     });
+  //   } else if (type === 'line') {
+  //     paint['line-width'] = opacityOrRadius;
+  //     this.map.addLayer({
+  //       'id': `${index}-${type}`,
+  //       'type': 'line',
+  //       'source': `${index}`,
+  //       paint: paint
+  //     });
+  //   }
+  // }
 
   openDialog(data: MarkerDetailsData): void {
     this.dialog.open(SensorDialogComponent, {

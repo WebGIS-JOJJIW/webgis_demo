@@ -13,7 +13,8 @@ import { Layer, LayerResponse } from '../models/layer.model';
 export class GeoServerService {
 
 
-  private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  // private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  private proxy = `http://139.59.221.224:8080/geoserver`;
 
   constructor(private http: HttpClient,
     private dialog: MatDialog, private shareService: SharedService) { }

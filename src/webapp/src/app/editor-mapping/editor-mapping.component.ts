@@ -102,9 +102,9 @@ export class EditorMappingComponent implements OnInit {
     if (this.mode == 'draw_point') {
       wrk = 'gis'; ly = 'test_poi_02';
     } else if (this.mode == 'draw_line_string') {
-      wrk = 'gis'; ly = 'test_polyline';
+      wrk = 'gis'; ly = 'test_pl_01';
     } else {
-      wrk = 'frvk'; ly = 'ply_frv';
+      wrk = 'gis'; ly = 'test_pol_01';
     }
 
     const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
@@ -211,9 +211,9 @@ export class EditorMappingComponent implements OnInit {
     if (this.mode == 'draw_point') {
       wrk = 'gis'; ly = 'test_poi_02'; type = 'test_poi_02';
     } else if (this.mode == 'draw_line_string') {
-      wrk = 'gis'; ly = 'test_polyline'; type = 'the_geom';
+      wrk = 'gis'; ly = 'test_pl_01'; type = 'test_pl_01';
     } else {
-      wrk = 'frvk'; ly = 'ply_frv'; type = 'ply_frv';
+      wrk = 'gis'; ly = 'test_pol_01'; type = 'test_pol_01';
     }
     const dict = [wrk, ly, type, 'urn:ogc:def:crs:EPSG::4326'];
     const dialogRef = this.dialog.open(DialogWarningComponent);
