@@ -1,23 +1,23 @@
-<nav id="sidebar" class="d-flex flex-column bg-dark text-white" style="height: calc(100vh - 64px) !important;">
+<nav id="sidebar" class="d-flex flex-column bg-dark text-white" style="height: 100% !important;">
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-      <a href="#" class="nav-link text-white">
-        <i class="fa-solid fa-desktop"></i>
+      <a  class="nav-link text-white ">
+          <img class="icon-side" src="assets/icons/map-marker.png" alt="Map Marker">
       </a>
     </li>
     <li class="nav-item">
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-map"></i>
+      <a  class="nav-link text-white">
+        <img class="icon-side" src="assets/icons/system-task.png" alt="Map Marker">
       </a>
     </li>
     <li>
-      <a href="#" class="nav-link text-white">
-        <i class="fa-solid fa-sliders"></i>
+      <a class="nav-link text-white">
+        <img class="icon-side" src="assets/icons/slider.png" alt="Map Marker">
       </a>
     </li>
-    <li>
-      <a class="nav-link text-white" (click)="openListLayer()">
-        <i class="bi bi-layers"></i>
+    <li class="nav-item">
+      <a class="nav-link text-white" (click)="openListLayer()" (keydown.enter)="openListLayer()">
+        <img class="icon-side" src="assets/icons/layers.png" alt="Layers">
       </a>
     </li>
     <li>

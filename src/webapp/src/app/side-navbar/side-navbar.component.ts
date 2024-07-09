@@ -4,6 +4,7 @@ import { SharedService } from '../../services/shared.service';
 import { LayersListComponent } from './layers-list/layers-list.component';
 import { GeoServerService } from '../../services/geoserver.service';
 import { Layer } from '../../models/layer.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-side-navbar',
@@ -14,15 +15,19 @@ export class SideNavbarComponent {
   layers: Layer[] = [];
 
   constructor(
-    private sharedService: SharedService
+    private sharedService: SharedService,
+    private router : Router
   ) { }
 
   async openListLayer() {
-    let flagPage = false;
+    // let flagPage = false;
     let flagLayer = false;
-    this.sharedService.currentPageOn.subscribe(x => flagPage = x);
+    const url = this.router.url;
+    // this.sharedService.currentPageOn.subscribe(x => flagPage = x);
+    // console.log('url',url);
 
-    if (flagPage) {
+    if(url === '/'){
+      // console.log('now');
       this.sharedService.currentShowLayerComp.subscribe(flag =>{
          flagLayer = flag;
       })

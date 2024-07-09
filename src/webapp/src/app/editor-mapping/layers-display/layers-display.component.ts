@@ -33,7 +33,7 @@ export class LayersDisplayComponent {
     let flagActive = false;
     this.sharedService.currentPageOn.subscribe(x => { flagPage = x });
     this.sharedService.currentShowLayerComp.subscribe(x => { flagActive = x });
-    if (flagPage && flagActive) {
+    if (flagActive) {
       this.geoService.getLayerListApi().subscribe(async res => {
         this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:')).map((layer => ({
           ...layer,
@@ -100,6 +100,7 @@ export class LayersDisplayComponent {
   onCheckboxChange(event: any, layerName: string) {
     if (event.checked) {
       this.selectedLayers.push(layerName);
+      // this.sharedService.setLayersDisplay(this.selectedLayers);
     } else {
       this.removeLayer(layerName);
     }
@@ -134,5 +135,17 @@ export class LayersDisplayComponent {
 
   isLayerSelected(layerName: string): boolean {
     return this.selectedLayers.includes(layerName);
+  }
+
+  onSaveChange(){
+    this.sharedService.setLayersDisplay(this.selectedLayers);
+    this.sharedService.ChangeShowLayerComp(false);
+    this.sharedService.onSaveChangeLayer(true);
+  }
+
+  onCancel(){
+    this.sharedService.setLayersDisplay([]);
+    this.sharedService.ChangeShowLayerComp(false);
+    this.sharedService.onSaveChangeLayer(false);
   }
 }
