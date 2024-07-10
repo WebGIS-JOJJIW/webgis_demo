@@ -26,5 +26,9 @@ export class TopNavbarComponent {
     
   }
 
+  setCloseAll(){
+    this.sharedService.setCloseAll();
+  }
+
   
 }

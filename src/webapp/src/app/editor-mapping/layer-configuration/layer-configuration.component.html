@@ -1,0 +1,53 @@
+<div class="layer-configuration-container">
+    <div class="header">
+      <h6>Layer Configuration (Static Point)</h6>
+      <h6>Camera POI</h6>
+    </div>
+    <div class="form-container">
+      <div class="form-left">
+        <div class="form-group">
+          <label for="layerName">Layer Name</label>
+          <input id="layerName" type="text" value="SENSOR 01" />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description">เซ็นเซอร์ที่ติดตั้งชุด 1</textarea>
+        </div>
+        <div class="form-group">
+          <label for="secretLevel">Secret Level</label>
+          <select id="secretLevel">
+            <option>Normal</option>
+            <!-- Add more options if needed -->
+          </select>
+        </div>
+        <button class="edit-button">Edit</button>
+        <div class="upload-section">
+          <label for="uploadPoi">Upload POI</label>
+          <button class="browse-csv">Browse CSV</button>
+          <a href="#" class="example-format">example format</a>
+        </div>
+      </div>
+      <div class="form-right">
+        <div class="form-group">
+          <label for="configuration">Configuration</label>
+          <input id="configuration" type="text" placeholder="Normal" />
+        </div>
+        <div class="form-group">
+          <label for="descriptionRight">Description</label>
+          <textarea id="descriptionRight"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Location (Type: ...)</label>
+          <div class="location-inputs">
+            <input type="text" placeholder="Lat" />
+            <input type="text" placeholder="Long" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="cancel-button" (click)="onCancel()">Cancel</button>
+      <button class="submit-button" (click)="onSubmit()">Submit</button>
+    </div>
+  </div>
+  

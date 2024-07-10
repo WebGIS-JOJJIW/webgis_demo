@@ -1,14 +1,14 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="padding: 15px">
   <a class="navbar-brand" href="#"><i class="fa-solid fa-shield-halved"></i> ARMYSENSE</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+  <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
-  </button>
+  </button> -->
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ">
-      <li class="nav-item"  [routerLink]="'/'">
+      <li class="nav-item"  [routerLink]="'/'" (click)="setCloseAll()">
         <a class="nav-link" ><img class="icon-side" src="assets/icons/sensor.png" alt="Sensor"> &nbsp; Live Monitoring</a>
       </li>
-      <li class="nav-item" [routerLink]="'/drone-patrol'">
+      <li class="nav-item" [routerLink]="'/drone-patrol' "(click)="setCloseAll()">
         <a class="nav-link" ><img class="icon-side-2" src="assets/icons/drone.png" alt="Sensor"> &nbsp; Drone Patrol</a>
         <!-- <mat-icon svgIcon="drone"></mat-icon>  -->
       </li>
@@ -17,10 +17,10 @@
       </li>
     </ul>
   </div>
-  <div class="collapse navbar-collaps-2 " id="navbarNav2">
+  <div class="collapse navbar-collaps-2 " id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item" >
-        <a class="nav-link" [routerLink]="'/map-editor'">
+        <a class="nav-link" [routerLink]="'/map-editor'" (click)="setCloseAll()">
           <i class="fa-solid fa-map-location-dot end-font"></i>
         </a>
       </li>

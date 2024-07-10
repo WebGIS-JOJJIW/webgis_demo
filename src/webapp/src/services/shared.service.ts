@@ -11,12 +11,14 @@ export class SharedService {
   private ShowLayerComp = new BehaviorSubject<boolean>(false);
   private layersDisplay = new BehaviorSubject<string[]>([]);
   private saveChangeLayer = new BehaviorSubject<boolean>(false);
+  private layerConf = new BehaviorSubject<boolean>(false);
   currentMessage = this.messagePageChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
   currentShowLayerComp = this.ShowLayerComp.asObservable();
   currentLayersDisplay = this.layersDisplay.asObservable();
   currentSaveChangeLayer = this.saveChangeLayer.asObservable();
+  currentLayerConf = this.layerConf.asObservable();
 
   changeMessage(message: string) {
     this.messagePageChange.next(message);
@@ -31,6 +33,10 @@ export class SharedService {
     // if(!sw){this.ShowLayerComp.next(sw);}
   }
 
+  setFlagLayerConf(sw : boolean){
+    this.layerConf.next(sw);
+  }
+
   ChangeShowLayerComp(sw : boolean){
     this.ShowLayerComp.next(sw);
   }
@@ -42,6 +48,14 @@ export class SharedService {
   setLayersDisplay(res: string[] =['']){
     this.layersDisplay.next(res);
   }
+
+  setCloseAll(){
+    this.layerConf.next(false);
+    this.pageEditorOn.next(false);
+    this.ShowLayerComp.next(false);
+  }
+
+
 
   getRandomColor(): string {
     const letters = '0123456789ABCDEF';

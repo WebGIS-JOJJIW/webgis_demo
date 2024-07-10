@@ -20,3 +20,39 @@
     height: calc(100vh - 105px); /* Adjust height based on toolbar */
   }
   
+
+  app-add-layer-list {
+    position: absolute;
+    top: 120px;
+    right: 10px;
+    /* background: #333; */
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    z-index: 999; /* Ensure it's above other map elements */
+  }
+
+
+  app-layer-configuration{
+    position: absolute;
+    top: 120px;
+    right: 10px;
+    /* background: #333; */
+    padding: 20px;
+    border-radius: 8px;
+    width: 680px;
+    /* height: 80%; */
+    z-index: 888; /* Ensure it's above other map elements */
+  }
+
+  app-lastest-events{
+    position: absolute;
+    bottom: 0px;
+    /* right: 10px; */
+    /* background: #333; */
+    /* padding: 20px; */
+    border-radius: 8px;
+    width: 97%;
+    /* height: 80%; */
+    z-index: 888; /* Ensure it's above other map elements */
+  }
