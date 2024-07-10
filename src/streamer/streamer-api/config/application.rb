@@ -37,7 +37,8 @@ module StreamerApi
     # Action Cable configuration
     # config.action_cable.mount_path = '/cable'
     config.action_cable.mount_path = nil
-    config.action_cable.url = ENV.fetch("WS_URL") { "ws://localhost:1337" }
+    config.action_cable.url = nil
+    config.action_cable.allowed_request_origins = [/http:\/\/.*/]
 
     # Add back session middleware for Action Cable
     config.middleware.use ActionDispatch::Cookies

@@ -6,7 +6,7 @@
   
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const cable = ActionCable.createConsumer('ws://localhost:1337/cable');
+      const cable = ActionCable.createConsumer(`ws://${window.location.hostname}:1337/cable`);
       // const cable = ActionCable.createConsumer('ws://localhost:3001/cable');
       
       // main channel
