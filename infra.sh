@@ -9,8 +9,13 @@ function up {
 }
 
 function setup {
+    # Compile protobuf definition
+    # This has to be done before starting Ingester container
+    make -C src/device/pb/ x86
+
     up
     set -x
+
     # Wait for the services to finish initialization
     echo Wait 90 seconds to wait for services to finish initialization
     sleep 90
@@ -22,9 +27,6 @@ function setup {
 
     # Setup GeoServer
     infra/geoserver/init/setup.sh
-
-    # Compile protobuf definition
-    make -C src/device/pb/ x86
     set +x
 }
 
