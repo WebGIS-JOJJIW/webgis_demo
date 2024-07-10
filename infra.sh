@@ -22,6 +22,9 @@ function setup {
 
     # Setup GeoServer
     infra/geoserver/init/setup.sh
+
+    # Compile protobuf definition
+    make -C src/device/pb/ x86
     set +x
 }
 

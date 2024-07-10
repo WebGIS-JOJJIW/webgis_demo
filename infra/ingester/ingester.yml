@@ -9,3 +9,4 @@ services:
       - webgis_net
     command:
       ["python3", "/data/src/ingester/ingrun.py"]
+    restart: always

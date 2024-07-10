@@ -7,6 +7,6 @@ set -e
 set -x
 
 sudo docker build -t $SETUP_IMAGE $SCRIPT_DIR/../streamer-api
-sudo docker run -it --network webgis_net $SETUP_IMAGE rake db:create
-sudo docker run -it --network webgis_net $SETUP_IMAGE rake db:migrate
-sudo docker run -it --network webgis_net $SETUP_IMAGE rake db:seed
+sudo docker run -it --rm --network webgis_net $SETUP_IMAGE rake db:create
+sudo docker run -it --rm --network webgis_net $SETUP_IMAGE rake db:migrate
+sudo docker run -it --rm --network webgis_net $SETUP_IMAGE rake db:seed
