@@ -1,0 +1,108 @@
+.latest-events {
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+  background-color: #2e3b4e;
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: height 0.3s;
+  overflow: hidden;
+}
+
+.latest-events.collapsed {
+  height: 170px;
+}
+
+.latest-events:not(.collapsed) {
+  height: 350px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  padding-left: 10px;
+}
+
+.filters label {
+  margin-right: 10px;
+}
+
+.collapse-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.table-container {
+  position: relative;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead {
+  background-color: #4b5c6b;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #3e4a56;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+th.col-datetime, td.col-datetime {
+  width: 20%;
+}
+
+th.col-type, td.col-type {
+  width: 10%;
+}
+
+th.col-system, td.col-system {
+  width: 15%;
+}
+
+th.col-description, td.col-description {
+  width: 55%;
+}
+
+.table-body {
+  max-height: 260px; /* Adjust height as needed */
+  overflow-y: auto;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #3e4a56;
+}
+
+tbody tr:hover {
+  background-color: #546177;
+}
+
+.sensor {
+  color: #68FF89; /* Green color for SENSOR */
+}
+
+.server {
+  color: #E168FF; /* Purple color for SERVER */
+}

@@ -1,4 +1,41 @@
+.custom-marker {
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
 .map-content {
-    width: 100% !important; 
+    width: 100% !important;
     height: calc(100vh - 74px) !important;
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+#map {
+    flex: 1;
+    position: relative;
+}
+
+.map-content {
+    width: calc(100% - 300px);
+    /* Adjust width based on sidebar */
+    height: calc(100vh - 105px);
+    /* Adjust height based on toolbar */
+}
+
+app-lastest-events {
+    position: absolute;
+    bottom: 0px;
+    /* right: 10px; */
+    /* background: #333; */
+    /* padding: 20px; */
+    border-radius: 8px;
+    width: 97%;
+    /* height: 80%; */
+    z-index: 888;
+    /* Ensure it's above other map elements */
 }

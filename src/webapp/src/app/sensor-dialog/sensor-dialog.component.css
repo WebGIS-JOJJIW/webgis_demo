@@ -3,8 +3,10 @@ mat-dialog-content {
     flex-direction: column;
   }
   
-  h2, h3 {
+  h4, h5 {
     margin: 0;
+    color: white;
+    padding-bottom: 10px;
   }
   
   .photo-item {
@@ -14,13 +16,13 @@ mat-dialog-content {
   }
   
   .photo {
-    width: 100%; /* Adjust the width as needed */
-    height: auto;
+    width: 90%; /* Adjust the width as needed */
+    height: 230px;
     margin-right: 10px;
   }
 
   .photo-item img {
-    width: 200px;
+    width: 100px;
     height: auto;
   }
   .photo-text {
@@ -41,4 +43,26 @@ mat-dialog-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  span{
+    color: white  ;
+    /* padding-left: 10px; */
+  }
+
+  p {
+    color: white  ;
+    padding-left: 10px;
+    font-size: medium;
+  }
+
+  .cam-button {
+    background-color: #4b848e; /* Button background color */
+    color: #ffffff; /* Text color */
+    border: none; /* Remove default border */
+    /* border-radius: 5px; Rounded corners */
+    padding: 5px 10px; /* Padding for the button */
+    font-size: 14px; /* Font size */
+    cursor: pointer; /* Cursor style on hover */
+    display: inline-block; /* Inline-block display */
   }

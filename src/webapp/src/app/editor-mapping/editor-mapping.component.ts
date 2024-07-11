@@ -16,6 +16,8 @@ export class EditorMappingComponent implements OnInit {
   private map!: maplibregl.Map;
   private draw!: MapboxDraw;
   private mode = 'draw_point';
+  showAddLayer = false;
+  showLayerConf = false;
   // private markers: Marker[] = [];
   private proxy = ''
   constructor(
@@ -31,8 +33,8 @@ export class EditorMappingComponent implements OnInit {
     this.initializeMap();
     // this.initializeDraw();
     this.subscribeToModeChanges();
-
-
+    this.sharedService.currentPageOn.subscribe(x=> this.showAddLayer = x);
+    this.sharedService.currentLayerConf.subscribe(x=> this.showLayerConf = x);
   }
 
   //#region Initialization
@@ -294,4 +296,6 @@ export class EditorMappingComponent implements OnInit {
     };
     img.src = imgUrl;
   }
+
+  
 }

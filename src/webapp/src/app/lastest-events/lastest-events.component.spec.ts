@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableComponent } from './table.component';
+import { LastestEventsComponent } from './lastest-events.component';
 
-describe('TableComponent', () => {
-  let component: TableComponent;
-  let fixture: ComponentFixture<TableComponent>;
+describe('LastestEventsComponent', () => {
+  let component: LastestEventsComponent;
+  let fixture: ComponentFixture<LastestEventsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TableComponent]
+      declarations: [LastestEventsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TableComponent);
+    fixture = TestBed.createComponent(LastestEventsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

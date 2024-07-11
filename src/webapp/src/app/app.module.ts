@@ -4,7 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LiveMotionComponent } from './live-motion/live-motion.component';
-import { TableComponent } from './SharedComponent/table/table.component';
 import { DroneMotionComponent } from './drone-motion/drone-motion.component';
 import { EditorMappingComponent } from './editor-mapping/editor-mapping.component';
 import { TopNavbarComponent } from './top-navbar/top-navbar.component';
@@ -19,19 +18,21 @@ import {MatIconModule} from '@angular/material/icon'
 import { HttpClientModule } from '@angular/common/http';
 import { AddLayerComponent } from './editor-mapping/add-layer/add-layer.component';
 import { MatSelectModule } from '@angular/material/select';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { LayersListComponent } from './side-navbar/layers-list/layers-list.component';
 import { LayersDisplayComponent } from './editor-mapping/layers-display/layers-display.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { AddLayerListComponent } from './editor-mapping/add-layer-list/add-layer-list.component';
+import { LayerConfigurationComponent } from './editor-mapping/layer-configuration/layer-configuration.component';
+import { LastestEventsComponent } from './lastest-events/lastest-events.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LiveMotionComponent,
-    TableComponent,
     DroneMotionComponent,
     EditorMappingComponent,
     TopNavbarComponent,
@@ -41,7 +42,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     DialogWarningComponent,
     AddLayerComponent,
     LayersListComponent,
-    LayersDisplayComponent
+    LayersDisplayComponent,
+    AddLayerListComponent,
+    LayerConfigurationComponent,
+    LastestEventsComponent
+    
   ],
   imports: [
     BrowserModule,
@@ -50,7 +55,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     MatDialogModule,
     MatIconModule,
     HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule,MatCheckboxModule,
-    DragDropModule
+    DragDropModule,
+    FormsModule
   ],
   providers: [
     provideAnimationsAsync()

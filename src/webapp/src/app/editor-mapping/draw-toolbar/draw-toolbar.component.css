@@ -15,6 +15,7 @@
   padding-left: var(--bs-navbar-nav-link-padding-x) !important;
   padding-top: 15px !important;
   color: white;
+  cursor: pointer;
 }
 
 
@@ -22,4 +23,5 @@
   padding-right: var(--bs-navbar-nav-link-padding-x) !important;
   padding-left: var(--bs-navbar-nav-link-padding-x) !important;
   color: white;
+  cursor: pointer;
 }

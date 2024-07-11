@@ -1,0 +1,37 @@
+<div class="latest-events" [class.collapsed]="isCollapsed">
+  <div class="header">
+    <span>Latest Events</span>
+    <div class="filters">
+      <label><input type="checkbox" [(ngModel)]="filter.all" (change)="applyFilter('all')"> All</label>
+      <label><input type="checkbox" [(ngModel)]="filter.alarm" (change)="applyFilter('alarm')"> Alarm</label>
+      <label><input type="checkbox" [(ngModel)]="filter.info" (change)="applyFilter('info')"> Info</label>
+    </div>
+    <button class="collapse-button" (click)="toggleHeight()">
+      <i [ngClass]="isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up'"></i>
+    </button>
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-datetime">Date Time</th>
+          <th class="col-type">Type</th>
+          <th class="col-system">System</th>
+          <th class="col-description">Description</th>
+        </tr>
+      </thead>
+    </table>
+    <div class="table-body">
+      <table>
+        <tbody>
+          <tr *ngFor="let event of filteredEvents">
+            <td class="col-datetime">{{ event.dateTime }}</td>
+            <td class="col-type">{{ event.type }}</td>
+            <td class="col-system" [ngClass]="{ 'sensor': event.system === 'SENSOR', 'server': event.system === 'SERVER' }">{{ event.system }}</td>
+            <td class="col-description">{{ event.description }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

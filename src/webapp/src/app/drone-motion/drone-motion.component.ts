@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
 import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { SensorDataService } from '../../services/sensor-data.service';
 
 @Component({
   selector: 'app-drone-motion',
@@ -13,6 +14,8 @@ export class DroneMotionComponent {
   private map!: maplibregl.Map;
   private markers: { marker: Marker, imgElement: HTMLImageElement }[] = [];
   private selectedLayerId: string | null = null;
+ 
+
   ngOnInit(): void {
 
     this.map = new maplibregl.Map({
@@ -23,6 +26,7 @@ export class DroneMotionComponent {
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right')
     this.setMarkerImgIcon();
+
   }
   //#region  marker 
   setMarkerImgIcon() {
@@ -100,6 +104,7 @@ export class DroneMotionComponent {
       imgElement.style.border = '2px solid #FFFFFF';
       imgElement.style.borderRadius = '30%';
       imgElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+      
 
       const marker = new Marker({ element: imgElement })
         .setLngLat(markerData.coordinates)
@@ -133,10 +138,11 @@ export class DroneMotionComponent {
 
   openDialog(data: MarkerDetailsData): void {
     this.dialog.open(SensorDialogComponent, {
-      width: '450px',
-      height: '100%',
+      width: '420px',
+      height: '800px',
       data: data,
-      position: { top: '80px', right: '0' }
+      position: { top: '80px', right: '0' },
+      hasBackdrop: false,
     });
   }
 

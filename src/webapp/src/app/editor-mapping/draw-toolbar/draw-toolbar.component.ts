@@ -20,25 +20,27 @@ export class DrawToolbarComponent {
   }
 
   onClickAddLayer() {
-    if (this.dialogRef) {
-      this.dialogRef.close();
-      this.dialogRef = null;
-    } else {
-      const dialogConfig = new MatDialogConfig();
-      dialogConfig.height = '90%';
-      dialogConfig.width = '450px';
-      dialogConfig.position = {
-        top: '110px',
-        right: '10px'
-      };
-      dialogConfig.hasBackdrop = false;
-      dialogConfig.panelClass = 'custom-modalbox';
+    this.sharedService.TurnOnOrOff(true);
+    this.sharedService.setFlagLayerConf(false);
+    // if (this.dialogRef) {
+    //   this.dialogRef.close();
+    //   this.dialogRef = null;
+    // } else {
+    //   const dialogConfig = new MatDialogConfig();
+    //   dialogConfig.height = '90%';
+    //   dialogConfig.width = '450px';
+    //   dialogConfig.position = {
+    //     top: '110px',
+    //     right: '10px'
+    //   };
+    //   dialogConfig.hasBackdrop = false;
+    //   dialogConfig.panelClass = 'custom-modalbox';
 
-      this.dialogRef = this.dialog.open(AddLayerComponent, dialogConfig);
+    //   this.dialogRef = this.dialog.open(AddLayerComponent, dialogConfig);
 
-      this.dialogRef.afterClosed().subscribe(() => {
-        this.dialogRef = null;
-      });
-    }
+    //   this.dialogRef.afterClosed().subscribe(() => {
+    //     this.dialogRef = null;
+    //   });
+    // }
   }
 }
