@@ -11,7 +11,7 @@ export class SensorDataService {
   private sensorDataChannel1: any;
   
   constructor() {
-    this.cable = ActionCable.createConsumer('ws://localhost:1337/cable');
+    this.cable = ActionCable.createConsumer(`ws://${window.location.hostname}:1337/cable`);
   }
 
   subscribeToMainChannel(): Observable<any> {

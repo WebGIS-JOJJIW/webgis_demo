@@ -33,7 +33,7 @@ export class LastestEventsComponent {
     // this.applyFilter();
     this.initialData();
     this.sensorDataService.subscribeToMainChannel().subscribe(data => {
-      this.http.get<SensorData[]>(`http://localhost:3001/sensor_data`).subscribe(res => {
+      this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
         this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
         this.refreshData();
       });
@@ -41,7 +41,7 @@ export class LastestEventsComponent {
   }
 
   initialData(): void {
-    this.http.get<SensorData[]>('http://localhost:3001/sensor_data').subscribe(res => {
+    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
       this.sortEventsByDateTime();
       this.applyFilter();
@@ -49,7 +49,7 @@ export class LastestEventsComponent {
   }
 
   refreshData(): void {
-    this.http.get<SensorData[]>('http://localhost:3001/sensor_data').subscribe(res => {
+    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
       this.sortEventsByDateTime();
       this.applyFilter();
