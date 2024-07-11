@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
 import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { SensorDataService } from '../../services/sensor-data.service';
 
 @Component({
   selector: 'app-drone-motion',
@@ -9,10 +10,14 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrl: './drone-motion.component.css'
 })
 export class DroneMotionComponent {
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog,private sensorDataService: SensorDataService) { }
   private map!: maplibregl.Map;
   private markers: { marker: Marker, imgElement: HTMLImageElement }[] = [];
   private selectedLayerId: string | null = null;
+  sensorData: any[] = [];
+  sensorSpecificData: any[] = [];
+  sensor_id = 1; // This is the sensor_id that we want to subscribe to
+
   ngOnInit(): void {
 
     this.map = new maplibregl.Map({
@@ -23,6 +28,19 @@ export class DroneMotionComponent {
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right')
     this.setMarkerImgIcon();
+
+
+    this.sensorDataService.subscribeToMainChannel().subscribe(data => {
+      this.sensorData.push(data);
+      console.log(data);
+      
+    });
+
+    this.sensorDataService.subscribeToSensorChannel(this.sensor_id).subscribe(data => {
+      this.sensorSpecificData.push(data);
+      console.log(data);
+      
+    });
   }
   //#region  marker 
   setMarkerImgIcon() {
@@ -133,8 +151,8 @@ export class DroneMotionComponent {
 
   openDialog(data: MarkerDetailsData): void {
     this.dialog.open(SensorDialogComponent, {
-      width: '450px',
-      height: '100%',
+      width: '420px',
+      height: '800px',
       data: data,
       position: { top: '80px', right: '0' }
     });

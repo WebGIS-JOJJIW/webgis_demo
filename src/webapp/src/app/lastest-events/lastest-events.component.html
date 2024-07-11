@@ -2,9 +2,9 @@
     <div class="header">
       <span>Latest Events</span>
       <div class="filters">
-        <label><input type="checkbox" [(ngModel)]="filter.all" (change)="applyFilter()"> All</label>
-        <label><input type="checkbox" [(ngModel)]="filter.alarm" (change)="applyFilter()"> Alarm</label>
-        <label><input type="checkbox" [(ngModel)]="filter.info" (change)="applyFilter()"> Info</label>
+        <label><input type="checkbox" [(ngModel)]="filter.all" (change)="applyFilter('all')"> All</label>
+        <label><input type="checkbox" [(ngModel)]="filter.alarm" (change)="applyFilter('alarm')"> Alarm</label>
+        <label><input type="checkbox" [(ngModel)]="filter.info" (change)="applyFilter('info')"> Info</label>
       </div>
     </div>
     <div class="table-container">

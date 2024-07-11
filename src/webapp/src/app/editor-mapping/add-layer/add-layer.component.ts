@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GeoServerService } from '../../../services/geoserver.service';
-import { InsertLayer } from '../../../models/geomodel';
+import { InsertLayer } from '../../../models/geo.model';
 
 @Component({
   selector: 'app-add-layer',

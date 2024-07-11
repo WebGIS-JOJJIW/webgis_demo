@@ -1,17 +1,21 @@
 <div mat-dialog-content *ngIf="dialogMode==='sensor'">
-  <h2>Sensor 001</h2>
+  <div class="row">
+    <div class="col-3"><button class="cam-button">CAM</button></div>
+    <div class="col-9"><h4>Sensor 001</h4></div>
+  </div>
+  <p>Event(Last 12 Hrs):</p>
   <p>
-    Human: <span>{{ data.humanCount }}</span> Vehicle:
-    <span>{{ data.vehicleCount }}</span> Other:
-    <span>{{ data.otherCount }}</span>
+    Human:<span> &nbsp;{{ data.humanCount }}</span> 
+    Vehicle:<span> &nbsp;{{ data.vehicleCount }}</span> 
+    Other:<span> &nbsp;{{ data.otherCount }}</span>
   </p>
   <p>
     <strong>Health:</strong> <span class="health-status">{{ data.healthStatus }}</span> {{ data.healthTime }}
   </p>
 
   <hr />
-  <h3>Photo</h3>
-  <p>{{data.latestPhotoTime}}</p>
+  <h5>Photo</h5>
+  <p>Lastest: {{data.latestPhotoTime}}</p>
   <img src="{{data.latestPhoto}}" alt="Latest Photo" class="photo">
   
   <div class="photo-gallery row" >
@@ -19,7 +23,7 @@
       <img [src]="photo.url"  alt="Photo 1">
       <div class="photo-text">
         <p>{{ photo.time }}</p>
-        <p>By: {{ photo.by }}</p>
+        <p>By: <span style="color: #9DEDFF;">{{ photo.by }}</span></p>
       </div>
     </div>
   </div>
@@ -27,8 +31,8 @@
   <hr />
 
   <div class="summary-container">
-    <h3>Trigger Summary</h3>
-    <a href="#">Log</a>
+    <h5>Trigger Summary</h5>
+    <a>Log</a>
   </div>
 </div>
 
