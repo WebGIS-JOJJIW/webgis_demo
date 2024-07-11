@@ -9,6 +9,7 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrl: './top-navbar.component.css'
 })
 export class TopNavbarComponent {
+  isDropdownOpen = false;
 
   constructor(private sharedService: SharedService,
     private matIconRegistry: MatIconRegistry,
@@ -20,6 +21,10 @@ export class TopNavbarComponent {
     );
   }
 
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+  
   changePage(page:string){
     this.sharedService.changeMessage(page);
     // console.log(page);

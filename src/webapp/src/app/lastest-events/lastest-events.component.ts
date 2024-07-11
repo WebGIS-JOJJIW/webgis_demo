@@ -14,7 +14,7 @@ export class LastestEventsComponent {
   // sensorSpecificData: any[] = [];
   sensor_id = 1; // This is the sensor_id that we want to subscribe to
   events: events[] = [];
-
+  isCollapsed = true;
   oldFilter ={
     all: true,
     alarm: true,
@@ -128,5 +128,10 @@ export class LastestEventsComponent {
       const dateB = new Date(b.dateTime).getTime();
       return dateB - dateA; // Sort in descending order, change to dateA - dateB for ascending
     });
+  }
+
+
+  toggleHeight(): void {
+    this.isCollapsed = !this.isCollapsed;
   }
 }
