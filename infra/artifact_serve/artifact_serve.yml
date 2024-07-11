@@ -10,5 +10,5 @@ services:
     networks:
       - webgis_net
     ports:
-      - 51515:8080
+      - 80:8080
     restart: always

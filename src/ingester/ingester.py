@@ -7,7 +7,7 @@ import requests
 # ARTIFACT_SERVE
 SCRIPT_PATH = Path(__file__).absolute()
 ARTIFACTORY_PATH = SCRIPT_PATH.parent / ".." / \
-    ".." / "infra" / "artifact_serve/data"
+    ".." / "infra" / "artifact_serve/data/sensor_images"
 
 # STREAMER
 STREAMER_ENDPOINT = "http://{}:3001/sensor_data"
