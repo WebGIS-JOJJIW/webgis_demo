@@ -13,6 +13,9 @@ function setup {
     # This has to be done before starting Ingester container
     make -C src/device/pb/ x86
 
+    # Compile WebApp
+    src/webapp/docker_build.sh
+
     up
     set -x
 
