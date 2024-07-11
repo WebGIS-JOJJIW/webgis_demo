@@ -15,8 +15,9 @@ def gracefully_exit(msg: str):
 @click.command
 @click.option("--image", "-i", help="Filename of JPEG image to publish", type=str, required=True)
 @click.option("--sensor", "-s", help="Sensor ID publising the image", type=str, required=True)
-@click.option("--timestamp", "-t", help="Timestamp of the captured image", type=int)
-def main(image: str, sensor: str, timestamp: int = None):
+@click.option("--timestamp", "-t", help="Timestamp of the captured image", type=int, default=None)
+@click.option("--host", "-h", help="Streamer hostname", type=str, default=None)
+def main(image: str, sensor: str, timestamp: int, host: str):
 
     if not timestamp:
         timestamp = int(datetime.now().timestamp())
@@ -33,7 +34,12 @@ def main(image: str, sensor: str, timestamp: int = None):
     print(f"Sensor        : {sensor}")
     print(f"Captured time : {timestamp}")
 
-    Ingester(image_path, sensor, timestamp).publish()
+    with open(image_path, "rb") as f:
+        image_bin = f.read()
+    ingester = Ingester(image_bin, sensor, timestamp)
+    if host:
+        ingester._streamer_host = host
+    ingester.publish()
 
 
 if __name__ == "__main__":

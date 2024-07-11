@@ -15,6 +15,7 @@ services:
       - .env/dev/db
     command:
       ["bin/rails","s","-b","0.0.0.0","-p","3001"]
+    restart: always
 
   subscriber:
     image: streamer-api:0.1
@@ -28,6 +29,7 @@ services:
       - .env/dev/db
     command:
       ["bin/rails","content_subscriber:subscribe"]
+    restart: always
 
   ws_server:
     image: streamer-api:0.1
@@ -43,3 +45,4 @@ services:
       - "1337:1337"
     command:
       ["bundle","exec","puma","-p","1337","cable/config.ru"]
+    restart: always
