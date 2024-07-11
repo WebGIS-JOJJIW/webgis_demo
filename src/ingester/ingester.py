@@ -6,8 +6,9 @@ import requests
 
 # ARTIFACT_SERVE
 SCRIPT_PATH = Path(__file__).absolute()
-ARTIFACTORY_PATH = SCRIPT_PATH.parent / ".." / \
-    ".." / "infra" / "artifact_serve/data/sensor_images"
+ARTIFACTORY_ROOT_PATH = SCRIPT_PATH.parent / ".." / \
+    ".." / "infra" / "artifact_serve/data"
+ARTIFACTORY_PATH = ARTIFACTORY_ROOT_PATH / "sensor_images"
 
 # STREAMER
 STREAMER_ENDPOINT = "http://{}:3001/sensor_data"
@@ -26,7 +27,7 @@ class Ingester:
         print(f"Saving image binary to '{str(artifact_path)}'")
         with open(artifact_path, "wb") as f:
             f.write(image_bin)
-        return artifact_path.relative_to(ARTIFACTORY_PATH)
+        return artifact_path.relative_to(ARTIFACTORY_ROOT_PATH)
 
     def _notify_streamer(self, sensor: str, image_url: str, timestamp: int) -> int:
         captured_ts = datetime.fromtimestamp(
