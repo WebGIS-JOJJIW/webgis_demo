@@ -87,11 +87,12 @@ def mock_send_file_over_websocket(filepath):
 # Monitor directory for new .jpg files
 def monitor_directory(directory):
     inotify = INotify()
-    watch_flags = flags.CREATE
+    watch_flags = flags.CREATE | flags.CLOSE_WRITE
     wd = inotify.add_watch(directory, watch_flags)
 
     print(f"Begin file monitoring..");
 
+    monitored_file = None
     while True:
         # This call blocks until events are available
         for event in inotify.read():
@@ -101,9 +102,12 @@ def monitor_directory(directory):
                     if filename.endswith('.jpg'):
                         filepath = os.path.join(directory, filename)
                         print("found: ", filename)
+                        monitored_file = filename
+                if flag == flags.CLOSE_WRITE:
+                    if monitored_file == event.name:
                         # Start a new thread to handle the file processing
                         #threading.Thread(target=mock_send_file_over_websocket, args=(filepath,)).start()
-                        threading.Thread(target=send_file_over_mbroker, args=(filepath,"-b",)).start()
+                        threading.Thread(target=send_file_over_mbroker, args=(filepath,"sensor1",)).start()
 
 if __name__ == "__main__":
     directory_to_monitor = "/opt/imgin/"
