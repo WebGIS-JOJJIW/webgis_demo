@@ -1,0 +1,7 @@
+{
+    "mode": "development",
+    "debug": true,
+    "mqhost": "163.47.10.22",
+    "mon_extension": ".jpg",
+    "mon_dir": "/opt/imgin/"
+}
