@@ -16,7 +16,6 @@ export class DroneMotionComponent {
   constructor(public dialog: MatDialog, private http: HttpClient, private sharedServie: SharedService) { }
   private map!: maplibregl.Map;
   private markers: { marker: Marker, imgElement: HTMLImageElement }[] = [];
-  private selectedLayerId: string | null = null;
   sensor: Sensor[] = [];
   
 
@@ -37,7 +36,7 @@ export class DroneMotionComponent {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       // this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
       let filteredSensorData: SensorData[] = [];
-      filteredSensorData = this.filterUniqueSensorPoiId(res);
+      filteredSensorData = this.sharedServie.filterUniqueSensorPoiId(res);
       // console.log('filteredSensorData : ', filteredSensorData);
       // this.getDataSensorFilter('sensor001', res);
       filteredSensorData.forEach(ele => {
@@ -65,7 +64,7 @@ export class DroneMotionComponent {
 
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
-      dataFilter = this.sortEventsByDateTime(dataFilter);
+      dataFilter = this.sharedServie.sortEventsByDateTime(dataFilter);
        sensor_marker= {
         coordinates: this.getRandomLatLngInThailand(),
         title: dataFilter[0].sensor_name,
@@ -76,36 +75,14 @@ export class DroneMotionComponent {
         healthTime: '2024-07-12 16:40',
         latestPhotoTime: this.sharedServie.formatDateNoSec(dataFilter[0].dt),
         latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
-        previousPhotos: this.getPhotos(dataFilter)
+        previousPhotos: this.sharedServie.getPhotos(dataFilter)
       }
     }
     return sensor_marker;
   }
 
-  getPhotos(res: SensorData[]): Photo[] {
-    let photo: Photo[] = [];
-    res.forEach((value, index) => {
-      if (index != 0 && index <= 3) {
-        photo.push({
-          url: `http://${window.location.hostname}/${value.value}`,
-          time: value.dt,
-          by: value.sensor_name
-        });
-      }
-    });
-    return photo;
-  }
 
-  sortEventsByDateTime(data: SensorData[]): SensorData[] {
-    data.sort((a, b) => {
-      const dateA = new Date(a.dt).getTime();
-      const dateB = new Date(b.dt).getTime();
-      return dateB - dateA; // Sort in descending order, change to dateA - dateB for ascending
-    });
-
-    return data;
-  }
-
+  
 
   getRandomLatLngInThailand(): [number, number] {
     const minLat = 5.61;
@@ -148,7 +125,7 @@ export class DroneMotionComponent {
       marker.getElement().addEventListener('click', () => {
         // console.log('click openlog');
 
-        this.openDialog(markerData as MarkerDetailsData);
+        this.sharedServie.openDialog(markerData as MarkerDetailsData,this.dialog);
       });
 
     });
@@ -167,16 +144,6 @@ export class DroneMotionComponent {
     imgElement.style.height = `${size}px`;
   }
 
-  openDialog(data: MarkerDetailsData): void {
-    this.dialog.open(SensorDialogComponent, {
-      width: '420px',
-      height: '800px',
-      data: data,
-      position: { top: '80px', right: '0' },
-      hasBackdrop: false,
-    });
-  }
-
   ngOnDestroy(): void {
     if (this.map) {
       this.map.remove();
@@ -184,14 +151,4 @@ export class DroneMotionComponent {
   }
   //#endregion
 
-  filterUniqueSensorPoiId(data: SensorData[]): SensorData[] {
-    const uniqueSensorPoiIds = new Set<string>();
-    return data.filter(item => {
-      if (!uniqueSensorPoiIds.has(item.sensor_poi_id)) {
-        uniqueSensorPoiIds.add(item.sensor_poi_id);
-        return true;
-      }
-      return false;
-    });
-  }
 }

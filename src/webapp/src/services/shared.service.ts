@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { SensorData } from '../models/sensor_data.model';
+import { Photo } from '../models/sensor.model';
+import { MarkerDetailsData, SensorDialogComponent } from '../app/sensor-dialog/sensor-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +59,29 @@ export class SharedService {
     this.ShowLayerComp.next(false);
   }
 
+  sortEventsByDateTime(data: SensorData[]): SensorData[] {
+    data.sort((a, b) => {
+      const dateA = new Date(a.dt).getTime();
+      const dateB = new Date(b.dt).getTime();
+      return dateB - dateA; // Sort in descending order, change to dateA - dateB for ascending
+    });
 
+    return data;
+  }
+
+  getPhotos(res: SensorData[]): Photo[] {
+    let photo: Photo[] = [];
+    res.forEach((value, index) => {
+      if (index != 0 && index <= 3) {
+        photo.push({
+          url: `http://${window.location.hostname}/${value.value}`,
+          time:this.formatDateNoSec(value.dt),
+          by: value.sensor_name
+        });
+      }
+    });
+    return photo;
+  }
 
   getRandomColor(): string {
     const letters = '0123456789ABCDEF';
@@ -92,6 +118,27 @@ export class SharedService {
     const seconds = ('0' + date.getUTCSeconds()).slice(-2);
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
+  }
+
+  filterUniqueSensorPoiId(data: SensorData[]): SensorData[] {
+    const uniqueSensorPoiIds = new Set<string>();
+    return data.filter(item => {
+      if (!uniqueSensorPoiIds.has(item.sensor_poi_id)) {
+        uniqueSensorPoiIds.add(item.sensor_poi_id);
+        return true;
+      }
+      return false;
+    });
+  }
+
+  openDialog(data: MarkerDetailsData,dialog:MatDialog): void {
+    dialog.open(SensorDialogComponent, {
+      width: '420px',
+      height: '800px',
+      data: data,
+      position: { top: '80px', right: '0' },
+      hasBackdrop: false,
+    });
   }
   
 }

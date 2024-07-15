@@ -13,7 +13,7 @@ import { Layer, LayerResponse } from '../models/layer.model';
 export class GeoServerService {
 
 
-  private proxy = `http://${window.location.hostname}:8000/geoserver`;
+   private proxy = `http://${window.location.hostname}:8000/geoserver`;
   // private proxy = `http://139.59.221.224:8080/geoserver`;
 
   constructor(private http: HttpClient,
@@ -95,8 +95,10 @@ export class GeoServerService {
           </${dict[0] + ':' + dict[2]}>`;
       }
     });
-
+    //<gis:name>Sensor002</gis:name>
+    //<gis:vector_type>STANDARD_POI</gis:vector_type>
     transactionXml += `
+     
       </${dict[0] + ':' + dict[1]}>
           </wfs:Insert>
         </wfs:Transaction>
