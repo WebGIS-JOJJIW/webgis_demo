@@ -16,6 +16,7 @@ export class SharedService {
   private layersDisplay = new BehaviorSubject<string[]>([]);
   private saveChangeLayer = new BehaviorSubject<boolean>(false);
   private layerConf = new BehaviorSubject<boolean>(false);
+  private dialogOpen = new BehaviorSubject<string>('');
   currentMessage = this.messagePageChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
@@ -23,6 +24,26 @@ export class SharedService {
   currentLayersDisplay = this.layersDisplay.asObservable();
   currentSaveChangeLayer = this.saveChangeLayer.asObservable();
   currentLayerConf = this.layerConf.asObservable();
+  currentDialogOpen = this.dialogOpen.asObservable();
+
+  private sensorDataSource = new BehaviorSubject<MarkerDetailsData>({
+    title: '',
+    humanCount: 0,
+    vehicleCount: 0,
+    otherCount: 0,
+    healthStatus: '',
+    healthTime: '',
+    latestPhotoTime: '',
+    latestPhoto: '',
+    previousPhotos: [],
+    coordinates: [0, 0],
+  });
+
+  currentSensorData = this.sensorDataSource.asObservable();
+
+  updateSensorData(data: MarkerDetailsData): void {
+    this.sensorDataSource.next(data);
+  }
 
   changeMessage(message: string) {
     this.messagePageChange.next(message);
@@ -99,7 +120,7 @@ export class SharedService {
     const year = date.getUTCFullYear();
     const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
     const day = ('0' + date.getUTCDate()).slice(-2);
-    const hours = ('0' + date.getUTCHours()).slice(-2);
+    const hours = ('0' + date.getHours()).slice(-2);
     const minutes = ('0' + date.getUTCMinutes()).slice(-2);
     const seconds = ('0' + date.getUTCSeconds()).slice(-2);
 
@@ -113,7 +134,7 @@ export class SharedService {
     const year = date.getUTCFullYear();
     const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
     const day = ('0' + date.getUTCDate()).slice(-2);
-    const hours = ('0' + date.getUTCHours()).slice(-2);
+    const hours = ('0' + date.getHours()).slice(-2);
     const minutes = ('0' + date.getUTCMinutes()).slice(-2);
     const seconds = ('0' + date.getUTCSeconds()).slice(-2);
 
@@ -132,12 +153,16 @@ export class SharedService {
   }
 
   openDialog(data: MarkerDetailsData,dialog:MatDialog): void {
+    // console.log(data.title);
+    this.sensorDataSource.next(data);
+    this.dialogOpen.next(data.title);
     dialog.open(SensorDialogComponent, {
       width: '420px',
-      height: '800px',
+      height: '780px',
       data: data,
-      position: { top: '80px', right: '0' },
+      position: { top: '80px', right: '5px' },
       hasBackdrop: false,
+      
     });
   }
   

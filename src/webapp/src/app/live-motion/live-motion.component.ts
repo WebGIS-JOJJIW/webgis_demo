@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
-import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
 import { SensorData } from '../../models/sensor_data.model';
-import { Sensor } from '../../models/sensor.model';
+import { MarkerDetailsData, Sensor } from '../../models/sensor.model';
 import { HttpClient } from '@angular/common/http';
 import { SensorDataService } from '../../services/sensor-data.service';
 
@@ -16,7 +15,7 @@ import { SensorDataService } from '../../services/sensor-data.service';
 })
 export class LiveMotionComponent implements OnInit, OnDestroy {
   constructor(private dialog: MatDialog, private sharedService: SharedService, private geoService: GeoServerService
-    , private http: HttpClient,private sensorDataService: SensorDataService
+    , private http: HttpClient, private sensorDataService: SensorDataService
   ) {
     this.dialog.closeAll();
     this.sharedService.TurnOnOrOff(false);
@@ -27,6 +26,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   layersId = [''];
   layersDisplay = ['']
   sensor: Sensor[] = [];
+  dialogOpen = ''
+  dataSensor : MarkerDetailsData | undefined ;
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -45,6 +46,18 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   }
 
   setupSubscriptions(): void {
+    this.sharedService.currentDialogOpen.subscribe(res => {
+      this.dialogOpen = res;
+      // console.log(this.dialogOpen);
+      
+    })
+
+    this.sharedService.currentSensorData.subscribe(res=>{
+      this.dataSensor = res;
+      // console.log(this.dataSensor);
+      
+    })
+
     this.sharedService.currentLayersDisplay.subscribe(res => {
       if (this.layersDisplay.length > 0 && res.length == 0) {
         this.removeLayersFromMap();
@@ -57,7 +70,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.sensorDataService.subscribeToMainChannel().subscribe(data => {
       this.refreshSensorPoints();
     });
-  
+
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
         this.activeFlag = flag;
@@ -65,7 +78,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     });
   }
 
-  initailSensorData(){
+  initailSensorData() {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.getSensorsPoint(res);
     });
@@ -165,7 +178,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
             'text-field': '{title}',
             'text-offset': [0, 1.25],
             'text-anchor': 'top'
-          }
+          },
+          minzoom: 0, // Add minzoom
+          maxzoom: 24 // Add maxzoom
         });
 
         this.map.once('idle', () => {
@@ -177,15 +192,19 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
-  
+    console.log(sensorData);
     this.geoService.getLayerDetails(url).subscribe(res => {
       let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
       filteredSensorData.forEach((ele, inx) => {
         const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features[inx]);
         this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+        
+        if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+          this.sharedService.updateSensorData(sensorMarker)
+        }
       });
     });
   }
@@ -307,7 +326,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
     // console.log(sensorMarker);
-    
+
     this.map.addSource(layerId, {
       type: 'geojson',
       data: {
@@ -328,7 +347,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.addPoint(layerId).then(() => {
       this.map.on('click', layerId, (e) => {
         // Open the dialog with the marker details data
-        this.sharedService.openDialog(sensorMarker,this.dialog);
+        this.sharedService.openDialog(sensorMarker, this.dialog);
       });
     });
   }
