@@ -13,8 +13,9 @@ import { Layer, LayerResponse } from '../models/layer.model';
 export class GeoServerService {
 
 
-//  private proxy = `http://${window.location.hostname}:8000/geoserver`;
-  private proxy = `http://139.59.221.224:8080/geoserver`;
+  // private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  // private  proxy = `http://139.59.221.224:8080/geoserver`;
+  private proxy = `http://167.172.94.39:8000/geoserver`;
 
   constructor(private http: HttpClient,
     private dialog: MatDialog, private shareService: SharedService) { }
@@ -29,9 +30,9 @@ export class GeoServerService {
 
     // console.log(httpOptions);
     // console.log('Basic ' + btoa('admin:geoserver'));
-    return this.http.post(this.proxy+'/wfs', payload,httpOptions);
+    return this.http.post(this.proxy + '/wfs', payload, httpOptions);
   }
-  
+
 
   InsertLayer(payload: string, workspace: string, db: string): Observable<any> {
     const httpOptions = {
@@ -50,7 +51,7 @@ export class GeoServerService {
     return this.http.get<LayerResponse>(url);
   }
 
-  getLayerDetails(url: string): Observable<any>{
+  getLayerDetails(url: string): Observable<any> {
     // const url = `${this.proxy}/rest/layers?Accept=application/json`
     return this.http.get<any>(url);
   }
@@ -135,6 +136,8 @@ export class GeoServerService {
   }
 
   xmlInsertLayerToPayload(response: InsertLayer): string {
+    console.log(response);
+
     var res = `{
       "featureType": {
         "name": "${response.layerName}",
@@ -204,7 +207,7 @@ export class GeoServerService {
         type = `"binding": "org.locationtech.jts.geom.Polygon"`
       } else if (res.type?.toLowerCase() == 'point') {
         type = `"binding": "org.locationtech.jts.geom.Point"`
-      } else if (res.type?.toLowerCase() == 'linestring') {
+      } else if (res.type?.toLowerCase() == 'polyline') {
         type = `"binding": "org.locationtech.jts.geom.LineString"`
       }
       text += `
@@ -215,15 +218,15 @@ export class GeoServerService {
         "nillable": true,
         ${type}
       } `
-      
-      if (!(attr[attr.length - 1].name==res.name)) {
+
+      if (!(attr[attr.length - 1].name == res.name)) {
         text += `,`
       }
     });
     return text;
   }
 
-  GetProxy():string{
+  GetProxy(): string {
     return this.proxy;
   }
 

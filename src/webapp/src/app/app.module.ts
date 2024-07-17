@@ -28,7 +28,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { AddLayerListComponent } from './editor-mapping/add-layer-list/add-layer-list.component';
 import { LayerConfigurationComponent } from './editor-mapping/layer-configuration/layer-configuration.component';
 import { LastestEventsComponent } from './lastest-events/lastest-events.component';
-
+import { ToastrModule } from 'ngx-toastr';
 @NgModule({
   declarations: [
     AppComponent,
@@ -55,7 +55,9 @@ import { LastestEventsComponent } from './lastest-events/lastest-events.componen
     MatDialogModule,
     MatIconModule,
     HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule,MatCheckboxModule,
-    DragDropModule,
+    DragDropModule,ToastrModule.forRoot({
+      positionClass: 'toast-top-right'
+    }),
     FormsModule
   ],
   providers: [
