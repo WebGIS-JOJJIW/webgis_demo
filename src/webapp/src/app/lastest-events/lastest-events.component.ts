@@ -42,6 +42,8 @@ export class LastestEventsComponent {
 
   initialData(): void {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
+      // console.log('res',res.filter(x=>x.sensor_poi_id === 'sensor001'));
+        
       this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
       this.sortEventsByDateTime();
       this.applyFilter();
@@ -62,7 +64,7 @@ export class LastestEventsComponent {
       dateTime: this.formatDate(sensorData.dt),
       type: 'Alarm', // Assume 'Alarm' for this example, adjust as necessary
       system: 'SENSOR',
-      description: `<${sensorData.sensor_name}>  Alarm (${sensorData.sensor_type_name}) - https://src.img/${sensorData.value} `
+      description: `<${sensorData.sensor_name}>  Alarm (${sensorData.sensor_type_name}) - ${sensorData.value} `
     };
   }
 

@@ -2,7 +2,10 @@ import { Component } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
 import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { SensorDataService } from '../../services/sensor-data.service';
+import { HttpClient } from '@angular/common/http';
+import { SensorData } from '../../models/sensor_data.model';
+import { Photo, Sensor } from '../../models/sensor.model';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-drone-motion',
@@ -10,101 +13,106 @@ import { SensorDataService } from '../../services/sensor-data.service';
   styleUrl: './drone-motion.component.css'
 })
 export class DroneMotionComponent {
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, private http: HttpClient, private sharedServie: SharedService) { }
   private map!: maplibregl.Map;
   private markers: { marker: Marker, imgElement: HTMLImageElement }[] = [];
-  private selectedLayerId: string | null = null;
- 
+  sensor: Sensor[] = [];
+  
 
   ngOnInit(): void {
-
+    this.initialData()
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [101.86863588113442, 14.174982274310366], // starting position [lng, lat]
-      zoom: 10 // starting zoom
+      zoom: 6 // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right')
-    this.setMarkerImgIcon();
+    
 
   }
+
+  initialData() {
+    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
+      // this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+      let filteredSensorData: SensorData[] = [];
+      filteredSensorData = this.sharedServie.filterUniqueSensorPoiId(res);
+      // console.log('filteredSensorData : ', filteredSensorData);
+      // this.getDataSensorFilter('sensor001', res);
+      filteredSensorData.forEach(ele => {
+        this.sensor.push(this.getDataSensorFilter(ele.sensor_poi_id,res))
+      });
+
+      // console.log('sensor :',this.sensor);
+      this.setMarkerImgIcon();
+    });
+  }
+
+  getDataSensorFilter(sensor_id: string, sensorData: SensorData[]): Sensor {
+    let sensor_marker: Sensor = {
+      coordinates: [0,0],
+      title: '',
+      humanCount: 0,
+      vehicleCount: 0,
+      otherCount: 0,
+      healthStatus: '',
+      healthTime: '',
+      latestPhotoTime: '',
+      latestPhoto: '',
+      previousPhotos: []
+    }
+
+    let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
+    if (dataFilter.length > 0) {
+      dataFilter = this.sharedServie.sortEventsByDateTime(dataFilter);
+       sensor_marker= {
+        coordinates: this.getRandomLatLngInThailand(),
+        title: dataFilter[0].sensor_name,
+        humanCount: 3,
+        vehicleCount: 2,
+        otherCount: 1,
+        healthStatus: 'Good',
+        healthTime: '2024-07-12 16:40',
+        latestPhotoTime: this.sharedServie.formatDateNoSec(dataFilter[0].dt),
+        latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
+        previousPhotos: this.sharedServie.getPhotos(dataFilter)
+      }
+    }
+    return sensor_marker;
+  }
+
+
+  
+
+  getRandomLatLngInThailand(): [number, number] {
+    const minLat = 5.61;
+    const maxLat = 20.46;
+    const minLng = 97.35;
+    const maxLng = 105.64;
+
+    const lat = Math.random() * (maxLat - minLat) + minLat;
+    const lng = Math.random() * (maxLng - minLng) + minLng;
+
+    return [lng,lat];
+  }
+
+
   //#region  marker 
   setMarkerImgIcon() {
 
-    const markers = [
-      {
-        coordinates: [101.86863588113442, 14.174982274310366] as [number, number],
-        title: 'Sensor 001',
-        humanCount: 2,
-        vehicleCount: 3,
-        otherCount: 1,
-        healthStatus: 'Good',
-        healthTime: '20 min ago',
-        latestPhotoTime: '2024-06-01 12:00',
-        latestPhoto: 'https://via.placeholder.com/150',
-        previousPhotos: [
-          { url: 'https://via.placeholder.com/100', time: '2024-06-01 10:00', by: 'S001.A' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' }
-        ]
-
-      },
-      {
-        coordinates: [101.60295866314311, 14.26650329710607] as [number, number],
-        title: 'Sensor 001',
-        humanCount: 2,
-        vehicleCount: 3,
-        otherCount: 1,
-        healthStatus: 'Good',
-        healthTime: '20 min ago',
-        latestPhotoTime: '2024-06-01 12:00',
-        latestPhoto: 'https://via.placeholder.com/150',
-        previousPhotos: [
-          { url: 'https://via.placeholder.com/100', time: '2024-06-01 10:00', by: 'S001.A' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' }
-        ]
-      },
-      {
-        coordinates: [101.76983030419524, 14.059996601554488] as [number, number],
-        title: 'Sensor 001',
-        humanCount: 2,
-        vehicleCount: 3,
-        otherCount: 1,
-        healthStatus: 'Good',
-        healthTime: '20 min ago',
-        latestPhotoTime: '2024-06-01 12:00',
-        latestPhoto: 'https://via.placeholder.com/150',
-        previousPhotos: [
-          { url: 'https://via.placeholder.com/100', time: '2024-06-01 10:00', by: 'S001.A' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' },
-          { url: 'https://via.placeholder.com/100', time: '2024-05-31 22:00', by: 'S001.B' }
-        ]
-      },
-    ]
-
-    markers.forEach(markerData => {
-    //   const popupContent = `
-    //   <div class="popup-card">
-    //     <h3>${markerData.title}</h3>
-    //     <p>${1}</p>
-    //     <img src="${markerData.latestPhoto}" alt="${markerData.title}" style="width: 100%;">
-    //   </div>
-    // `;
-
-      // const popup = new Popup({ offset: 25 }).setHTML(popupContent);
+    this.sensor.forEach(markerData => {
 
       const imgElement = document.createElement('img');
       imgElement.src = markerData.latestPhoto;
       imgElement.alt = markerData.title;
       this.setMarkerImageSize(imgElement, this.map.getZoom());
-      imgElement.style.width = '50px';
-      imgElement.style.height = '50px';
+      imgElement.style.width = '30px';
+      imgElement.style.height = '30px';
       imgElement.style.cursor = 'pointer';
       imgElement.style.border = '2px solid #FFFFFF';
       imgElement.style.borderRadius = '30%';
       imgElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
-      
+
 
       const marker = new Marker({ element: imgElement })
         .setLngLat(markerData.coordinates)
@@ -117,7 +125,7 @@ export class DroneMotionComponent {
       marker.getElement().addEventListener('click', () => {
         // console.log('click openlog');
 
-        this.openDialog(markerData as MarkerDetailsData);
+        this.sharedServie.openDialog(markerData as MarkerDetailsData,this.dialog);
       });
 
     });
@@ -136,22 +144,11 @@ export class DroneMotionComponent {
     imgElement.style.height = `${size}px`;
   }
 
-  openDialog(data: MarkerDetailsData): void {
-    this.dialog.open(SensorDialogComponent, {
-      width: '420px',
-      height: '800px',
-      data: data,
-      position: { top: '80px', right: '0' },
-      hasBackdrop: false,
-    });
-  }
-
   ngOnDestroy(): void {
     if (this.map) {
       this.map.remove();
     }
   }
   //#endregion
-
 
 }

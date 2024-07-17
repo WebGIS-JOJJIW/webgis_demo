@@ -2,6 +2,26 @@ mat-dialog-content {
     display: flex;
     flex-direction: column;
   }
+
+  .dialog-container {
+    position: relative;
+    /* border-radius: 20px;  */
+    overflow: hidden;
+    /* background: white; */
+    /* padding: 20px; */
+    width: 100%;
+    max-width: 450px; /* Adjust the width as necessary */
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); */
+    /* height: 100%; */
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+  }
+  
   
   h4, h5 {
     margin: 0;
@@ -17,7 +37,7 @@ mat-dialog-content {
   
   .photo {
     width: 90%; /* Adjust the width as needed */
-    height: 230px;
+    height: 200px;
     margin-right: 10px;
   }
 

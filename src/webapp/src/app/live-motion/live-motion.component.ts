@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
-import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
+import { SensorData } from '../../models/sensor_data.model';
+import { Feature, FeatureCollection, MarkerDetailsData, Sensor } from '../../models/sensor.model';
+import { HttpClient } from '@angular/common/http';
+import { SensorDataService } from '../../services/sensor-data.service';
 
 @Component({
   selector: 'app-live-motion',
@@ -11,7 +14,9 @@ import { GeoServerService } from '../../services/geoserver.service';
   styleUrl: './live-motion.component.css'
 })
 export class LiveMotionComponent implements OnInit, OnDestroy {
-  constructor(private dialog: MatDialog, private sharedService: SharedService, private geoService: GeoServerService) {
+  constructor(private dialog: MatDialog, private sharedService: SharedService, private geoService: GeoServerService
+    , private http: HttpClient, private sensorDataService: SensorDataService
+  ) {
     this.dialog.closeAll();
     this.sharedService.TurnOnOrOff(false);
   }
@@ -20,18 +25,38 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   activeFlag = false;
   layersId = [''];
   layersDisplay = ['']
-
+  sensor: Sensor[] = [];
+  dialogOpen = ''
+  dataSensor : MarkerDetailsData | undefined ;
 
   ngOnInit(): void {
     this.addCustomImages();
+    this.initializeMap();
+    this.setupSubscriptions();
+  }
 
+  initializeMap(): void {
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [101.86863588113442, 14.174982274310366], // starting position [lng, lat]
-      zoom: 3 // starting zoom
+      center: [102.841609, 16.466389], // starting position [lng, lat]
+      zoom: 11 // starting zoom
     });
-    this.map.addControl(new NavigationControl({}), 'bottom-right')
+    this.map.addControl(new NavigationControl({}), 'bottom-right');
+  }
+
+  setupSubscriptions(): void {
+    this.sharedService.currentDialogOpen.subscribe(res => {
+      this.dialogOpen = res;
+      // console.log(this.dialogOpen);
+      
+    })
+
+    this.sharedService.currentSensorData.subscribe(res=>{
+      this.dataSensor = res;
+      // console.log(this.dataSensor);
+      
+    })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
       if (this.layersDisplay.length > 0 && res.length == 0) {
@@ -40,15 +65,41 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         this.layersDisplay = res;
         this.showLayerDataOnMap(this.layersDisplay, 'VECTOR');
       }
-
-
+    });
+    this.initailSensorData();
+    this.sensorDataService.subscribeToMainChannel().subscribe(data => {
+      this.refreshSensorPoints();
     });
 
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
-        this.activeFlag = flag
+        this.activeFlag = flag;
       }
-    })
+    });
+  }
+
+  initailSensorData() {
+    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
+      this.getSensorsPoint(res);
+    });
+  }
+
+  refreshSensorPoints(): void {
+    this.clearSensorLayers();
+    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
+      this.getSensorsPoint(res);
+    });
+  }
+
+  clearSensorLayers(): void {
+    this.map.getStyle().layers.forEach((layer) => {
+      if (layer.id.startsWith('sensor-layer-')) {
+        this.map.removeLayer(layer.id);
+        if (this.map.getSource(layer.id)) {
+          this.map.removeSource(layer.id);
+        }
+      }
+    });
   }
 
   showLayerDataOnMap(layersName: Array<string>, type: 'VECTOR' | 'RASTER'): void {
@@ -127,7 +178,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
             'text-field': '{title}',
             'text-offset': [0, 1.25],
             'text-anchor': 'top'
-          }
+          },
+          minzoom: 0, // Add minzoom
+          maxzoom: 24 // Add maxzoom
         });
 
         this.map.once('idle', () => {
@@ -138,6 +191,64 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         resolve();
       }
     });
+  }
+
+  getSensorsPoint(sensorData: SensorData[]) {
+    const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
+    // console.log(sensorData);
+    
+    this.http.get<FeatureCollection>(url).subscribe(res => {
+      // console.log(res);
+      
+      let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
+      filteredSensorData.forEach((ele, inx) => {
+        const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x=>x.properties.name === ele.sensor_poi_id));
+        this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+        
+        if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+          this.sharedService.updateSensorData(sensorMarker)
+        }
+      });
+    });
+  }
+
+  getDataSensorFilter(sensor_id: string, sensorData: SensorData[], data: Feature[]): Sensor {
+    // console.log(data);
+
+    let sensor_marker: Sensor = {
+      coordinates: [0, 0],
+      title: '',
+      humanCount: 0,
+      vehicleCount: 0,
+      otherCount: 0,
+      healthStatus: '',
+      healthTime: '',
+      latestPhotoTime: '',
+      latestPhoto: '',
+      previousPhotos: []
+    }
+
+    let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
+    if (dataFilter.length > 0) {
+      dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
+      sensor_marker = {
+        coordinates:  [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
+        title: dataFilter[0].sensor_name,
+        humanCount: this.getRandomInt(4),
+        vehicleCount: this.getRandomInt(4),
+        otherCount: this.getRandomInt(4),
+        healthStatus: 'Good',
+        healthTime: '2024-07-12 16:40',
+        latestPhotoTime: this.sharedService.formatDateNoSec(dataFilter[0].dt),
+        latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
+        previousPhotos: this.sharedService.getPhotos(dataFilter)
+      }
+    }
+    return sensor_marker;
+  }
+
+  getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
   }
 
   addPolylineAndPolygon(layerId: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): Promise<void> {
@@ -216,48 +327,34 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     });
   }
 
+  addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
+    // console.log(sensorMarker);
 
+    this.map.addSource(layerId, {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: sensorMarker.coordinates
+          },
+          properties: {
+            title: sensorMarker.title
+          }
+        }]
+      }
+    });
 
-
-  // addPolylineAndPolygon(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
-  //   const paint: { [key: string]: any } = {};
-  //   paint[colorProperty] = ['get', 'color'];
-  //   // console.log(type);
-  //   if (type === 'fill') {
-  //     paint['fill-opacity'] = opacityOrRadius;
-  //     this.map.addLayer({
-  //       'id': `${index}-${type}`,
-  //       'type': 'fill',
-  //       'source': `${index}`,
-  //       paint: paint
-  //     });
-  //   } else if (type === 'circle') {
-  //     paint['circle-radius'] = opacityOrRadius;
-  //     this.map.addLayer({
-  //       'id': `${index}-${type}`,
-  //       'type': 'circle',
-  //       'source': `${index}`,
-  //       paint: paint
-  //     });
-  //   } else if (type === 'line') {
-  //     paint['line-width'] = opacityOrRadius;
-  //     this.map.addLayer({
-  //       'id': `${index}-${type}`,
-  //       'type': 'line',
-  //       'source': `${index}`,
-  //       paint: paint
-  //     });
-  //   }
-  // }
-
-  openDialog(data: MarkerDetailsData): void {
-    this.dialog.open(SensorDialogComponent, {
-      width: '450px',
-      height: '100%',
-      data: data,
-      position: { top: '80px', right: '0' }
+    this.addPoint(layerId).then(() => {
+      this.map.on('click', layerId, (e) => {
+        // Open the dialog with the marker details data
+        this.sharedService.openDialog(sensorMarker, this.dialog);
+      });
     });
   }
+
 
   ngOnDestroy(): void {
     if (this.map) {

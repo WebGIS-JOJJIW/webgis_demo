@@ -25,3 +25,14 @@ body {
   background-color: #1f2834;
   color: white;
 }
+
+
+.mdc-dialog--open .mat-mdc-dialog-inner-container {
+  opacity: 1;
+  background: #1f2834;
+  border-radius: 10px;
+}
+
+.mat-mdc-dialog-content {
+  max-height: 70vh !important;
+}
