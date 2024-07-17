@@ -40,7 +40,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [102.841609, 16.466389], // starting position [lng, lat]
-      zoom: 11 // starting zoom
+      zoom: 11, // starting zoom
+      
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }

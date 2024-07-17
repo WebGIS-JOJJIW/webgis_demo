@@ -1,111 +1,114 @@
 .layer-configuration-container {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    width: 600px;
-    height: 800px;
-    margin: 0 auto;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .form-container {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .form-left, .form-right {
-    width: 48%;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  input[type="text"], textarea, select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    background-color: #444;
-    border: 1px solid #555;
-    color: #fff;
-    border-radius: 3px;
-  }
-  
-  .edit-button {
-    background-color: #00aaff;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  
-  .upload-section {
-    margin-top: 20px;
-  }
-  
-  .browse-csv {
-    background-color: #555;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
-  .example-format {
-    color: #00aaff;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  
-  .location-inputs {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .location-inputs input {
-    width: 48%;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-  
-  .cancel-button {
-    background-color: #ad8dab;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-  
-  .submit-button {
-    background-color: #4ea0da;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-  }
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 600px;
+  height: 800px;
+  margin: 0 auto;
+}
 
-  /* .btn-secondary {
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-left,
+.form-right {
+  width: 48%;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  background-color: #444;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.edit-button {
+  background-color: #00aaff;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.upload-section {
+  margin-top: 20px;
+}
+
+.browse-csv {
+  background-color: #555;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.example-format {
+  color: #00aaff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.location-inputs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.location-inputs input {
+  width: 48%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  background-color: #ad8dab;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.submit-button {
+  background-color: #4ea0da;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* .btn-secondary {
     background-color: #ad8dab;
     border: none;
   }
@@ -114,4 +117,3 @@
     background-color: #4ea0da;
     border: none;
   } */
-  
