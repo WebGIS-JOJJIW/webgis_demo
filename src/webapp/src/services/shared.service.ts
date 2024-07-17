@@ -136,7 +136,7 @@ export class SharedService {
     const day = ('0' + date.getUTCDate()).slice(-2);
     const hours = ('0' + date.getHours()).slice(-2);
     const minutes = ('0' + date.getUTCMinutes()).slice(-2);
-    const seconds = ('0' + date.getUTCSeconds()).slice(-2);
+    // const seconds = ('0' + date.getUTCSeconds()).slice(-2);
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   }

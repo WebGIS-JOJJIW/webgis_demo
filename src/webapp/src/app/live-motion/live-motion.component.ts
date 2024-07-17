@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
 import { SensorData } from '../../models/sensor_data.model';
-import { MarkerDetailsData, Sensor } from '../../models/sensor.model';
+import { Feature, FeatureCollection, MarkerDetailsData, Sensor } from '../../models/sensor.model';
 import { HttpClient } from '@angular/common/http';
 import { SensorDataService } from '../../services/sensor-data.service';
 
@@ -195,11 +195,14 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
-    console.log(sensorData);
-    this.geoService.getLayerDetails(url).subscribe(res => {
+    // console.log(sensorData);
+    
+    this.http.get<FeatureCollection>(url).subscribe(res => {
+      // console.log(res);
+      
       let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
       filteredSensorData.forEach((ele, inx) => {
-        const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features[inx]);
+        const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x=>x.properties.name === ele.sensor_poi_id));
         this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
         
         if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
@@ -209,8 +212,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDataSensorFilter(sensor_id: string, sensorData: SensorData[], data: any): Sensor {
-    // console.log(data.geometry.coordinates);
+  getDataSensorFilter(sensor_id: string, sensorData: SensorData[], data: Feature[]): Sensor {
+    // console.log(data);
 
     let sensor_marker: Sensor = {
       coordinates: [0, 0],
@@ -229,7 +232,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
       sensor_marker = {
-        coordinates: data.geometry.coordinates as [number, number],
+        coordinates:  [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
         title: dataFilter[0].sensor_name,
         humanCount: this.getRandomInt(4),
         vehicleCount: this.getRandomInt(4),

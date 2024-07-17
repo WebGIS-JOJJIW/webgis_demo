@@ -32,3 +32,7 @@ body {
   background: #1f2834;
   border-radius: 10px;
 }
+
+.mat-mdc-dialog-content {
+  max-height: 70vh !important;
+}
