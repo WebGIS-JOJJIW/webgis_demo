@@ -63,7 +63,7 @@ export class LayersDisplayComponent {
               } catch (error) {
                 description = 'NO_LAYER_TYPE';
               }
-              this.layersList[index].vector_type = description;
+              this.layersList[index].vector_type = description.toUpperCase();
             }
           })
         );

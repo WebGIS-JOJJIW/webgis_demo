@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InsertLayer } from '../../../models/geo.model';
 import { GeoServerService } from '../../../services/geoserver.service';
 import { ToastrService } from 'ngx-toastr';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-add-layer-list',
@@ -12,8 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AddLayerListComponent {
   addLayerForm!: FormGroup;
-  constructor(private sharedService: SharedService, private fb: FormBuilder, private geoService: GeoServerService,
-    private toastr: ToastrService
+  constructor(private sharedService: SharedService, private fb: FormBuilder, private geoService: GeoServerService,private snackBar:MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -37,7 +37,7 @@ export class AddLayerListComponent {
   }
   onSubmit() {
     if (this.addLayerForm.valid) {
-      console.log('Form Value:', this.addLayerForm.value);
+
       const response = new InsertLayer()
       response.workspace = 'gis';
       response.dbName = 'gis_db';
@@ -60,22 +60,23 @@ export class AddLayerListComponent {
         'isNull': true,
         'type': ''
       })
-
       let payload = this.geoService.xmlInsertLayerToPayload(response);
       console.log('payload :', payload);
 
       this.geoService.InsertLayer(payload, response.workspace, response.dbName).subscribe(res => {
-        this.toastr.success('Created layer success!', 'Success');
-        this.onClose();
+        this.geoService.PutLayer(payload, response).subscribe(x =>{this.onClose();}, err =>{this.onClose();})
+        this.snackBar.open('Add Layer Success!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass : ['green-snackbar']
+        });
       }, err => {
-        this.toastr.error(err.message, 'Error');
-        this.onClose();
+        this.errMss(err+'');
+        
       });
     } else {
-      // console.error('Form is invalid');
-      console.log('Form Errors:', this.addLayerForm.errors);
-      console.log('Controls State:', this.addLayerForm.controls);
-      // alert('Form is invalid');
+      this.errMss('validate field')
     }
     // Handle form submission
     // console.log('onSubmit');
@@ -85,5 +86,14 @@ export class AddLayerListComponent {
   }
   onClose() {
     this.sharedService.TurnOnOrOff(false);
+  }
+
+  errMss(mss : string){
+    this.snackBar.open(mss, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass : ['red-snackbar']
+    });
   }
 }

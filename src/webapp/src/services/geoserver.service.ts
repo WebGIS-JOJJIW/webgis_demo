@@ -13,46 +13,47 @@ import { Layer, LayerResponse } from '../models/layer.model';
 export class GeoServerService {
 
 
-  private proxy = `http://${window.location.hostname}:8000/geoserver`;
-  // private proxy = `http://167.172.94.39:8000/geoserver`; 
-
-  constructor(private http: HttpClient,
-    private dialog: MatDialog, private shareService: SharedService) { }
+  // private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  private proxy = `http://167.172.94.39:8000/geoserver`;  
+  private httpOptions ={}
+  constructor(private http: HttpClient) { 
+       this.httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa('admin:geoserver')
+        })
+      };
+    }
 
   pushData(payload: string): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('admin:geoserver')
-      })
-    };
-
-    // console.log(httpOptions);
-    // console.log('Basic ' + btoa('admin:geoserver'));
-    return this.http.post(this.proxy + '/wfs', payload, httpOptions);
+    return this.http.post(this.proxy + '/wfs', payload, this.httpOptions);
   }
 
 
   InsertLayer(payload: string, workspace: string, db: string): Observable<any> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('admin:geoserver')
-      })
-    };
     // console.log('Basic ' + btoa('admin:geoserver'));
     const url = `${this.proxy}/rest/workspaces/${workspace}/datastores/${db}/featuretypes/`
-    return this.http.post(url, payload, httpOptions);
+    return this.http.post(url, payload, this.httpOptions);
+  }
+
+  PutLayer(payload: string, res:InsertLayer ){
+    const url = `${this.proxy}/rest/workspaces/${res.workspace}/datastores/${res.dbName}/featuretypes/${res.layerName}`
+    return this.http.put(url, payload, this.httpOptions);
   }
 
   getLayerListApi(): Observable<LayerResponse> {
+    console.log(this.httpOptions);
+    
     const url = `${this.proxy}/rest/layers?Accept=application/json`
-    return this.http.get<LayerResponse>(url);
+    return this.http.get<LayerResponse>(url,this.httpOptions);
   }
 
   getLayerDetails(url: string): Observable<any> {
     // const url = `${this.proxy}/rest/layers?Accept=application/json`
-    return this.http.get<any>(url);
+    const re = /http.*8080/gi;
+    const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
+    // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
+    return this.http.get<any>(corrected_url,this.httpOptions);
   }
 
   getAbstract(layerName: string): Observable<string> {
@@ -200,14 +201,19 @@ export class GeoServerService {
   addAttr(attr: attr[]): string {
     var text = `"attributes": {
           "attribute": [`
+    var vector_text = ''
     attr.forEach(res => {
       var type = '"binding": "java.lang.String"'
+      
       if (res.type?.toLowerCase() == 'polygon') {
         type = `"binding": "org.locationtech.jts.geom.Polygon"`
+        vector_text = 'polygon'
       } else if (res.type?.toLowerCase() == 'point') {
         type = `"binding": "org.locationtech.jts.geom.Point"`
+        vector_text = 'standard_poi'
       } else if (res.type?.toLowerCase() == 'polyline') {
         type = `"binding": "org.locationtech.jts.geom.LineString"`
+        vector_text = 'polyline'
       }
       text += `
       {
@@ -215,7 +221,10 @@ export class GeoServerService {
         "minOccurs": 0,
         "maxOccurs": 1,
         "nillable": true,
-        ${type}
+        ${type} , 
+        "description": {
+            "en-US": "${res.name === 'vector_type'? vector_text : ''}"
+          }
       } `
 
       if (!(attr[attr.length - 1].name == res.name)) {
