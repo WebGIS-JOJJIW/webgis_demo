@@ -1,0 +1,50 @@
+from urllib.parse import urljoin
+
+import requests
+
+from common import (BASE_URL, GEOSERVER_ADMIN_ID, GEOSERVER_ADMIN_PASSWD,
+                    GEOSERVER_DB_DATASOURCE, GEOSERVER_WORKSPACE, Executer,
+                    JSONTemplate)
+
+
+class CreateSensorLayerRequest(JSONTemplate):
+    REST_PATH = f"workspaces/{GEOSERVER_WORKSPACE}/datastores/{GEOSERVER_DB_DATASOURCE}/featuretypes"
+
+    def __init__(self, base_url: str):
+        super().__init__("templates/sensor_layer.json")
+        self.url = urljoin(base_url, CreateSensorLayerRequest.REST_PATH)
+
+
+class CreateSensorLayer(Executer):
+    def __init__(self, base_url: str):
+        super().__init__()
+        self.request = CreateSensorLayerRequest(base_url)
+
+    def task(self, **kwargs):
+        print(f"Creating sensor layer")
+        auth = requests.auth.HTTPBasicAuth(
+            GEOSERVER_ADMIN_ID, GEOSERVER_ADMIN_PASSWD)
+
+        response = requests.post(
+            self.request.url, json=self.request.template, auth=auth)
+        if (response.status_code != 201):
+            print(f"\tFailed with http status code {response.status_code}")
+            print(f"===BODY===\n{self.request.template}")
+            print(f"===RESPONSE===\n{response.text}")
+            return False
+
+        put_url = urljoin(f"{self.request.url}/", "sensors")
+        response = requests.put(
+            put_url, json=self.request.template, auth=auth)
+        if (response.status_code != 200):
+            print(f"\tFailed with http status code {response.status_code}")
+            return False
+        return True
+
+
+def main():
+    CreateSensorLayer(BASE_URL).execute()
+
+
+if __name__ == "__main__":
+    main()
