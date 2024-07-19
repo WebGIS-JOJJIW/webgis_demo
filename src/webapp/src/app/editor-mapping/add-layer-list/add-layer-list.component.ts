@@ -75,6 +75,7 @@ export class AddLayerListComponent {
           // verticalPosition: 'top',
           panelClass: ['custom-snackbar' ,'snackbar-success']
         });
+        this.onClose();
       }, err => {
         this.errMss(err+'');
       });
