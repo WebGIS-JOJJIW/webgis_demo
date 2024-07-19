@@ -63,7 +63,7 @@ export class LayersDisplayComponent {
               } catch (error) {
                 description = 'NO_LAYER_TYPE';
               }
-              this.layersList[index].vector_type = description;
+              this.layersList[index].vector_type = description.toUpperCase();
             }
           })
         );
@@ -80,8 +80,8 @@ export class LayersDisplayComponent {
         // console.log(this.standard_list);
         // console.log(this.camera_list);
         // console.log(this.communication_list);
-        console.log(this.polygon_list);
-        console.log(this.layersList);
+        // console.log(this.polygon_list);
+        // console.log(this.layersList);
         
         // console.log(this.polyline_list);
         // console.log(this.raster_list);

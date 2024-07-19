@@ -40,7 +40,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [102.841609, 16.466389], // starting position [lng, lat]
-      zoom: 11 // starting zoom
+      zoom: 11, // starting zoom
+      
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }
@@ -120,42 +121,50 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
         this.geoService.getLayerDetails(url).subscribe(
           data => {
-            data.features.forEach((feature: any) => {
-              feature.properties.color = this.sharedService.getRandomColor();
-            });
-            const layerId = `id-${name}`;
 
-            if (!this.map.getSource(layerId)) {
-              this.map.addSource(layerId, {
-                type: 'geojson',
-                data: data
+            if(data.features.length > 0){
+              // console.log(data.feature);
+              
+              data.features.forEach((feature: any) => {
+                feature.properties.color = this.sharedService.getRandomColor();
               });
+              const layerId = `id-${name}`;
+  
+              if (!this.map.getSource(layerId)) {
+                this.map.addSource(layerId, {
+                  type: 'geojson',
+                  data: data
+                });
+              }
+  
+              if (!this.map.getLayer(layerId)) {
+                this.layersId.push(layerId);
+  
+                if (data.features[0].geometry.type === 'Point') {
+                  this.addPoint(layerId).then(() => {
+                    this.addFilterCheckbox(filterGroup, layerId, name);
+                  });
+                }
+                else if (data.features[0].geometry.type === 'Polygon') {
+                  this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5).then(() => {
+                    this.addFilterCheckbox(filterGroup, layerId, name);
+                  });
+                }
+                else {
+                  this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2).then(() => {
+                    this.addFilterCheckbox(filterGroup, layerId, name);
+                  });
+                }
+  
+  
+              } else {
+                console.warn(`Layer with ID ${layerId} already exists.`);
+                this.addFilterCheckbox(filterGroup, layerId, name);
+              }
+            }else{
+              this.addFilterCheckbox(filterGroup, '', name);
             }
-
-            if (!this.map.getLayer(layerId)) {
-              this.layersId.push(layerId);
-
-              if (data.features[0].geometry.type === 'Point') {
-                this.addPoint(layerId).then(() => {
-                  this.addFilterCheckbox(filterGroup, layerId, name);
-                });
-              }
-              else if (data.features[0].geometry.type === 'Polygon') {
-                this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5).then(() => {
-                  this.addFilterCheckbox(filterGroup, layerId, name);
-                });
-              }
-              else {
-                this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2).then(() => {
-                  this.addFilterCheckbox(filterGroup, layerId, name);
-                });
-              }
-
-
-            } else {
-              console.warn(`Layer with ID ${layerId} already exists.`);
-              this.addFilterCheckbox(filterGroup, layerId, name);
-            }
+            
           },
           error => {
             console.error('Error fetching places data', error);
@@ -231,18 +240,23 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
-      sensor_marker = {
-        coordinates:  [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
-        title: dataFilter[0].sensor_name,
-        humanCount: this.getRandomInt(4),
-        vehicleCount: this.getRandomInt(4),
-        otherCount: this.getRandomInt(4),
-        healthStatus: 'Good',
-        healthTime: '2024-07-12 16:40',
-        latestPhotoTime: this.sharedService.formatDateNoSec(dataFilter[0].dt),
-        latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
-        previousPhotos: this.sharedService.getPhotos(dataFilter)
+      console.log(data);
+      
+      if(data.length>0){
+        sensor_marker = {
+          coordinates:  [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
+          title: dataFilter[0].sensor_name,
+          humanCount: this.getRandomInt(4),
+          vehicleCount: this.getRandomInt(4),
+          otherCount: this.getRandomInt(4),
+          healthStatus: 'Good',
+          healthTime: '2024-07-12 16:40',
+          latestPhotoTime: this.sharedService.formatDateNoSec(dataFilter[0].dt),
+          latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
+          previousPhotos: this.sharedService.getPhotos(dataFilter)
+        }
       }
+      
     }
     return sensor_marker;
   }

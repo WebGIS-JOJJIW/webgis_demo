@@ -28,7 +28,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { AddLayerListComponent } from './editor-mapping/add-layer-list/add-layer-list.component';
 import { LayerConfigurationComponent } from './editor-mapping/layer-configuration/layer-configuration.component';
 import { LastestEventsComponent } from './lastest-events/lastest-events.component';
-
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 @NgModule({
   declarations: [
     AppComponent,
@@ -56,6 +56,7 @@ import { LastestEventsComponent } from './lastest-events/lastest-events.componen
     MatIconModule,
     HttpClientModule,MatSelectModule,ReactiveFormsModule,MatFormFieldModule,MatRadioModule,MatCheckboxModule,
     DragDropModule,
+    MatSnackBarModule,
     FormsModule
   ],
   providers: [

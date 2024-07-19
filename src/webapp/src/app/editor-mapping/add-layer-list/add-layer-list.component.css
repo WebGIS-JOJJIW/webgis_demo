@@ -1,54 +1,120 @@
 /* add-layer.component.css */
 .add-layer-container {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    max-width: 400px;
-    margin: auto;
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  background-color: #444;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.browse-csv {
+  background-color: #555;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  /* border: 1px solid #ccc; */
+  border-radius: 5px;
+  margin-top: 5px;
+  background-color: #555;
+  color: #fff;
+}
+
+.form-check {
+  margin-top: 10px;
+}
+
+.form-check-input {
+  margin-right: 10px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-secondary {
+  background-color: #ad8dab;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #4ea0da;
+  border: none;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+h3 {
+  color: #A4FEFF;
+}
+
+.invalid-feedback {
+  color: red;
+  display: block;
+}
+
+.is-invalid {
+  border-color: red;
+}
+
+.form-control:disabled {
+  background-color: #7c8081;
+  opacity: 0.5;
+}
+
+
+
+/* snack bar color */
+::ng-deep .custom-snackbar {
+  margin: 0 !important;
+  position: absolute;
+  right: 40%;
+  top: 130px;
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: 8px !important;
   }
-  
-  .form-group {
-    margin-bottom: 15px;
+
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: white !important;
   }
-  
-  .form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-top: 5px;
-  }
-  
-  .form-check {
-    margin-top: 10px;
-  }
-  
-  .form-check-input {
-    margin-right: 10px;
-  }
-  
-  .buttons {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .btn-secondary {
-    background-color: #ad8dab;
-    border: none;
-  }
-  
-  .btn-primary {
-    background-color: #4ea0da;
-    border: none;
-  }
-  
-  .btn {
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  h3{
-    color: #A4FEFF;
-  }
-  
+}
+
+::ng-deep.snackbar-success {
+  border-radius: 8px;
+  margin-top: 10%;
+  --mdc-snackbar-container-color : #148c73
+}
+
+::ng-deep.snackbar-error {
+  border-radius: 8px;
+  --mdc-snackbar-container-color : #b72020
+}
