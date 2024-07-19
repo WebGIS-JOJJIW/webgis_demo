@@ -9,7 +9,7 @@ else
 fi
 
 set -x
-sudo docker run -it \
+sudo docker run -it --rm \
     --network webgis_net \
     -v $SCRIPT_DIR/:/data \
     --workdir /data \
