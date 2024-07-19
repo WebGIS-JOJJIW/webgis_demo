@@ -1,5 +1,6 @@
 import json
 import time
+import xml.etree.ElementTree as ET
 from abc import abstractmethod
 
 BASE_URL = "http://geoserver:8080/geoserver/rest/"
@@ -7,6 +8,9 @@ GEOSERVER_ADMIN_ID = "admin"
 GEOSERVER_ADMIN_PASSWD = "geoserver"
 GEOSERVER_WORKSPACE = "gis"
 GEOSERVER_DB_DATASOURCE = "gis_db"
+
+WFS_BASE_URL = "http://geoserver:8080/geoserver/wfs/"
+
 
 class Executer:
     DEFAULT_MAX_RETRY = 30
@@ -50,3 +54,12 @@ class JSONTemplate:
     def __init__(self, template_file: str):
         with open(template_file) as f:
             self.template = json.load(f)
+
+
+class XMLTemplate:
+    def __init__(self, template_file: str):
+        self.tree = ET.parse(template_file)
+        self.root = self.tree.getroot()
+
+    def serialize(self):
+        return ET.tostring(self.root, encoding='utf8')

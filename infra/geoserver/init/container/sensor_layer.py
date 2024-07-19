@@ -3,8 +3,8 @@ from urllib.parse import urljoin
 import requests
 
 from common import (BASE_URL, GEOSERVER_ADMIN_ID, GEOSERVER_ADMIN_PASSWD,
-                    GEOSERVER_DB_DATASOURCE, GEOSERVER_WORKSPACE, Executer,
-                    JSONTemplate)
+                    GEOSERVER_DB_DATASOURCE, GEOSERVER_WORKSPACE, WFS_BASE_URL,
+                    Executer, JSONTemplate, XMLTemplate)
 
 
 class CreateSensorLayerRequest(JSONTemplate):
@@ -42,8 +42,38 @@ class CreateSensorLayer(Executer):
         return True
 
 
+class InsertSensorsRequest(XMLTemplate):
+    def __init__(self, base_url: str):
+        super().__init__("templates/insert_sensors.xml")
+        self.url = base_url
+
+
+class InsertSensors(Executer):
+    def __init__(self, base_url: str):
+        super().__init__()
+        self.request = InsertSensorsRequest(base_url)
+
+    def task(self, **kwargs):
+        print(f"Inserting sensors at locations")
+        headers = {'Content-Type': 'application/xml'}
+        auth = requests.auth.HTTPBasicAuth(
+            GEOSERVER_ADMIN_ID, GEOSERVER_ADMIN_PASSWD)
+        response = requests.post(
+            self.request.url, data=self.request.serialize(), headers=headers, auth=auth)
+        if (response.status_code != 200):
+            print(f"\tFailed with http status code {response.status_code}")
+            print(f"===BODY===\n{self.request.serialize()}")
+            print(f"===RESPONSE===\n{response.text}")
+            return False
+        if not "<wfs:totalInserted>2</wfs:totalInserted>" in response.text:
+            raise Exception(
+                f"Inserting sensor locations failed:\n{response.text}")
+        return True
+
+
 def main():
     CreateSensorLayer(BASE_URL).execute()
+    InsertSensors(WFS_BASE_URL).execute()
 
 
 if __name__ == "__main__":
