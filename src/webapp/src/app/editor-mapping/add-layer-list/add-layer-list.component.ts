@@ -5,6 +5,7 @@ import { InsertLayer } from '../../../models/geo.model';
 import { GeoServerService } from '../../../services/geoserver.service';
 import { ToastrService } from 'ngx-toastr';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-layer-list',
@@ -60,22 +61,24 @@ export class AddLayerListComponent {
         'isNull': true,
         'type': ''
       })
-      let payload = this.geoService.xmlInsertLayerToPayload(response);
-      console.log('payload :', payload);
 
-      this.geoService.InsertLayer(payload, response.workspace, response.dbName).subscribe(res => {
-        this.geoService.PutLayer(payload, response).subscribe(x =>{this.onClose();}, err =>{this.onClose();})
-        this.snackBar.open('Add Layer Success!', 'Close', {
+      
+      let payload = this.geoService.xmlInsertLayerToPayload(response);
+      // console.log('payload :', payload);
+
+      this.geoService.InsertLayer(payload, response.workspace, response.dbName).pipe(
+        switchMap(res => this.geoService.PutLayer(payload, response))
+      ).subscribe(res => {
+        this.snackBar.open('Insert Layer success', 'Close', {
           duration: 3000,
-          // horizontalPosition: 'center',
+          // horizontalPosition: 'end',
           // verticalPosition: 'top',
-          panelClass: ['custom-snackbar', 'snackbar-success'],
-          
+          panelClass: ['custom-snackbar' ,'snackbar-success']
         });
       }, err => {
         this.errMss(err+'');
-        
       });
+
     } else {
       this.errMss('validate field')
     }
