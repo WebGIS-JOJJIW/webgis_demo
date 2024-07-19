@@ -14,3 +14,11 @@ export interface Layer {
   export interface LayerResponse {
     layers: Layers;
   }
+
+
+  export interface Layer_List {
+    name: string;
+    zone: string;
+    type: string;
+    subtype: string;
+  }

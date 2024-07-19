@@ -1,13 +1,13 @@
 .custom-marker {
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 50%;
-    cursor: pointer;
-  }
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
 
-  .map-content {
-    width: 100% !important; 
-    height: calc(100vh - 74px) !important;
+.map-content {
+  width: 100% !important;
+  height: calc(100vh - 74px) !important;
 }
 
 .content-wrapper {
@@ -21,8 +21,10 @@
 }
 
 .map-content {
-  width: calc(100% - 300px); /* Adjust width based on sidebar */
-  height: calc(100vh - 105px); /* Adjust height based on toolbar */
+  width: calc(100% - 300px);
+  /* Adjust width based on sidebar */
+  height: calc(100vh - 105px);
+  /* Adjust height based on toolbar */
 }
 
 /* new style for filter */
@@ -38,45 +40,7 @@
   color: #fff;
 }
 
-/* .filter-group input[type='checkbox']:first-child + label {
-  border-radius: 3px 3px 0 0;
-}
-
-.filter-group label:last-child {
-  border-radius: 0 0 3px 3px;
-  border: none;
-} */
-
-/* .filter-group input[type='checkbox'] {
-  display: none;
-}
-
-.filter-group input[type='checkbox'] + label {
-  background-color: #3386c0;
-  display: block;
-  cursor: pointer;
-  padding: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-}
-
-.filter-group input[type='checkbox'] + label {
-  background-color: #3386c0;
-  text-transform: capitalize;
-}
-
-.filter-group input[type='checkbox'] + label:hover,
-.filter-group input[type='checkbox']:checked + label {
-  background-color: #4ea0da;
-}
-
-.filter-group input[type='checkbox']:checked + label:before {
-  content: '✔';
-  margin-right: 5px;
-} */
-
-/* host and deep */
-
-:host ::ng-deep .filter-group input[type='checkbox']:first-child + label {
+:host ::ng-deep .filter-group input[type='checkbox']:first-child+label {
   border-radius: 3px 3px 0 0;
 }
 
@@ -84,11 +48,12 @@
   border-radius: 0 0 3px 3px;
   border: none;
 }
+
 :host ::ng-deep .filter-group input[type='checkbox'] {
   display: none;
 }
 
-:host ::ng-deep .filter-group input[type='checkbox'] + label {
+:host ::ng-deep .filter-group input[type='checkbox']+label {
   background-color: #3386c0;
   display: block;
   cursor: pointer;
@@ -96,22 +61,22 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
-:host ::ng-deep .filter-group input[type='checkbox'] + label {
+:host ::ng-deep .filter-group input[type='checkbox']+label {
   background-color: #3386c0;
   text-transform: capitalize;
 }
 
-:host ::ng-deep .filter-group input[type='checkbox'] + label:hover,
-:host ::ng-deep .filter-group input[type='checkbox']:checked + label {
+:host ::ng-deep .filter-group input[type='checkbox']+label:hover,
+:host ::ng-deep .filter-group input[type='checkbox']:checked+label {
   background-color: #4ea0da;
 }
 
-:host ::ng-deep .filter-group input[type='checkbox']:checked + label:before {
+:host ::ng-deep .filter-group input[type='checkbox']:checked+label:before {
   content: '✔';
   margin-right: 5px;
 }
 
-app-lastest-events{
+app-lastest-events {
   position: absolute;
   bottom: 0px;
   /* right: 10px; */
@@ -120,5 +85,6 @@ app-lastest-events{
   border-radius: 8px;
   width: 97%;
   /* height: 80%; */
-  z-index: 888; /* Ensure it's above other map elements */
+  z-index: 888;
+  /* Ensure it's above other map elements */
 }

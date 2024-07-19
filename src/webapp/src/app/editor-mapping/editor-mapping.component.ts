@@ -18,7 +18,7 @@ export class EditorMappingComponent implements OnInit {
   private mode = 'draw_point';
   showAddLayer = false;
   showLayerConf = false;
-  // private markers: Marker[] = [];
+  
   private proxy = ''
   constructor(
     public dialog: MatDialog,
@@ -27,11 +27,8 @@ export class EditorMappingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // this.sharedService.TurnOnOrOff(true);
     this.proxy = this.geoServerService.GetProxy();
-    // console.log(this.proxy);
     this.initializeMap();
-    // this.initializeDraw();
     this.subscribeToModeChanges();
     this.sharedService.currentPageOn.subscribe(x=> this.showAddLayer = x);
     this.sharedService.currentLayerConf.subscribe(x=> this.showLayerConf = x);
@@ -74,7 +71,6 @@ export class EditorMappingComponent implements OnInit {
         this.mode = mode;
         this.initializeMap();
       }
-
     });
     // console.log(this.mode);
 

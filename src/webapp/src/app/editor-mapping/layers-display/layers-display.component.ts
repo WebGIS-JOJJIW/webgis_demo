@@ -81,7 +81,7 @@ export class LayersDisplayComponent {
         // console.log(this.camera_list);
         // console.log(this.communication_list);
         // console.log(this.polygon_list);
-        // console.log(this.layersList);
+        // console.log(this.layersList.filter(x=>x.type != 'RASTER' && x.vector_type != 'NO_LAYER_TYPE'));
         
         // console.log(this.polyline_list);
         // console.log(this.raster_list);

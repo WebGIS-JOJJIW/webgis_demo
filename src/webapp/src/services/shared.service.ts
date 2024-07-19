@@ -4,6 +4,7 @@ import { SensorData } from '../models/sensor_data.model';
 import { Photo } from '../models/sensor.model';
 import { MarkerDetailsData, SensorDialogComponent } from '../app/sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { Layer } from '../models/layer.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class SharedService {
   private saveChangeLayer = new BehaviorSubject<boolean>(false);
   private layerConf = new BehaviorSubject<boolean>(false);
   private dialogOpen = new BehaviorSubject<string>('');
+  private layerList = new BehaviorSubject<Layer[]>([])
   currentMessage = this.messagePageChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
@@ -25,7 +27,7 @@ export class SharedService {
   currentSaveChangeLayer = this.saveChangeLayer.asObservable();
   currentLayerConf = this.layerConf.asObservable();
   currentDialogOpen = this.dialogOpen.asObservable();
-
+  currentLayerList = this.layerList.asObservable();
   private sensorDataSource = new BehaviorSubject<MarkerDetailsData>({
     title: '',
     humanCount: 0,
@@ -72,6 +74,10 @@ export class SharedService {
 
   setLayersDisplay(res: string[] =['']){
     this.layersDisplay.next(res);
+  }
+
+  setLayerList(data: Layer[]){
+    this.layerList.next(data);
   }
 
   setCloseAll(){

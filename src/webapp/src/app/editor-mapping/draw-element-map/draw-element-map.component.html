@@ -1,0 +1,32 @@
+<div class="layer-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Layer Name</th>
+          <th>Layer Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let layer of layers">
+          <td>
+            <div class="layer-name">
+              <div>{{ layer.name }}</div>
+              <div class="layer-zone">{{ layer.zone }}</div>
+            </div>
+          </td>
+          <td>
+            <div class="layer-type">
+              <div>{{ layer.type }}</div>
+              <div class="layer-subtype">{{ layer.subtype }}</div>
+            </div>
+          </td>
+          <td>
+            <button class="edit-button">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

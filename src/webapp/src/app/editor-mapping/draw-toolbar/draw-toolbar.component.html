@@ -15,12 +15,12 @@
   <div class="collapse navbar-collaps-2" id="navbarNav2">
     <ul class="navbar-nav">
       <li>
-        <a class="nav-link" >
+        <a class="nav-link" [class.disabled]="true"  [attr.aria-disabled]="true ? true : null">
           <i class="fa-solid fa-file-arrow-up"></i> Upload Data
         </a>
       </li>
-      <li>
-        <a class="nav-link" (click)="onClickAddLayer()">
+      <li >
+        <a class="nav-link" [class.disabled]="isAddLayerDisabled" (click)="onClickAddLayer()" [attr.aria-disabled]="isAddLayerDisabled ? true : null" >
           <i class="fa-solid fa-layer-group"></i> Add Layer
         </a>
       </li>
@@ -31,33 +31,33 @@
         </a>
       </li>
       <li>
-        <a class="nav-link" (click)="changeMode('draw_line_string')">
+        <a class="nav-link" (click)="changeMode('draw_line_string')" [class.disabled]="isPolyline"  [attr.aria-disabled]="isPolyline ? true : null" >
           <mat-icon>timeline</mat-icon>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" (click)="changeMode('draw_point')">
+        <a class="nav-link" (click)="changeMode('draw_point')" [class.disabled]="isPoint"  [attr.aria-disabled]="isPoint ? true : null">
           <i class="fa-solid fa-location-dot"></i>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" >
+        <a class="nav-link"  [class.disabled]="true"  [attr.aria-disabled]="true ? true : null">
           <i class="fa-regular fa-square"></i>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" (click)="changeMode('draw_polygon')">
+        <a class="nav-link" (click)="changeMode('draw_polygon')" [class.disabled]="isPolygon"  [attr.aria-disabled]="isPolygon ? true : null">
           <i class="fa-solid fa-draw-polygon"></i>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" >
-          <i class="fa-solid fa-upload"></i>
+        <a class="nav-link" [class.disabled]="true"  [attr.aria-disabled]="true ? true : null">
+          <i class="fa-solid fa-upload"  ></i>
         </a>
       </li>
       <li class="nav-link" ><h5>|</h5></li>
       <li>
-        <a class="nav-link" >
+        <a class="nav-link" [class.disabled]="true"  [attr.aria-disabled]="true ? true : null">
           <i class="fa-solid fa-gear"></i> Setting 
         </a>
       </li>

@@ -1,0 +1,61 @@
+.layer-table {
+    width: 400px;
+    color: #fff;
+    background-color: #162528;
+    border-collapse: collapse;
+    height: 762px;
+  }
+  
+  .layer-table table {
+    width: 100%;
+  }
+  
+  .layer-table th,
+  .layer-table td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .layer-table thead {
+    background-color: #162528;
+    border-bottom:1px #fff;
+  }
+  
+  .layer-table tbody tr {
+    background-color: #162528;
+    border-bottom: 1px solid #ffff;
+  }
+  
+  .layer-table tbody tr:hover {
+    background-color: #3a3a3a;
+  }
+  
+  .layer-name {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .layer-zone {
+    color: #00bcd4;
+  }
+  
+  .layer-type {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .layer-subtype {
+    color: #aaa;
+  }
+  
+  .edit-button {
+    background: none;
+    border: none;
+    color: #00bcd4;
+    cursor: pointer;
+  }
+  
+  .edit-button mat-icon {
+    font-size: 20px;
+  }
+  
