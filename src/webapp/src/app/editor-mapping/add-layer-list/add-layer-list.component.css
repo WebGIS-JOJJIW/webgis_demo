@@ -12,7 +12,9 @@
   margin-bottom: 15px;
 }
 
-input[type="text"], textarea, select {
+input[type="text"],
+textarea,
+select {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -92,16 +94,27 @@ h3 {
 
 
 /* snack bar color */
-.green-snackbar {
-  background-color: #58cb65 !important;
-  color: #fff;
+::ng-deep .custom-snackbar {
+  margin: 0 !important;
+  position: absolute;
+  right: 40%;
+  top: 130px;
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: white !important;
+  }
 }
 
-.red-snackbar {
-  background-color: #cb5861 !important;
-  color: #fff;
+::ng-deep.snackbar-success {
+  border-radius: 8px;
+  margin-top: 10%;
+  --mdc-snackbar-container-color : #148c73
 }
 
-
-
-
+::ng-deep.snackbar-error {
+  border-radius: 8px;
+  --mdc-snackbar-container-color : #b72020
+}

@@ -37,7 +37,7 @@ export class AddLayerListComponent {
   }
   onSubmit() {
     if (this.addLayerForm.valid) {
-
+      
       const response = new InsertLayer()
       response.workspace = 'gis';
       response.dbName = 'gis_db';
@@ -67,9 +67,10 @@ export class AddLayerListComponent {
         this.geoService.PutLayer(payload, response).subscribe(x =>{this.onClose();}, err =>{this.onClose();})
         this.snackBar.open('Add Layer Success!', 'Close', {
           duration: 3000,
-          horizontalPosition: 'right',
-          verticalPosition: 'top',
-          panelClass : ['green-snackbar']
+          // horizontalPosition: 'center',
+          // verticalPosition: 'top',
+          panelClass: ['custom-snackbar', 'snackbar-success'],
+          
         });
       }, err => {
         this.errMss(err+'');
@@ -91,9 +92,9 @@ export class AddLayerListComponent {
   errMss(mss : string){
     this.snackBar.open(mss, 'Close', {
       duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
-      panelClass : ['red-snackbar']
+      // horizontalPosition: 'end',
+      // verticalPosition: 'top',
+      panelClass: ['custom-snackbar' ,'snackbar-error']
     });
   }
 }
