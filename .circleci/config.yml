@@ -11,7 +11,7 @@ jobs:
           command: echo Setup tests is not available for now
   build:
     docker:
-      - image: cimg/node:20.15.0
+      - image: cimg/base:current
     steps:
       - checkout
       - run:
