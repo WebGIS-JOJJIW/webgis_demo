@@ -13,6 +13,7 @@ jobs:
     docker:
       - image: cimg/base:current
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: Build Artifacts & Deploy
