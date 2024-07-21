@@ -10,13 +10,15 @@ jobs:
           name: Setup Tests
           command: echo Setup tests is not available for now
   build:
-    docker:
-      - image: cimg/node:20.15.0
+    # Machine Executor - Ref: https://circleci.com/docs/using-linuxvm/
+    machine:
+      image: ubuntu-2004:current
+      resource_class: medium
     steps:
       - checkout
       - run:
-          name: Build WebApp
-          command: src/webapp/build.sh
+          name: Build Artifacts & Deploy
+          command: ./infra.sh setup; ./infra.sh down
   deploy:
     docker:
       - image: cimg/base:current
