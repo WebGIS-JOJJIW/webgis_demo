@@ -15,8 +15,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build WebApp
-          command: src/webapp/build.sh
+          name: Build Artifacts & Deploy
+          command: ./infra.sh setup; ./infra.sh down
   deploy:
     docker:
       - image: cimg/base:current
