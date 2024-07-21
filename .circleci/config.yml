@@ -10,6 +10,7 @@ jobs:
           name: Setup Tests
           command: echo Setup tests is not available for now
   build:
+    # Machine Executor - Ref: https://circleci.com/docs/using-linuxvm/
     machine:
       image: ubuntu-2004:current
       resource_class: medium
