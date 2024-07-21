@@ -10,8 +10,9 @@ jobs:
           name: Setup Tests
           command: echo Setup tests is not available for now
   build:
-    docker:
-      - image: cimg/base:current
+    machine:
+      image: ubuntu-2004:current
+      resource_class: medium
     steps:
       - setup_remote_docker
       - checkout
