@@ -11,12 +11,12 @@ jobs:
           command: echo Setup tests is not available for now
   build:
     docker:
-      - image: cimg/base:current
+      - image: cimg/node:20.15.0
     steps:
       - checkout
       - run:
-          name: Build Images
-          command: echo Building images is not available for now.
+          name: Build WebApp
+          command: src/webapp/build.sh
   deploy:
     docker:
       - image: cimg/base:current
@@ -28,4 +28,4 @@ jobs:
 workflows:
   all_tests:
     jobs:
-      - test
+      - build
