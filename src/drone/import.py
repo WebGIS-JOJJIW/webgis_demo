@@ -1,3 +1,5 @@
+import shutil
+import uuid
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -10,6 +12,9 @@ from geoserver_lib.common import (BASE_URL, GEOSERVER_ADMIN_ID,
                                   GEOSERVER_DB_DATASOURCE, GEOSERVER_WORKSPACE,
                                   WFS_BASE_URL, Executer, JSONTemplate,
                                   XMLTemplate)
+
+ARTIFACTORY_PATH = Path(__file__).parent / "drone_images"
+ARTIFACTORY_PUBLIC_PATH = "drone_images"
 
 
 def get_decimal_from_dms(dms, ref):
@@ -107,6 +112,8 @@ class InsertDroneImages(Executer):
             raise Exception("No layer specified")
         if not "coordinates" in kwargs:
             raise Exception("No coordinates specified")
+        if not "artifact_path" in kwargs:
+            raise Exception("No artifact path specified")
 
         # Modify XML tag to reflect the name of the specified layer
         layer_tags = self.request.root.findall(".//{gis}drone_images")
@@ -120,6 +127,12 @@ class InsertDroneImages(Executer):
         if not coordinates_tags or len(coordinates_tags) <= 0:
             raise Exception("Cannot find coordinates tag in XML")
         coordinates_tags[0].text = kwargs["coordinates"]
+
+        # Modify XML tag to reflect the name of the specified layer
+        imrel_tags = self.request.root.findall(".//{gis}image_relpath")
+        if not imrel_tags or len(imrel_tags) <= 0:
+            raise Exception("Cannot find layer tag in XML")
+        imrel_tags[0].text = kwargs["artifact_path"]
 
         # Send WFS-T to GeoServer
         headers = {'Content-Type': 'application/xml'}
@@ -139,6 +152,14 @@ class InsertDroneImages(Executer):
         return True
 
 
+def copy_file_to_artifactory(file_path: str) -> str:
+    dst_file = f"{str(uuid.uuid4())}.jpg"
+    dst_path = ARTIFACTORY_PATH / dst_file
+    shutil.copy(file_path, dst_path)
+    print(f"Copied {file_path} ---> {dst_path}")
+    return f"{ARTIFACTORY_PUBLIC_PATH}/{dst_file}"
+
+
 @click.command
 @click.option("--directory", "-d", help="Directory containing JPEG images", default="./")
 @click.option("--layer", "-l", help="Name of vector layer on GeoServer", required=True)
@@ -150,8 +171,9 @@ def main(directory, layer):
         lat, lon = get_gps_coordinates(file_path)
         if lat and lon:
             print(f"File: {file_path}, Latitude: {lat}, Longitude: {lon}")
+            artifact_path = copy_file_to_artifactory(file_path)
             InsertDroneImages(WFS_BASE_URL).execute(
-                layer=layer, coordinates=f"{lon},{lat}")
+                layer=layer, coordinates=f"{lon},{lat}", artifact_path=artifact_path)
         else:
             print(f"File: {file_path} has no GPS information.")
 
