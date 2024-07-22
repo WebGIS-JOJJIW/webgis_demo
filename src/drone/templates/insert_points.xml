@@ -1,0 +1,19 @@
+<wfs:Transaction service="WFS" version="1.1.0"
+    xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.opengis.net/wfs
+    http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+    <wfs:Insert>
+        <gis:drone_images xmlns:gis="gis">
+            <gis:the_geom>
+                <gml:Point srsName="EPSG:4326">
+                    <gml:coordinates>102.555173,13.670468</gml:coordinates>
+                </gml:Point>
+            </gis:the_geom>
+            <gis:image_relpath>path_to_image</gis:image_relpath>
+            <gis:vector_type></gis:vector_type>
+        </gis:drone_images>
+    </wfs:Insert>
+</wfs:Transaction>
