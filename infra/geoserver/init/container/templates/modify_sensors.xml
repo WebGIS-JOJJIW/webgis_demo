@@ -1,0 +1,43 @@
+<wfs:Transaction service="WFS" version="1.1.0"
+    xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.opengis.net/wfs
+    http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+    
+    <wfs:Update typeName="gis:sensors">
+        <wfs:Property>
+            <wfs:Name>gis:the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:Point srsName="EPSG:4326">
+                    <gml:coordinates>103.000000,14.000000</gml:coordinates>
+                </gml:Point>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>gis:name</ogc:PropertyName>
+                <ogc:Literal>sensor1</ogc:Literal>
+            </ogc:PropertyIsEqualTo>
+        </ogc:Filter>
+    </wfs:Update>
+    
+    <wfs:Update typeName="gis:sensors">
+        <wfs:Property>
+            <wfs:Name>gis:the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:Point srsName="EPSG:4326">
+                    <gml:coordinates>104.000100,14.000100</gml:coordinates>
+                </gml:Point>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:PropertyIsEqualTo>
+                <ogc:PropertyName>gis:name</ogc:PropertyName>
+                <ogc:Literal>sensor2</ogc:Literal>
+            </ogc:PropertyIsEqualTo>
+        </ogc:Filter>
+    </wfs:Update>
+    
+</wfs:Transaction>
