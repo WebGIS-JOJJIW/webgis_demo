@@ -12,7 +12,7 @@ import { Layer, Layer_List } from '../models/layer.model';
 export class SharedService {
 
   //#region parameters
-  private messagePageChange = new BehaviorSubject<string>('livemonitor');
+  private PageOnChange = new BehaviorSubject<string>('livemonitor');
   private messageMode = new BehaviorSubject<string>('draw_point');
   private pageEditorOn = new BehaviorSubject<boolean>(false);
   private ShowLayerComp = new BehaviorSubject<boolean>(false);
@@ -22,7 +22,7 @@ export class SharedService {
   private dialogOpen = new BehaviorSubject<string>('');
   private layer = new BehaviorSubject<Layer_List>(new Layer_List)
   private activeLayerEditor = new BehaviorSubject<boolean>(false);
-  currentMessage = this.messagePageChange.asObservable();
+  currentPageLive = this.PageOnChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
   currentShowLayerComp = this.ShowLayerComp.asObservable();
@@ -62,8 +62,8 @@ export class SharedService {
     this.sensorDataSource.next(data);
   }
 
-  changeMessage(message: string) {
-    this.messagePageChange.next(message);
+  changePage(message: string) {
+    this.PageOnChange.next(message);
   }
 
   changeMode(mode: string){

@@ -267,10 +267,6 @@ export class EditorMappingComponent implements OnInit {
       }
     }
   }
-
-  changePage(page: string): void {
-    this.sharedService.changeMode(page);
-  }
   //#endregion
 
   //#region Keyboard Events
