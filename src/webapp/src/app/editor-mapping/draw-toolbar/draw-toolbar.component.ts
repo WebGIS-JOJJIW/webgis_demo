@@ -1,19 +1,29 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { AddLayerComponent } from '../add-layer/add-layer.component';
 
 @Component({
   selector: 'app-draw-toolbar',
   templateUrl: './draw-toolbar.component.html',
   styleUrls: ['./draw-toolbar.component.css']
 })
-export class DrawToolbarComponent {
-  
-  constructor(private sharedService: SharedService, private dialog: MatDialog) {}
+export class DrawToolbarComponent implements OnInit{
+  isAddLayerDisabled: boolean = false;
+  isPoint : boolean =true;
+  isPolygon : boolean =true;
+  isPolyline : boolean =true;
+
+  constructor(private sharedService: SharedService) {}
+  ngOnInit(): void {
+    this.setSubscriptions();
+  }
+  setSubscriptions(){
+    this.sharedService.currentIsPoint.subscribe(x=> this.isPoint = !x);
+    this.sharedService.currentIsPolygon.subscribe(x=> this.isPolygon = !x);
+    this.sharedService.currentIsPolyline.subscribe(x=> this.isPolyline = !x);
+  }
   
   inputSearch = "";
-  dialogRef: MatDialogRef<AddLayerComponent> | null = null;
 
   changeMode(mode: 'draw_polygon' | 'draw_line_string' | 'draw_point') {
     this.sharedService.changeMode(mode);
@@ -22,25 +32,5 @@ export class DrawToolbarComponent {
   onClickAddLayer() {
     this.sharedService.TurnOnOrOff(true);
     this.sharedService.setFlagLayerConf(false);
-    // if (this.dialogRef) {
-    //   this.dialogRef.close();
-    //   this.dialogRef = null;
-    // } else {
-    //   const dialogConfig = new MatDialogConfig();
-    //   dialogConfig.height = '90%';
-    //   dialogConfig.width = '450px';
-    //   dialogConfig.position = {
-    //     top: '110px',
-    //     right: '10px'
-    //   };
-    //   dialogConfig.hasBackdrop = false;
-    //   dialogConfig.panelClass = 'custom-modalbox';
-
-    //   this.dialogRef = this.dialog.open(AddLayerComponent, dialogConfig);
-
-    //   this.dialogRef.afterClosed().subscribe(() => {
-    //     this.dialogRef = null;
-    //   });
-    // }
   }
 }

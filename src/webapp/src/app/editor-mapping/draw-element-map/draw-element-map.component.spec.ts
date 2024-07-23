@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AddLayerComponent } from './add-layer.component';
+import { DrawElementMapComponent } from './draw-element-map.component';
 
-describe('AddLayerComponent', () => {
-  let component: AddLayerComponent;
-  let fixture: ComponentFixture<AddLayerComponent>;
+describe('DrawElementMapComponent', () => {
+  let component: DrawElementMapComponent;
+  let fixture: ComponentFixture<DrawElementMapComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AddLayerComponent]
+      declarations: [DrawElementMapComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AddLayerComponent);
+    fixture = TestBed.createComponent(DrawElementMapComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

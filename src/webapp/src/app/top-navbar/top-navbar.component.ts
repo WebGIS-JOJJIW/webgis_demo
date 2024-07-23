@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { SharedService } from '../../services/shared.service';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { AppConst as appConst } from '../../models/AppConst';
 
 @Component({
   selector: 'app-top-navbar',
@@ -10,11 +11,11 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class TopNavbarComponent {
   isDropdownOpen = false;
-
+  appConst = appConst;
   constructor(private sharedService: SharedService,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer
-  ){
+  ) {
     this.matIconRegistry.addSvgIcon(
       'drone',
       this.domSanitizer.bypassSecurityTrustResourceUrl('assets/img/drone.svg')
@@ -24,16 +25,15 @@ export class TopNavbarComponent {
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
-  
-  changePage(page:string){
-    this.sharedService.changeMessage(page);
-    // console.log(page);
-    
-  }
 
-  setCloseAll(){
+  setCloseAll(str: string) {
     this.sharedService.setCloseAll();
+    if (str === appConst.LivePage) {
+      this.sharedService.changePage(appConst.LivePage);
+    } else if (str === appConst.DronePage) {
+      this.sharedService.changePage(appConst.DronePage);
+    }
   }
 
-  
+
 }

@@ -6,6 +6,7 @@ import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
+import { Layer_List } from '../../models/layer.model';
 
 @Component({
   selector: 'app-editor-mapping',
@@ -18,7 +19,7 @@ export class EditorMappingComponent implements OnInit {
   private mode = 'draw_point';
   showAddLayer = false;
   showLayerConf = false;
-  // private markers: Marker[] = [];
+  private layer!: Layer_List;
   private proxy = ''
   constructor(
     public dialog: MatDialog,
@@ -27,14 +28,12 @@ export class EditorMappingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // this.sharedService.TurnOnOrOff(true);
     this.proxy = this.geoServerService.GetProxy();
-    // console.log(this.proxy);
     this.initializeMap();
-    // this.initializeDraw();
     this.subscribeToModeChanges();
-    this.sharedService.currentPageOn.subscribe(x=> this.showAddLayer = x);
-    this.sharedService.currentLayerConf.subscribe(x=> this.showLayerConf = x);
+    this.sharedService.currentPageOn.subscribe(x => this.showAddLayer = x);
+    this.sharedService.currentLayerConf.subscribe(x => this.showLayerConf = x);
+    this.sharedService.setActiveLayerEditor(true);
   }
 
   //#region Initialization
@@ -43,11 +42,11 @@ export class EditorMappingComponent implements OnInit {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: [-74.3100039, 40.697538],
-      zoom: 3,
+      zoom: 2,
     });
 
     this.map.addControl(new NavigationControl(), 'bottom-right');
-    
+
     this.map.on('load', () => {
       this.setMultiLayersOnMap();
       this.addCustomImages();
@@ -74,9 +73,13 @@ export class EditorMappingComponent implements OnInit {
         this.mode = mode;
         this.initializeMap();
       }
-
     });
-    // console.log(this.mode);
+
+    this.sharedService.currentLayer.subscribe(x => {
+      this.layer = x;
+      this.setMultiLayersOnMap();
+
+    })
 
   }
   //#endregion
@@ -98,45 +101,42 @@ export class EditorMappingComponent implements OnInit {
 
   //#region Map Layers
   private setMultiLayersOnMap(): void {
-    // const workspaceLayers = [['frvk', 'ply_frv'],['gis','test_polyline'],['gis','poi']];
-    var wrk = 'workspace'
-    var ly = 'layer'
-    if (this.mode == 'draw_point') {
-      wrk = 'gis'; ly = 'test_poi_02';
-    } else if (this.mode == 'draw_line_string') {
-      wrk = 'gis'; ly = 'test_pl_01';
-    } else {
-      wrk = 'gis'; ly = 'test_pol_01';
+    var wrk = 'gis'
+    var ly = this.layer.originalName
+
+    // console.log(this.layer);
+    // console.log(wrk,ly);
+
+    if (this.layer.name != '') {
+      const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
+      const index = `${wrk}-${ly}`;
+      // console.log(wfsUrl);
+
+      fetch(wfsUrl)
+        .then(response => response.json())
+        .then(data => {
+          data.features.forEach((feature: any) => {
+            feature.properties.color = this.sharedService.getRandomColor();
+          });
+
+          this.map.addSource(`wfs-layer-${index}`, {
+            type: 'geojson',
+            data: data
+          });
+
+          if (this.mode == 'draw_polygon') {
+            this.addLayerToMap(index, 'fill', 'fill-color', 0.5);
+          }
+
+          if (this.mode == 'draw_point') {
+            this.addLayerToMap(index, 'circle', 'circle-color', 6);
+          } else {
+            this.addLayerToMap(index, 'circle', 'circle-color', 3);
+          }
+          this.addLayerToMap(index, 'line', 'line-color', 2);
+        })
+        .catch(error => console.error('Error fetching WFS data:', error));
     }
-
-    const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
-    const index = `${wrk}-${ly}`;
-    // console.log(wfsUrl);
-
-    fetch(wfsUrl)
-      .then(response => response.json())
-      .then(data => {
-        data.features.forEach((feature: any) => {
-          feature.properties.color = this.sharedService.getRandomColor();
-        });
-
-        this.map.addSource(`wfs-layer-${index}`, {
-          type: 'geojson',
-          data: data
-        });
-
-        if (this.mode == 'draw_polygon') {
-          this.addLayerToMap(index, 'fill', 'fill-color', 0.5);
-        }
-
-        if (this.mode == 'draw_point') {
-          this.addLayerToMap(index, 'circle', 'circle-color', 6);
-        } else {
-          this.addLayerToMap(index, 'circle', 'circle-color', 3);
-        }
-        this.addLayerToMap(index, 'line', 'line-color', 2);
-      })
-      .catch(error => console.error('Error fetching WFS data:', error));
   }
 
   private addLayerToMap(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
@@ -207,40 +207,41 @@ export class EditorMappingComponent implements OnInit {
   }
 
   private sendFeatureDataToGeoServer(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], type: string): void {
-    var wrk = 'workspace'
-    var ly = 'layer'
-    var type = 'type'
-    if (this.mode == 'draw_point') {
-      wrk = 'gis'; ly = 'test_poi_02'; type = 'test_poi_02';
-    } else if (this.mode == 'draw_line_string') {
-      wrk = 'gis'; ly = 'test_pl_01'; type = 'test_pl_01';
-    } else {
-      wrk = 'gis'; ly = 'test_pol_01'; type = 'test_pol_01';
-    }
-    const dict = [wrk, ly, type, 'urn:ogc:def:crs:EPSG::4326'];
-    const dialogRef = this.dialog.open(DialogWarningComponent);
+    var wrk = 'gis'; var ly = this.layer.originalName; var type = 'the_geom';
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
-        const wfsUrl = `${this.proxy}/wfs`;
+    if (this.layer.originalName != '') {
+      const dict = [wrk, ly, type, 'urn:ogc:def:crs:EPSG::4326'];
+      const dialogRef = this.dialog.open(DialogWarningComponent);
 
-        fetch(wfsUrl, {
-          method: 'POST',
-          headers: {},
-          body: wfsTransactionXml
-        })
-          .then(response => response.text())
-          .then(() => {
-            this.initializeMap();
-            this.initializeDraw();
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
+          const wfsUrl = `${this.proxy}/wfs`;
+          // console.log(wfsTransactionXml);
+          console.log(wfsUrl);
+
+          fetch(wfsUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Basic ' + btoa('admin:geoserver')
+            },
+            body: wfsTransactionXml
           })
-          .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
-      } else {
-        console.log('User chose not to save.');
-        // this.cancelDrawing();
-      }
-    });
+            .then(response => response.text())
+            .then(() => {
+              this.initializeMap();
+              this.initializeDraw();
+            })
+            .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
+        } else {
+          console.log('User chose not to save.');
+          // this.cancelDrawing();
+          // this.initializeMap();
+          // this.initializeDraw();
+        }
+      });
+    }
   }
   //#endregion
 
@@ -265,10 +266,6 @@ export class EditorMappingComponent implements OnInit {
         this.map.removeSource(sourceId);
       }
     }
-  }
-
-  changePage(page: string): void {
-    this.sharedService.changeMode(page);
   }
   //#endregion
 
@@ -297,5 +294,5 @@ export class EditorMappingComponent implements OnInit {
     img.src = imgUrl;
   }
 
-  
+
 }

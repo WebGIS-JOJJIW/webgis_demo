@@ -34,7 +34,7 @@ export class SensorDataService {
     return new Observable(observer => {
       this.sensorDataChannel1 = this.cable.subscriptions.create({ channel: 'SensorDataChannel', sensor_id: sensor_id }, {
         connected: () => {
-          console.log(`Connected to the sensor:${sensor_id}:sensor_data channel`);
+          console.log(`Connected to   the sensor:${sensor_id}:sensor_data channel`);
         },
         disconnected: () => {
           console.log(`Disconnected from the sensor:${sensor_id}:sensor_data channel`);

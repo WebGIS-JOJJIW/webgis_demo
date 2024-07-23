@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { SharedService } from '../services/shared.service';
+import { AppConst } from '../models/AppConst';
 
 @Component({
   selector: 'app-root',
@@ -7,16 +8,11 @@ import { SharedService } from '../services/shared.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  
-  PageShow = 'livemonitor'
-
   constructor(private sharedService: SharedService) {
-    // console.log(this.PageShow);
-    
    }
 
   ngOnInit() {
-    this.sharedService.currentMessage.subscribe(message => this.PageShow = message);
+    this.sharedService.changePage(AppConst.LivePage);
   }
 
 

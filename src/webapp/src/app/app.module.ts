@@ -16,7 +16,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon'
 import { HttpClientModule } from '@angular/common/http';
-import { AddLayerComponent } from './editor-mapping/add-layer/add-layer.component';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -29,6 +28,7 @@ import { AddLayerListComponent } from './editor-mapping/add-layer-list/add-layer
 import { LayerConfigurationComponent } from './editor-mapping/layer-configuration/layer-configuration.component';
 import { LastestEventsComponent } from './lastest-events/lastest-events.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DrawElementMapComponent } from './editor-mapping/draw-element-map/draw-element-map.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -40,12 +40,12 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     SensorDialogComponent,
     DrawToolbarComponent,
     DialogWarningComponent,
-    AddLayerComponent,
     LayersListComponent,
     LayersDisplayComponent,
     AddLayerListComponent,
     LayerConfigurationComponent,
-    LastestEventsComponent
+    LastestEventsComponent,
+    DrawElementMapComponent
     
   ],
   imports: [

@@ -240,7 +240,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
-      console.log(data);
+      // console.log(data);
       
       if(data.length>0){
         sensor_marker = {

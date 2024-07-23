@@ -14,3 +14,13 @@ export interface Layer {
   export interface LayerResponse {
     layers: Layers;
   }
+
+
+  export class Layer_List {
+    name: string ='' ;
+    originalName : string ='';
+    zone: string ='';
+    type: string ='';
+    typeID: string ='';
+    subtype: string ='';
+  }

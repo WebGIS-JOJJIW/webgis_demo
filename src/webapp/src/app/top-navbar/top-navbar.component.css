@@ -80,3 +80,7 @@
 .dropdown-menu a:hover {
   text-decoration: underline;
 }
+
+.space-line{
+  padding-inline: 20px !important;
+}

@@ -32,6 +32,16 @@
     z-index: 999; /* Ensure it's above other map elements */
   }
 
+  app-draw-element-map {
+    position: absolute;
+    top: 88px;
+    left: 40px;
+    /* background: #333; */
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    z-index: 888; /* Ensure it's above other map elements */
+  }
 
   app-layer-configuration{
     position: absolute;
@@ -54,5 +64,5 @@
     border-radius: 8px;
     width: 97%;
     /* height: 80%; */
-    z-index: 888; /* Ensure it's above other map elements */
+    z-index: 1000; /* Ensure it's above other map elements */
   }
