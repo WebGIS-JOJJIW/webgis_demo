@@ -10,13 +10,15 @@ jobs:
           name: Setup Tests
           command: echo Setup tests is not available for now
   build:
-    docker:
-      - image: cimg/base:current
+    # Machine Executor - Ref: https://circleci.com/docs/using-linuxvm/
+    machine:
+      image: ubuntu-2004:current
+      resource_class: medium
     steps:
       - checkout
       - run:
-          name: Build Images
-          command: echo Building images is not available for now.
+          name: Build Artifacts & Deploy
+          command: ./infra.sh setup; ./infra.sh down
   deploy:
     docker:
       - image: cimg/base:current
@@ -28,4 +30,4 @@ jobs:
 workflows:
   all_tests:
     jobs:
-      - test
+      - build

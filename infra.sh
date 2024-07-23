@@ -37,7 +37,8 @@ function reset {
     down
     set -x
     sudo git clean -Xfd
-    sudo docker rmi artifact_serve:latest
+    sudo git clean -fd
+    sudo docker rmi -f artifact_serve:latest
     set +x
 }
 
