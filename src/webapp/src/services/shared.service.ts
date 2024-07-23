@@ -4,12 +4,14 @@ import { SensorData } from '../models/sensor_data.model';
 import { Photo } from '../models/sensor.model';
 import { MarkerDetailsData, SensorDialogComponent } from '../app/sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Layer } from '../models/layer.model';
+import { Layer, Layer_List } from '../models/layer.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SharedService {
+
+  //#region parameters
   private messagePageChange = new BehaviorSubject<string>('livemonitor');
   private messageMode = new BehaviorSubject<string>('draw_point');
   private pageEditorOn = new BehaviorSubject<boolean>(false);
@@ -18,7 +20,8 @@ export class SharedService {
   private saveChangeLayer = new BehaviorSubject<boolean>(false);
   private layerConf = new BehaviorSubject<boolean>(false);
   private dialogOpen = new BehaviorSubject<string>('');
-  private layerList = new BehaviorSubject<Layer[]>([])
+  private layer = new BehaviorSubject<Layer_List>(new Layer_List)
+  private activeLayerEditor = new BehaviorSubject<boolean>(false);
   currentMessage = this.messagePageChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
@@ -27,7 +30,8 @@ export class SharedService {
   currentSaveChangeLayer = this.saveChangeLayer.asObservable();
   currentLayerConf = this.layerConf.asObservable();
   currentDialogOpen = this.dialogOpen.asObservable();
-  currentLayerList = this.layerList.asObservable();
+  currentLayer = this.layer.asObservable();
+  currentActiveLayerEditor = this.activeLayerEditor.asObservable();
   private sensorDataSource = new BehaviorSubject<MarkerDetailsData>({
     title: '',
     humanCount: 0,
@@ -43,6 +47,17 @@ export class SharedService {
 
   currentSensorData = this.sensorDataSource.asObservable();
 
+
+  //flag item 
+  private isPoint = new BehaviorSubject<boolean>(false);
+  private isPolygon = new BehaviorSubject<boolean>(false);
+  private isPolyline = new BehaviorSubject<boolean>(false);
+
+  currentIsPoint = this.isPoint.asObservable();
+  currentIsPolygon = this.isPolygon.asObservable();
+  currentIsPolyline = this.isPolyline.asObservable();
+
+  //#endregion
   updateSensorData(data: MarkerDetailsData): void {
     this.sensorDataSource.next(data);
   }
@@ -76,14 +91,35 @@ export class SharedService {
     this.layersDisplay.next(res);
   }
 
-  setLayerList(data: Layer[]){
-    this.layerList.next(data);
+  setLayer(data: Layer_List){
+    this.layer.next(data);
   }
 
   setCloseAll(){
     this.layerConf.next(false);
     this.pageEditorOn.next(false);
     this.ShowLayerComp.next(false);
+  }
+
+  setActiveLayerEditor(sw : boolean){
+    this.activeLayerEditor.next(sw);
+  }
+
+  setIsMode(mode:string){
+    if(mode==='draw_point'){
+      this.isPoint.next(true);
+      this.isPolygon.next(false);
+      this.isPolyline.next(false);
+    }else if(mode ==='draw_polygon'){
+      this.isPoint.next(false);
+      this.isPolygon.next(true);
+      this.isPolyline.next(false);
+    }else if(mode == 'draw_line_string'){
+      this.isPoint.next(false);
+      this.isPolygon.next(false);
+      this.isPolyline.next(true);
+    }
+    
   }
 
   sortEventsByDateTime(data: SensorData[]): SensorData[] {

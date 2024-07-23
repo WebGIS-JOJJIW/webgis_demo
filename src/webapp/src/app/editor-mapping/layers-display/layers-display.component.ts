@@ -29,9 +29,7 @@ export class LayersDisplayComponent {
 
 
   ngOnInit(): void {
-    let flagPage = false;
     let flagActive = false;
-    this.sharedService.currentPageOn.subscribe(x => { flagPage = x });
     this.sharedService.currentShowLayerComp.subscribe(x => { flagActive = x });
     if (flagActive) {
       this.geoService.getLayerListApi().subscribe(async res => {

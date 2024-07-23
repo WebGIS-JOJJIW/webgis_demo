@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
@@ -7,13 +7,21 @@ import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dial
   templateUrl: './draw-toolbar.component.html',
   styleUrls: ['./draw-toolbar.component.css']
 })
-export class DrawToolbarComponent {
+export class DrawToolbarComponent implements OnInit{
   isAddLayerDisabled: boolean = false;
   isPoint : boolean =true;
   isPolygon : boolean =true;
   isPolyline : boolean =true;
 
-  constructor(private sharedService: SharedService, private dialog: MatDialog) {}
+  constructor(private sharedService: SharedService) {}
+  ngOnInit(): void {
+    this.setSubscriptions();
+  }
+  setSubscriptions(){
+    this.sharedService.currentIsPoint.subscribe(x=> this.isPoint = !x);
+    this.sharedService.currentIsPolygon.subscribe(x=> this.isPolygon = !x);
+    this.sharedService.currentIsPolyline.subscribe(x=> this.isPolyline = !x);
+  }
   
   inputSearch = "";
 

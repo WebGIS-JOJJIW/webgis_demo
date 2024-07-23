@@ -25,7 +25,7 @@ export class GeoServerService {
       };
     }
 
-  pushData(payload: string): Observable<any> {
+  postDataOnLayer(payload: string): Observable<any> {
     return this.http.post(this.proxy + '/wfs', payload, this.httpOptions);
   }
 
@@ -99,8 +99,6 @@ export class GeoServerService {
     //<gis:name>Sensor002</gis:name>
     //<gis:vector_type>STANDARD_POI</gis:vector_type>
     transactionXml += `
-      <gis:name>sensor2</gis:name>
-      <gis:vector_type>standard_poi</gis:vector_type>
       </${dict[0] + ':' + dict[1]}>
           </wfs:Insert>
         </wfs:Transaction>

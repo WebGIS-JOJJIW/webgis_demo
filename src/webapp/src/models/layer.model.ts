@@ -16,9 +16,11 @@ export interface Layer {
   }
 
 
-  export interface Layer_List {
-    name: string;
-    zone: string;
-    type: string;
-    subtype: string;
+  export class Layer_List {
+    name: string ='' ;
+    originalName : string ='';
+    zone: string ='';
+    type: string ='';
+    typeID: string ='';
+    subtype: string ='';
   }

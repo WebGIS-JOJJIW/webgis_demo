@@ -7,7 +7,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let layer of layers">
+        <tr *ngFor="let layer of layersData">
           <td>
             <div class="layer-name">
               <div>{{ layer.name }}</div>
@@ -21,7 +21,7 @@
             </div>
           </td>
           <td>
-            <button class="edit-button">
+            <button class="edit-button" (click)="setEditorMap(layer)">
               <mat-icon>edit</mat-icon>
             </button>
           </td>
