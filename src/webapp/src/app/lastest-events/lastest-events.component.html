@@ -1,13 +1,36 @@
-<div class="latest-events" [class.collapsed]="isCollapsed">
+<div class="latest-events" [class.collapsed]="isCollapsed" *ngIf="!ActiveFull">
   <div class="header">
     <span>Latest Events</span>
     <div class="filters">
-      <label><input type="checkbox" [(ngModel)]="filter.all" (change)="applyFilter('all')"> All</label>
-      <label><input type="checkbox" [(ngModel)]="filter.alarm" (change)="applyFilter('alarm')"> Alarm</label>
-      <label><input type="checkbox" [(ngModel)]="filter.info" (change)="applyFilter('info')"> Info</label>
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.all"
+          (change)="applyFilter('all')"
+        />
+        All</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.alarm"
+          (change)="applyFilter('alarm')"
+        />
+        Alarm</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.info"
+          (change)="applyFilter('info')"
+        />
+        Info</label
+      >
     </div>
     <button class="collapse-button" (click)="toggleHeight()">
-      <i [ngClass]="isCollapsed ?  'fas fa-chevron-up' :'fas fa-chevron-down'"></i>
+      <i
+        [ngClass]="isCollapsed ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"
+      ></i>
     </button>
   </div>
   <div class="table-container">
@@ -27,7 +50,15 @@
           <tr *ngFor="let event of filteredEvents">
             <td class="col-datetime">{{ event.dateTime }}</td>
             <td class="col-type">{{ event.type }}</td>
-            <td class="col-system" [ngClass]="{ 'sensor': event.system === 'SENSOR', 'server': event.system === 'SERVER' }">{{ event.system }}</td>
+            <td
+              class="col-system"
+              [ngClass]="{
+                sensor: event.system === 'SENSOR',
+                server: event.system === 'SERVER'
+              }"
+            >
+              {{ event.system }}
+            </td>
             <td class="col-description">{{ event.description }}</td>
           </tr>
         </tbody>
@@ -35,3 +66,82 @@
     </div>
   </div>
 </div>
+
+<div class="full-page" *ngIf="ActiveFull">
+  <div class="header">
+    <span>Latest Events</span>
+    <div class="filters">
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.all"
+          (change)="applyFilter('all')"
+        />
+        All</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.alarm"
+          (change)="applyFilter('alarm')"
+        />
+        Alarm</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          [(ngModel)]="filter.info"
+          (change)="applyFilter('info')"
+        />
+        Info</label
+      >
+    </div>
+    <!-- <button class="collapse-button" (click)="toggleHeight()">
+      <i [ngClass]="isCollapsed ?  'fas fa-chevron-up' :'fas fa-chevron-down'"></i>
+    </button> -->
+  </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-datetime-full">Date Time</th>
+          <th class="col-type-full">Type</th>
+          <th class="col-system-full">System</th>
+          <th class="col-description-full">Name</th>
+          <th class="col-photo-full">Photo</th>
+        </tr>
+      </thead>
+    </table>
+    <div class="table-body-full">
+      <table>
+        <tbody>
+          <tr *ngFor="let event of filteredEvents">
+            <td class="col-datetime-full">{{ event.dateTime }}</td>
+            <td class="col-type-full">{{ event.type }}</td>
+            <td
+              class="col-system-full"
+              [ngClass]="{
+                sensor: event.system === 'SENSOR',
+                server: event.system === 'SERVER'
+              }"
+            >
+              {{ event.system }}
+            </td>
+            <td class="col-description-full">{{ event.sensorName }}</td>
+            <td class="col-photo-full">
+              <div class="thumbnail">
+                <img src="{{ event.description }}" alt="Thumbnail Image"(click)="openDialog(myTemplate)" />
+              </div>
+              <ng-template #myTemplate>
+                <img src="{{ event.description }}" style="height:600px; width:900px">
+                <!-- <button (click)="myDialogRef?.close()">this close button is optional</button> -->
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+

@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef } from '@angular/core';
 import { SensorDataService } from '../../services/sensor-data.service';
 import { HttpClient } from '@angular/common/http';
 import { SensorData, Event as events } from '../../models/sensor_data.model';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Dialog, DialogRef } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'app-lastest-events',
@@ -9,17 +11,12 @@ import { SensorData, Event as events } from '../../models/sensor_data.model';
   styleUrl: './lastest-events.component.css'
 })
 export class LastestEventsComponent {
-  constructor(private sensorDataService: SensorDataService, private http: HttpClient) { }
+  constructor(private sensorDataService: SensorDataService, private http: HttpClient,private route: ActivatedRoute,private dialog: Dialog) { }
   sensorData: SensorData[] = [];
   // sensorSpecificData: any[] = [];
   sensor_id = 1; // This is the sensor_id that we want to subscribe to
   events: events[] = [];
   isCollapsed = true;
-  oldFilter ={
-    all: true,
-    alarm: true,
-    info: true
-  }
 
   filter = {
     all: true,
@@ -28,31 +25,49 @@ export class LastestEventsComponent {
   };
 
   filteredEvents = this.events;
+  ActiveFull = false;
 
   ngOnInit(): void {
     // this.applyFilter();
     this.initialData();
     this.sensorDataService.subscribeToMainChannel().subscribe(data => {
       this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
-        this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+        if(this.ActiveFull){
+          this.events = res.map(sensorData => this.mapSensorDataToEventThumbs(sensorData));
+        }else{
+          this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+        }
         this.refreshData();
       });
     });
+    // ActiveFull
+    this.route.params.subscribe(params => {
+      this.ActiveFull = params['flag']; 
+   });
   }
 
   initialData(): void {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       // console.log('res',res.filter(x=>x.sensor_poi_id === 'sensor001'));
-        
-      this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+      if(this.ActiveFull){
+        this.events = res.map(sensorData => this.mapSensorDataToEventThumbs(sensorData));
+      }else{
+        this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+      }
+      
       this.sortEventsByDateTime();
       this.applyFilter();
     });
   }
 
+
   refreshData(): void {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
-      this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+      if(this.ActiveFull){
+        this.events = res.map(sensorData => this.mapSensorDataToEventThumbs(sensorData));
+      }else{
+        this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
+      }
       this.sortEventsByDateTime();
       this.applyFilter();
     });
@@ -64,7 +79,19 @@ export class LastestEventsComponent {
       dateTime: this.formatDate(sensorData.dt),
       type: 'Alarm', // Assume 'Alarm' for this example, adjust as necessary
       system: 'SENSOR',
+      sensorName: `${sensorData.sensor_name}`,
       description: `<${sensorData.sensor_name}>  Alarm (${sensorData.sensor_type_name}) - ${sensorData.value} `
+    };
+  }
+
+  mapSensorDataToEventThumbs(sensorData: SensorData): events {
+    // let date = new Date(sensorData.dt).toLocaleString()
+    return {
+      dateTime: this.formatDate(sensorData.dt),
+      type: 'Alarm', // Assume 'Alarm' for this example, adjust as necessary
+      system: 'SENSOR',
+      sensorName: `${sensorData.sensor_name}`,
+      description: `http://${window.location.hostname}/${sensorData.value}`
     };
   }
 
@@ -135,5 +162,12 @@ export class LastestEventsComponent {
 
   toggleHeight(): void {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  myDialogRef: DialogRef<unknown, any> | undefined;
+
+  openDialog(template: TemplateRef<unknown>) {
+    // you can pass additional params, choose the size and much more
+    this.myDialogRef = this.dialog.open(template);
   }
 }

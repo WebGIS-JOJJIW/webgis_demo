@@ -24,3 +24,8 @@ export interface Layer {
     typeID: string ='';
     subtype: string ='';
   }
+
+  export class LayerDisplay{
+    name:string = '';
+    type = 'RASTER' || 'VECTOR';
+  }

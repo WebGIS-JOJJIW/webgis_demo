@@ -12,35 +12,35 @@
         <div *ngIf="standard_list.length > 0">
           <div class="group-title">+ Standard POI</div>
           <div class="layer-item" *ngFor="let item of standard_list">
-            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+            <mat-checkbox [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
           </div>
         </div>
 
         <div *ngIf="camera_list.length > 0">
           <div class="group-title">+ Camera POI</div>
           <div class="layer-item" *ngFor="let item of camera_list">
-            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+            <mat-checkbox [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
           </div>
         </div>
         
         <div *ngIf="communication_list.length > 0">
           <div class="group-title">+ Communication POI</div>
           <div class="layer-item" *ngFor="let item of communication_list">
-            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+            <mat-checkbox [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
           </div>
         </div>
 
         <div *ngIf="polygon_list.length > 0">
           <div class="group-title">+ Polygon</div>
           <div class="layer-item" *ngFor="let item of polygon_list">
-            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+            <mat-checkbox [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
           </div>
         </div>
 
         <div *ngIf="polyline_list.length > 0">
           <div class="group-title">+ Polyline</div>
           <div class="layer-item" *ngFor="let item of polyline_list">
-            <mat-checkbox [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+            <mat-checkbox [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
           </div>
         </div>
         
@@ -55,7 +55,7 @@
         RASTERS
       </div>
       <div class="layer-item" *ngIf="sections.rasters" style="word-wrap: break-word;">
-        <mat-checkbox *ngFor="let item of raster_list"  [checked]="isLayerSelected(item.name)" (change)="onCheckboxChange($event, item.name)">{{item.name}}</mat-checkbox>
+        <mat-checkbox *ngFor="let item of raster_list"  [checked]="isLayerSelected(item)" (change)="onCheckboxChange($event, item)">{{item.name}}</mat-checkbox>
       </div>
     </div>
     <div class="footer">
@@ -69,9 +69,9 @@
     <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
       <div *ngFor="let layer of selectedLayers" class="example-box" cdkDrag>
         <div class="col-1"><i class="fa-solid fa-bars"></i></div>
-        <div class="col-8">{{ layer }}</div>
+        <div class="col-8">{{ layer.name }}</div>
         <div class="col-1"><span></span></div>
-        <div class="col-1"><i class="fa-solid fa-eraser" (click)="removeLayer(layer)"></i></div>
+        <div class="col-1"><i class="fa-solid fa-eraser" (click)="removeLayer(layer.name)"></i></div>
       </div>
     </div>
   </div>

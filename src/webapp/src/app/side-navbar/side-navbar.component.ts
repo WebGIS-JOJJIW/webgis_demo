@@ -24,7 +24,7 @@ export class SideNavbarComponent implements OnInit{
     this.sharedService.currentPageLive.subscribe(x=> this.PageLive = x);
   }
 
-  async openListLayer() {
+  openListLayer() {
     let flagLayer = false;
     const url = this.router.url;
 
@@ -39,6 +39,10 @@ export class SideNavbarComponent implements OnInit{
         this.sharedService.ChangeShowLayerComp(true);
       }
     }
+  }
+
+  openLastEvent(){
+    this.router.navigate(['/lastest-events', true]);
   }
 
 
