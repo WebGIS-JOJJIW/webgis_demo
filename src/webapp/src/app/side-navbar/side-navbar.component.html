@@ -6,7 +6,7 @@
       </a>
     </li>
     <li class="nav-item">
-      <a  class="nav-link text-white" *ngIf="PageLive === appConst.LivePage">
+      <a  class="nav-link text-white" *ngIf="PageLive === appConst.LivePage" (click)="openLastEvent()" (keydown.enter)="openLastEvent()">
         <img class="icon-side" src="assets/icons/system-task.png" alt="Map Marker">
       </a>
     </li>

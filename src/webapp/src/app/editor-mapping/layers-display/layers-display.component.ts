@@ -1,7 +1,7 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { GeoServerService } from '../../../services/geoserver.service';
-import { Layer } from '../../../models/layer.model';
+import { Layer, LayerDisplay } from '../../../models/layer.model';
 import { SharedService } from '../../../services/shared.service';
 
 @Component({
@@ -25,12 +25,13 @@ export class LayersDisplayComponent {
     rasters: true
   };
 
-  selectedLayers: string[] = [];
+  selectedLayers: LayerDisplay[] = [];
 
 
   ngOnInit(): void {
     let flagActive = false;
     this.sharedService.currentShowLayerComp.subscribe(x => { flagActive = x });
+    this.sharedService.currentLayersDisplay.subscribe(x => this.selectedLayers =x);
     if (flagActive) {
       this.geoService.getLayerListApi().subscribe(async res => {
         this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:')).map((layer => ({
@@ -97,17 +98,17 @@ export class LayersDisplayComponent {
     this.sections[section] = !this.sections[section];
   }
 
-  onCheckboxChange(event: any, layerName: string) {
+  onCheckboxChange(event: any, layer: Layer) {
     if (event.checked) {
-      this.selectedLayers.push(layerName);
+      this.selectedLayers.push({name: layer.name , type: layer.type});
       // this.sharedService.setLayersDisplay(this.selectedLayers);
     } else {
-      this.removeLayer(layerName);
+      this.removeLayer(layer.name);
     }
   }
 
   removeLayer(layerName: string) {
-    this.selectedLayers = this.selectedLayers.filter(layer => layer !== layerName);
+    this.selectedLayers = this.selectedLayers.filter(layer => layer.name !== layerName);
     this.uncheckLayer(layerName);
   }
 
@@ -133,8 +134,8 @@ export class LayersDisplayComponent {
     });
   }
 
-  isLayerSelected(layerName: string): boolean {
-    return this.selectedLayers.includes(layerName);
+  isLayerSelected(layer: LayerDisplay): boolean {
+    return this.selectedLayers.some(selectedLayer => selectedLayer.name === layer.name);
   }
 
   onSaveChange(){

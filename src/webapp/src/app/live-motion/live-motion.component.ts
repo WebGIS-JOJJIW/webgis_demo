@@ -7,6 +7,7 @@ import { SensorData } from '../../models/sensor_data.model';
 import { Feature, FeatureCollection, MarkerDetailsData, Sensor } from '../../models/sensor.model';
 import { HttpClient } from '@angular/common/http';
 import { SensorDataService } from '../../services/sensor-data.service';
+import { LayerDisplay } from '../../models/layer.model';
 
 @Component({
   selector: 'app-live-motion',
@@ -24,10 +25,12 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   markers: Marker[] = [];
   activeFlag = false;
   layersId = [''];
-  layersDisplay = ['']
+  layersDisplay : LayerDisplay[]=[];
   sensor: Sensor[] = [];
   dialogOpen = ''
-  dataSensor : MarkerDetailsData | undefined ;
+  dataSensor: MarkerDetailsData | undefined;
+
+  lngLat = [0,0]
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -39,9 +42,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [102.841609, 16.466389], // starting position [lng, lat]
-      zoom: 11, // starting zoom
-      
+      center: [102.375108883211, 13.67923667917], // starting position [lng, lat]
+      zoom: 10, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }
@@ -50,13 +52,13 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.sharedService.currentDialogOpen.subscribe(res => {
       this.dialogOpen = res;
       // console.log(this.dialogOpen);
-      
+
     })
 
-    this.sharedService.currentSensorData.subscribe(res=>{
+    this.sharedService.currentSensorData.subscribe(res => {
       this.dataSensor = res;
       // console.log(this.dataSensor);
-      
+
     })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
@@ -64,7 +66,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         this.removeLayersFromMap();
       } else {
         this.layersDisplay = res;
-        this.showLayerDataOnMap(this.layersDisplay, 'VECTOR');
+        this.showLayerDataOnMap(this.layersDisplay);
       }
     });
     this.initailSensorData();
@@ -103,73 +105,75 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     });
   }
 
-  showLayerDataOnMap(layersName: Array<string>, type: 'VECTOR' | 'RASTER'): void {
-    if (layersName.length > 0) {
+  showLayerDataOnMap(layers: LayerDisplay[]): void {
+    if (layers.length > 0) {
       const filterGroup = document.getElementById('filter-group');
       if (!filterGroup) {
         console.error('Filter group element not found');
         return;
       }
 
-      layersName.forEach(name => {
+      layers.forEach(ele => {
         let url = `${this.geoService.GetProxy()}`;
-        if (type === 'VECTOR') {
-          url += `/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${name}&outputFormat=application/json`;
-        } else {
-          // Add RASTER URL logic if needed
-        }
+        const layerId = `id-${ele.name}`;
+        if (ele.type === 'VECTOR') {
+          url += `/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ele.name}&outputFormat=application/json`;
+          this.geoService.getLayerDetails(url).subscribe(
+            data => {
+              if (data.features.length > 0) {
+                // console.log(data.feature);
 
-        this.geoService.getLayerDetails(url).subscribe(
-          data => {
-
-            if(data.features.length > 0){
-              // console.log(data.feature);
-              
-              data.features.forEach((feature: any) => {
-                feature.properties.color = this.sharedService.getRandomColor();
-              });
-              const layerId = `id-${name}`;
-  
-              if (!this.map.getSource(layerId)) {
-                this.map.addSource(layerId, {
-                  type: 'geojson',
-                  data: data
+                data.features.forEach((feature: any) => {
+                  feature.properties.color = this.sharedService.getRandomColor();
                 });
-              }
-  
-              if (!this.map.getLayer(layerId)) {
-                this.layersId.push(layerId);
-  
-                if (data.features[0].geometry.type === 'Point') {
-                  this.addPoint(layerId).then(() => {
-                    this.addFilterCheckbox(filterGroup, layerId, name);
+                if (!this.map.getSource(layerId)) {
+                  this.map.addSource(layerId, {
+                    type: 'geojson',
+                    data: data
                   });
                 }
-                else if (data.features[0].geometry.type === 'Polygon') {
-                  this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5).then(() => {
-                    this.addFilterCheckbox(filterGroup, layerId, name);
-                  });
+
+                if (!this.map.getLayer(layerId)) {
+                  this.layersId.push(layerId);
+
+                  if (data.features[0].geometry.type === 'Point') {
+                    this.addPoint(layerId).then(() => {
+                      this.addFilterCheckbox(filterGroup, layerId, ele.name);
+                    });
+                  }
+                  else if (data.features[0].geometry.type === 'Polygon') {
+                    this.addPolylineAndPolygon(layerId, 'fill', 'fill-color', 0.5).then(() => {
+                      this.addFilterCheckbox(filterGroup, layerId, ele.name);
+                    });
+                  }
+                  else {
+                    this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2).then(() => {
+                      this.addFilterCheckbox(filterGroup, layerId, ele.name);
+                    });
+                  }
+
+
+                } else {
+                  console.warn(`Layer with ID ${layerId} already exists.`);
+                  this.addFilterCheckbox(filterGroup, layerId, ele.name);
                 }
-                else {
-                  this.addPolylineAndPolygon(layerId, 'line', 'line-color', 2).then(() => {
-                    this.addFilterCheckbox(filterGroup, layerId, name);
-                  });
-                }
-  
-  
               } else {
-                console.warn(`Layer with ID ${layerId} already exists.`);
-                this.addFilterCheckbox(filterGroup, layerId, name);
+                this.addFilterCheckbox(filterGroup, '', ele.name);
               }
-            }else{
-              this.addFilterCheckbox(filterGroup, '', name);
+
+            },
+            error => {
+              console.error('Error fetching places data', error);
             }
-            
-          },
-          error => {
-            console.error('Error fetching places data', error);
-          }
-        );
+          );
+        } else if(ele.type === 'RASTER'){
+          // Add RASTER URL logic if needed
+          url += `/gis/wms?service=WMS&version=1.1.0&request=GetMap&layers=gis%3A${ele.name}&bbox={bbox-epsg-3857}&width=512&height=512&srs=EPSG%3A3857&styles=&format=image%2Fpng&TRANSPARENT=true`;
+          // console.log(url);
+          
+          this.setRaster(layerId,url);
+          this.addFilterCheckbox(filterGroup, layerId, ele.name);
+        }
       });
     }
   }
@@ -204,19 +208,22 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
-    // console.log(sensorData);
+    // console.log(url);
     
     this.http.get<FeatureCollection>(url).subscribe(res => {
-      // console.log(res);
-      
       let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
       filteredSensorData.forEach((ele, inx) => {
-        const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x=>x.properties.name === ele.sensor_poi_id));
-        this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
-        
-        if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-          this.sharedService.updateSensorData(sensorMarker)
+        if(res.features.filter(x => x.properties.name === ele.sensor_poi_id).length> 0){
+          const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
+          // console.log(sensorMarker);
+          
+          this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+  
+          if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+            this.sharedService.updateSensorData(sensorMarker)
+          }
         }
+        
       });
     });
   }
@@ -238,13 +245,15 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     }
 
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
+    // console.log(sensor_id);
+    // console.log(dataFilter.length)
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
       // console.log(data);
-      
-      if(data.length>0){
+
+      if (data.length > 0) {
         sensor_marker = {
-          coordinates:  [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
+          coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
           title: dataFilter[0].sensor_name,
           humanCount: this.getRandomInt(4),
           vehicleCount: this.getRandomInt(4),
@@ -255,14 +264,43 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
           latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
           previousPhotos: this.sharedService.getPhotos(dataFilter)
         }
+
+        console.log(sensor_marker);
+        
       }
-      
+
     }
     return sensor_marker;
   }
 
   getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
+  }
+
+  setRaster(layerId:string , url:string){
+    // console.log(layerId);
+    // console.log(url);
+    
+    if (!this.map.getLayer(`${layerId}`)){
+      console.log('addSource');
+      
+      this.map.addSource(`${layerId}`, {
+        type: 'raster',
+        tiles: [
+          `${url}` // URL template for the raster tiles
+        ],
+        tileSize: 512 // Tile size in pixels (256 is common)
+      });
+  
+      // Add a raster layer
+      this.map.addLayer({
+        id: `${layerId}`,
+        type: 'raster',
+        source: `${layerId}`,
+        paint: {'raster-opacity': 1.0}
+      });
+      
+    }
   }
 
   addPolylineAndPolygon(layerId: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): Promise<void> {
@@ -336,7 +374,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
           target.checked ? 'visible' : 'none'
         );
       } else {
-        console.error(`Layer with ID ${layerId} does not exist.`);
+        // console.error(`Layer with ID ${layerId} does not exist.`);
       }
     });
   }

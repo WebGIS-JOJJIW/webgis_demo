@@ -5,7 +5,8 @@
 .nav-link {
   display: flex;
   align-items: center;
-  padding-bottom: 30px;
+  padding-bottom: 15px;
+  padding-top: 15px;
   cursor: pointer !important;
 }
 
@@ -15,19 +16,23 @@
   /* Add a fixed width to align the text properly */
   text-align: center;
   /* Center align the icon within the width */
-  
+
 }
 
 .bg-g {
   background-color: #162528;
 }
 
-.icon-side{
-  width: 30px;  /* Adjust the size as needed */
-  height: 30px; /* Adjust the size as needed */
+.icon-side {
+  width: 30px;
+  /* Adjust the size as needed */
+  height: 30px;
+  /* Adjust the size as needed */
 }
 
 .nav-link:hover {
-  background-color: #555; /* Change to the desired highlight color */
-  color: #fff; /* Change text color if needed */
+  background-color: #555;
+  /* Change to the desired highlight color */
+  color: #fff;
+  /* Change text color if needed */
 }

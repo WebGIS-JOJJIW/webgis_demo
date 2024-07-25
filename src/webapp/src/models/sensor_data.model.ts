@@ -23,5 +23,6 @@ export interface SensorData {
     dateTime: string;
     type: string;
     system: string;
+    sensorName : string;
     description: string;
   }
