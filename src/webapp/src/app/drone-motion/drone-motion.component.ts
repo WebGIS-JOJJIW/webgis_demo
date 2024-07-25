@@ -1,50 +1,63 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
-import { MarkerDetailsData, SensorDialogComponent } from '../sensor-dialog/sensor-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { SensorData } from '../../models/sensor_data.model';
-import { Photo, Sensor } from '../../models/sensor.model';
+import { DroneModel, FeatureCollection, Sensor } from '../../models/sensor.model';
 import { SharedService } from '../../services/shared.service';
+import { Dialog, DialogRef } from '@angular/cdk/dialog';
+import { GeoServerService } from '../../services/geoserver.service';
+import { AppConst } from '../../models/AppConst';
 
 @Component({
   selector: 'app-drone-motion',
   templateUrl: './drone-motion.component.html',
   styleUrl: './drone-motion.component.css'
 })
-export class DroneMotionComponent {
-  constructor(public dialog: MatDialog, private http: HttpClient, private sharedServie: SharedService) { }
+export class DroneMotionComponent implements OnInit, OnDestroy {
+  @ViewChild('myTemplate') myTemplate!: TemplateRef<unknown>;
+  constructor(public matDialog: MatDialog, private http: HttpClient, private sharedServie: SharedService,private dialog: Dialog,
+    private geoService:GeoServerService
+  ) { 
+    this.sharedServie.changePage(AppConst.DronePage);
+  }
   private map!: maplibregl.Map;
   private markers: { marker: Marker, imgElement: HTMLImageElement }[] = [];
   sensor: Sensor[] = [];
-  
+  drone:DroneModel[] =[];
+  pathImg = ''  
+  lngLat = [100.97515970012046,  12.831584690521908]
 
   ngOnInit(): void {
+    this.mapSetUp();
     this.initialData()
+  }
+
+  mapSetUp(){
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [101.86863588113442, 14.174982274310366], // starting position [lng, lat]
-      zoom: 6 // starting zoom
+      center: this.lngLat as [number,number], // starting position [lng, lat]
+      zoom: 15 // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right')
-    
-
   }
 
   initialData() {
-    this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
-      // this.events = res.map(sensorData => this.mapSensorDataToEvent(sensorData));
-      let filteredSensorData: SensorData[] = [];
-      filteredSensorData = this.sharedServie.filterUniqueSensorPoiId(res);
-      // console.log('filteredSensorData : ', filteredSensorData);
-      // this.getDataSensorFilter('sensor001', res);
-      filteredSensorData.forEach(ele => {
-        this.sensor.push(this.getDataSensorFilter(ele.sensor_poi_id,res))
+    const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=drone_images&outputFormat=application/json`;
+    this.http.get<FeatureCollection>(url).subscribe(res => {
+      // console.log(res);
+      this.lngLat = [res.features[0].geometry.coordinates[0],res.features[0].geometry.coordinates[1]]
+      
+      res.features.forEach(ele => {
+        this.drone.push({
+          imgPath: `${window.location.hostname}/${ele.properties.image_relpath}`, //${this.geoService.getStringBefore8000(url)}
+          title: ele.id,
+          coordinates: [ele.geometry.coordinates[0],ele.geometry.coordinates[1]]
+        })
       });
-
-      // console.log('sensor :',this.sensor);
       this.setMarkerImgIcon();
+      
     });
   }
 
@@ -96,14 +109,12 @@ export class DroneMotionComponent {
     return [lng,lat];
   }
 
-
+  
   //#region  marker 
   setMarkerImgIcon() {
-
-    this.sensor.forEach(markerData => {
-
+    this.drone.forEach(markerData => {
       const imgElement = document.createElement('img');
-      imgElement.src = markerData.latestPhoto;
+      imgElement.src = markerData.imgPath;
       imgElement.alt = markerData.title;
       this.setMarkerImageSize(imgElement, this.map.getZoom());
       imgElement.style.width = '30px';
@@ -111,23 +122,21 @@ export class DroneMotionComponent {
       imgElement.style.cursor = 'pointer';
       imgElement.style.border = '2px solid #FFFFFF';
       imgElement.style.borderRadius = '30%';
-      imgElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
-
+      // imgElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
 
       const marker = new Marker({ element: imgElement })
         .setLngLat(markerData.coordinates)
-        // .setPopup(popup)
         .addTo(this.map);
-
 
       this.markers.push({ marker, imgElement });
 
-      marker.getElement().addEventListener('click', () => {
-        // console.log('click openlog');
-
-        this.sharedServie.openDialog(markerData as MarkerDetailsData,this.dialog);
+      marker.getElement().addEventListener('click', (event) => {
+        this.openDialog(this.myTemplate);
+        const imgElement = event.currentTarget as HTMLImageElement;
+        this.pathImg=imgElement.src;
+        // console.log(imgElement.src); // Log the src attribute of the img element
+        
       });
-
     });
 
     this.map.on('zoom', () => {
@@ -138,8 +147,13 @@ export class DroneMotionComponent {
     });
   }
 
+  myDialogRef: DialogRef<unknown, any> | undefined;
+  openDialog(template: TemplateRef<unknown>) {
+    // you can pass additional params, choose the size and much more
+    this.myDialogRef = this.dialog.open(template);
+  }
   private setMarkerImageSize(imgElement: HTMLImageElement, zoomLevel: number): void {
-    const size = Math.max(30, 50 * (zoomLevel / 7));
+    const size = Math.max(20, 20 * (zoomLevel / 7));
     imgElement.style.width = `${size}px`;
     imgElement.style.height = `${size}px`;
   }

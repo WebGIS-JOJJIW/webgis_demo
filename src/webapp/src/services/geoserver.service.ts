@@ -63,6 +63,14 @@ export class GeoServerService {
     );
   }
 
+  getStringBefore8000(url: string): string {
+    const index = url.indexOf(':8000');
+    if (index !== -1) {
+      return url.substring(0, index);
+    }
+    return url; // Return the original string if :8000 is not found
+  }
+
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
     // const featureType = 'frvk:ply_frv'; // replace with your feature type
     // const xmlns = 'frvk'; // replace with your type name
@@ -96,8 +104,8 @@ export class GeoServerService {
           </${dict[0] + ':' + dict[2]}>`;
       }
     });
-    //<gis:name>Sensor002</gis:name>
-    //<gis:vector_type>STANDARD_POI</gis:vector_type>
+    // <gis:name>Sensor002</gis:name>
+    // <gis:vector_type>STANDARD_POI</gis:vector_type>
     transactionXml += `
       </${dict[0] + ':' + dict[1]}>
           </wfs:Insert>

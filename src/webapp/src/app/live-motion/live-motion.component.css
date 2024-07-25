@@ -32,9 +32,9 @@
   font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-weight: 600;
   position: absolute;
-  top: 70%;
-  right: 20px;
-  z-index: 1;
+  top: 10%;
+  left: 70px;
+  z-index: 111;
   border-radius: 3px;
   width: 120px;
   color: #fff;
@@ -87,5 +87,9 @@ app-lastest-events {
   /* height: 80%; */
   z-index: 888;
   /* Ensure it's above other map elements */
+}
+
+app-layers-display{
+  z-index: 888;
 }
 

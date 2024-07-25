@@ -1,7 +1,5 @@
 .end-font {
   font-size: 25px;
-  /* padding: 0 20px;
-    margin: 0 -20px; */
 }
 
 .navbar-expand-lg .navbar-collaps-2 {
@@ -21,23 +19,27 @@
 
 .nav-link:hover {
   background-color: #555;
-  /* Change to the desired highlight color */
   color: #fff;
-  /* Change text color if needed */
+}
+
+.nav-item.active .nav-link {
+  background-color: #58564a;
+  color: #fff;
 }
 
 .icon-side {
   width: 25px;
-  /* Adjust the size as needed */
   height: 25px;
-  /* Adjust the size as needed */
+}
+
+.icon-top {
+  width: 27px;
+  height: 27px;
 }
 
 .icon-side-2 {
   width: 20px;
-  /* Adjust the size as needed */
   height: 20px;
-  /* Adjust the size as needed */
 }
 
 .dropdown-container {
@@ -81,6 +83,6 @@
   text-decoration: underline;
 }
 
-.space-line{
+.space-line {
   padding-inline: 20px !important;
 }

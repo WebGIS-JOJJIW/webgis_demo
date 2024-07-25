@@ -71,14 +71,14 @@ export class EditorMappingComponent implements OnInit {
     this.sharedService.currentMode.subscribe(mode => {
       if (mode != this.mode) {
         this.mode = mode;
-        this.initializeMap();
+        // this.initializeMap();
       }
     });
 
     this.sharedService.currentLayer.subscribe(x => {
       this.layer = x;
-      this.setMultiLayersOnMap();
-
+      this.initializeMap();
+      // this.reloadMap();
     })
 
   }
@@ -103,9 +103,6 @@ export class EditorMappingComponent implements OnInit {
   private setMultiLayersOnMap(): void {
     var wrk = 'gis'
     var ly = this.layer.originalName
-
-    // console.log(this.layer);
-    // console.log(wrk,ly);
 
     if (this.layer.name != '') {
       const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
@@ -218,7 +215,7 @@ export class EditorMappingComponent implements OnInit {
           const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
           const wfsUrl = `${this.proxy}/wfs`;
           // console.log(wfsTransactionXml);
-          console.log(wfsUrl);
+          // console.log(wfsUrl);
 
           fetch(wfsUrl, {
             method: 'POST',
@@ -235,7 +232,7 @@ export class EditorMappingComponent implements OnInit {
             })
             .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
         } else {
-          console.log('User chose not to save.');
+          // console.log('User chose not to save.');
           // this.cancelDrawing();
           // this.initializeMap();
           // this.initializeDraw();

@@ -23,7 +23,8 @@
           </td>
           <td>
             <button class="edit-button" (click)="setEditorMap(layer)">
-              <mat-icon>edit</mat-icon>
+              <mat-icon *ngIf="layer.name != this.layerOld.name">edit</mat-icon>
+              <mat-icon *ngIf="layer.name == this.layerOld.name" style="color: yellow;">save</mat-icon>
             </button>
           </td>
         </tr>

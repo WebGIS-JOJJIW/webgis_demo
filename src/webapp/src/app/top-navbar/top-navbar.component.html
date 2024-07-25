@@ -15,24 +15,23 @@
     </ul>
   </div>
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ">
-      <li class="nav-item "  [routerLink]="'/'" (click)="setCloseAll(appConst.LivePage)">
-        <a class="nav-link space-line" ><img class="icon-side" src="assets/icons/sensor.png" alt="Sensor"> &nbsp; Live Monitoring</a>
+    <ul class="navbar-nav">
+      <li class="nav-item" routerLinkActive="active" [routerLink]="['/live-monitoring']" (click)="setCloseAll(appConst.LivePage)">
+        <a class="nav-link space-line"><img class="icon-side" src="assets/icons/sensor.png" alt="Sensor"> &nbsp; Live Monitoring</a>
       </li>
-      <li class="nav-item" [routerLink]="'/drone-patrol' "(click)="setCloseAll(appConst.DronePage)">
-        <a class="nav-link space-line" ><img class="icon-side-2" src="assets/icons/drone.png" alt="Sensor"> &nbsp; Drone Patrol</a>
-        <!-- <mat-icon svgIcon="drone"></mat-icon>  -->
+      <li class="nav-item" routerLinkActive="active" [routerLink]="['/drone-patrol']" (click)="setCloseAll(appConst.DronePage)">
+        <a class="nav-link space-line"><img class="icon-side-2" src="assets/icons/drone.png" alt="Drone"> &nbsp; Drone Patrol</a>
       </li>
-      <li class="nav-item ">
-        <a class="nav-link space-line" ><img class="icon-side" style="margin-top: -5px;" src="assets/icons/laptop-analytic.png" alt="Sensor"> &nbsp; Summary</a>
+      <li class="nav-item">
+        <a class="nav-link space-line"><img class="icon-side" style="margin-top: -5px;" src="assets/icons/laptop-analytic.png" alt="Summary"> &nbsp; Summary</a>
       </li>
     </ul>
   </div>
   <div class="collapse navbar-collaps-2 " id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item" >
-        <a class="nav-link" [routerLink]="'/map-editor'" (click)="setCloseAll(appConst.LivePage)">
-          <i class="fa-solid fa-map-location-dot end-font"></i>
+        <a class="nav-link" [routerLink]="'/map-editor'" (click)="setCloseAll(appConst.MapEditorPage)">
+          <img class="icon-top" style="margin-top: -5px; position: inherit;" src="assets/icons/map-editing.png" alt="Summary"> 
         </a>
       </li>
       <li class="nav-item">

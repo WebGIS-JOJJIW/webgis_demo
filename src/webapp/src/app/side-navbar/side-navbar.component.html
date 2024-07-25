@@ -1,26 +1,26 @@
 <nav id="sidebar" class="d-flex flex-column bg-dark text-white" style="height: 100% !important;">
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-      <a  class="nav-link text-white " *ngIf="PageLive === appConst.LivePage || PageLive === appConst.DronePage">
+      <a  class="nav-link text-white " *ngIf="checkMenuShow(1)">
           <img class="icon-side" src="assets/icons/map-marker.png" alt="Map Marker">
       </a>
     </li>
     <li class="nav-item">
-      <a  class="nav-link text-white" *ngIf="PageLive === appConst.LivePage" (click)="openLastEvent()" (keydown.enter)="openLastEvent()">
+      <a  class="nav-link text-white" *ngIf="checkMenuShow(2)" (click)="openLastEvent()" (keydown.enter)="openLastEvent()">
         <img class="icon-side" src="assets/icons/system-task.png" alt="Map Marker">
       </a>
     </li>
     <li>
-      <a class="nav-link text-white" *ngIf="PageLive === appConst.LivePage">
+      <a class="nav-link text-white" *ngIf="checkMenuShow(3)">
         <img class="icon-side" src="assets/icons/slider.png" alt="Map Marker">
       </a>
     </li>
-    <li class="nav-item" *ngIf="PageLive === appConst.LivePage">
+    <li class="nav-item" *ngIf="checkMenuShow(4)">
       <a class="nav-link text-white" (click)="openListLayer()" (keydown.enter)="openListLayer()">
         <img class="icon-side" src="assets/icons/layers.png" alt="Layers">
       </a>
     </li>
-    <li *ngIf="PageLive === appConst.LivePage">
+    <li *ngIf="checkMenuShow(5)">
       <a href="#" class="nav-link text-white">
         <i class="bi bi-clipboard"></i>
       </a>

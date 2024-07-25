@@ -25,12 +25,12 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   markers: Marker[] = [];
   activeFlag = false;
   layersId = [''];
-  layersDisplay : LayerDisplay[]=[];
+  layersDisplay: LayerDisplay[] = [];
   sensor: Sensor[] = [];
   dialogOpen = ''
   dataSensor: MarkerDetailsData | undefined;
 
-  lngLat = [0,0]
+  lngLat = [102.375108883211,  13.67923667917]
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -42,8 +42,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [102.375108883211, 13.67923667917], // starting position [lng, lat]
-      zoom: 10, // starting zoom
+      center: this.lngLat as [number, number], // starting position [lng, lat]
+      zoom: 9, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }
@@ -51,14 +51,10 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   setupSubscriptions(): void {
     this.sharedService.currentDialogOpen.subscribe(res => {
       this.dialogOpen = res;
-      // console.log(this.dialogOpen);
-
     })
 
     this.sharedService.currentSensorData.subscribe(res => {
       this.dataSensor = res;
-      // console.log(this.dataSensor);
-
     })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
@@ -121,8 +117,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
           this.geoService.getLayerDetails(url).subscribe(
             data => {
               if (data.features.length > 0) {
-                // console.log(data.feature);
-
                 data.features.forEach((feature: any) => {
                   feature.properties.color = this.sharedService.getRandomColor();
                 });
@@ -166,12 +160,12 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
               console.error('Error fetching places data', error);
             }
           );
-        } else if(ele.type === 'RASTER'){
+        } else if (ele.type === 'RASTER') {
           // Add RASTER URL logic if needed
           url += `/gis/wms?service=WMS&version=1.1.0&request=GetMap&layers=gis%3A${ele.name}&bbox={bbox-epsg-3857}&width=512&height=512&srs=EPSG%3A3857&styles=&format=image%2Fpng&TRANSPARENT=true`;
           // console.log(url);
-          
-          this.setRaster(layerId,url);
+
+          this.setRaster(layerId, url);
           this.addFilterCheckbox(filterGroup, layerId, ele.name);
         }
       });
@@ -208,67 +202,74 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
-    // console.log(url);
-    
     this.http.get<FeatureCollection>(url).subscribe(res => {
       let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
-      filteredSensorData.forEach((ele, inx) => {
-        if(res.features.filter(x => x.properties.name === ele.sensor_poi_id).length> 0){
-          const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
-          // console.log(sensorMarker);
-          
-          this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
-  
-          if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-            this.sharedService.updateSensorData(sensorMarker)
+      if (filteredSensorData.length > 0) {
+        filteredSensorData.forEach((ele, inx) => {
+          if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
+            const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
+            this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+
+            if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+              this.sharedService.updateSensorData(sensorMarker)
+            }
           }
-        }
-        
-      });
+        });
+      }
+      else {
+        let sensors = ['sensor1', 'sensor2']
+        sensors.forEach((ele, inx) => {
+          if (res.features.filter(x => x.properties.name === ele).length > 0) {
+            const sensorMarker = this.getDataSensorFilter(ele, sensorData, res.features.filter(x => x.properties.name === ele));
+            this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+
+            if (this.dialogOpen === ele && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+              this.sharedService.updateSensorData(sensorMarker)
+            }
+          }
+        });
+      }
     });
   }
 
   getDataSensorFilter(sensor_id: string, sensorData: SensorData[], data: Feature[]): Sensor {
-    // console.log(data);
-
     let sensor_marker: Sensor = {
-      coordinates: [0, 0],
-      title: '',
-      humanCount: 0,
-      vehicleCount: 0,
-      otherCount: 0,
-      healthStatus: '',
+      coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
+      title: data[0].properties.name ?? '',
+      humanCount: this.getRandomInt(4),
+      vehicleCount: this.getRandomInt(4),
+      otherCount: this.getRandomInt(4),
+      healthStatus: 'Good',
       healthTime: '',
       latestPhotoTime: '',
-      latestPhoto: '',
+      latestPhoto: ``,
       previousPhotos: []
     }
-
+    // this.lngLat = sensor_marker.coordinates
+    // console.log(this.lngLat);
+    
+    // if (data.length > 0) {
+    //   sensor_marker = {
+    //     coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
+    //     title: data[0].properties.name??'',
+    //     humanCount: this.getRandomInt(4),
+    //     vehicleCount: this.getRandomInt(4),
+    //     otherCount: this.getRandomInt(4),
+    //     healthStatus: 'Good',
+    //     healthTime: '',
+    //     latestPhotoTime: '',
+    //     latestPhoto: ``,
+    //     previousPhotos: []
+    //   }
+    // }
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
-    // console.log(sensor_id);
-    // console.log(dataFilter.length)
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
-      // console.log(data);
-
-      if (data.length > 0) {
-        sensor_marker = {
-          coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
-          title: dataFilter[0].sensor_name,
-          humanCount: this.getRandomInt(4),
-          vehicleCount: this.getRandomInt(4),
-          otherCount: this.getRandomInt(4),
-          healthStatus: 'Good',
-          healthTime: '2024-07-12 16:40',
-          latestPhotoTime: this.sharedService.formatDateNoSec(dataFilter[0].dt),
-          latestPhoto: `http://${window.location.hostname}/${dataFilter[0].value}`,
-          previousPhotos: this.sharedService.getPhotos(dataFilter)
-        }
-
-        console.log(sensor_marker);
-        
-      }
-
+      sensor_marker.healthTime = this.sharedService.formatDateNoSec(dataFilter[0].dt);
+      sensor_marker.title = dataFilter[0].sensor_name
+      sensor_marker.latestPhotoTime = this.sharedService.formatDateNoSec(dataFilter[0].dt),
+        sensor_marker.latestPhoto = `http://${window.location.hostname}/${dataFilter[0].value}`,
+        sensor_marker.previousPhotos = this.sharedService.getPhotos(dataFilter)
     }
     return sensor_marker;
   }
@@ -277,13 +278,10 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     return Math.floor(Math.random() * max);
   }
 
-  setRaster(layerId:string , url:string){
-    // console.log(layerId);
-    // console.log(url);
-    
-    if (!this.map.getLayer(`${layerId}`)){
+  setRaster(layerId: string, url: string) {
+    if (!this.map.getLayer(`${layerId}`)) {
       console.log('addSource');
-      
+
       this.map.addSource(`${layerId}`, {
         type: 'raster',
         tiles: [
@@ -291,15 +289,15 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         ],
         tileSize: 512 // Tile size in pixels (256 is common)
       });
-  
+
       // Add a raster layer
       this.map.addLayer({
         id: `${layerId}`,
         type: 'raster',
         source: `${layerId}`,
-        paint: {'raster-opacity': 1.0}
+        paint: { 'raster-opacity': 1.0 }
       });
-      
+
     }
   }
 
@@ -419,7 +417,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   addCustomImages(): void {
     // Add your custom marker image
     const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
-    const img = new Image(30, 30); // Adjust the size as needed
+    const img = new Image(15, 15); // Adjust the size as needed
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
         this.map.addImage('custom-marker', img);

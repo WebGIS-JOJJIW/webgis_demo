@@ -12,7 +12,7 @@ export class DrawElementMapComponent implements OnInit {
 
   layersList: Layer[] = [];
   layersData: Layer_List[] = [];
-
+  layerOld = new Layer_List;
   constructor(private sharedService: SharedService, private geoService: GeoServerService) { }
 
   ngOnInit(): void {
@@ -29,7 +29,8 @@ export class DrawElementMapComponent implements OnInit {
           ...layer,
           name: layer.name.replace('gis:', ''),  // Remove 'gis:' from layer.name
         })));
-
+        // console.log(res);
+        
         // First loop get Type 'VECTOR' or 'RASTER' 
         const firstLoopPromises = this.layersList.map((element, index) =>
           this.geoService.getLayerDetails(element.href).toPromise().then(details1 => {
@@ -58,7 +59,6 @@ export class DrawElementMapComponent implements OnInit {
         );
         // Wait for all promises in the second loop to resolve
         await Promise.all(secondLoopPromises);
-        // console.log(this.layersList.filter(x => x.type === 'VECTOR'));
 
         this.layersList.filter(x => x.type === 'VECTOR').forEach(ele => {
           let type = '';
@@ -94,20 +94,22 @@ export class DrawElementMapComponent implements OnInit {
         });
       });
     }
+    this.sharedService.currentLayer.subscribe(x=> this.layerOld = x);
   }
 
   setEditorMap(layer : Layer_List){
-    if(layer.typeID.endsWith('POI')){
-      this.sharedService.changeMode('draw_point');
-      this.sharedService.setIsMode('draw_point');
-    }else if(layer.typeID === 'POLYGON'){
-      this.sharedService.changeMode('draw_polygon');
-      this.sharedService.setIsMode('draw_polygon');
-    }else if (layer.typeID === 'POLYLINE'){
-      this.sharedService.changeMode('draw_line_string');
-      this.sharedService.setIsMode('draw_line_string');
+    if(layer != this.layerOld){
+      if(layer.typeID.endsWith('POI')){
+        this.sharedService.changeMode('draw_point');
+        this.sharedService.setIsMode('draw_point');
+      }else if(layer.typeID === 'POLYGON'){
+        this.sharedService.changeMode('draw_polygon');
+        this.sharedService.setIsMode('draw_polygon');
+      }else if (layer.typeID === 'POLYLINE'){
+        this.sharedService.changeMode('draw_line_string');
+        this.sharedService.setIsMode('draw_line_string');
+      }
+      this.sharedService.setLayer(layer);
     }
-
-    this.sharedService.setLayer(layer);
   }
 }
