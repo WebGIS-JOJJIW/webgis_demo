@@ -272,9 +272,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
-      sensor_marker.healthTime = this.sharedService.formatDateNoSec(dataFilter[0].dt);
+      sensor_marker.healthTime = this.sharedService.formatDate(dataFilter[0].dt);
       sensor_marker.title = dataFilter[0].sensor_name
-      sensor_marker.latestPhotoTime = this.sharedService.formatDateNoSec(dataFilter[0].dt),
+      sensor_marker.latestPhotoTime = this.sharedService.formatDate(dataFilter[0].dt),
         sensor_marker.latestPhoto = `http://${window.location.hostname}/${dataFilter[0].value}`,
         sensor_marker.previousPhotos = this.sharedService.getPhotos(dataFilter)
     }
