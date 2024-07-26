@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, input, OnInit } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
@@ -8,10 +8,12 @@ import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dial
   styleUrls: ['./draw-toolbar.component.css']
 })
 export class DrawToolbarComponent implements OnInit{
+  @Input() pageLive : string = '';
   isAddLayerDisabled: boolean = false;
   isPoint : boolean =true;
   isPolygon : boolean =true;
   isPolyline : boolean =true;
+  datetimeValue: string = '';
 
   constructor(private sharedService: SharedService) {}
   ngOnInit(): void {

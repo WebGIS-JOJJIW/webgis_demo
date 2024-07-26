@@ -44,6 +44,10 @@ thead {
   background-color: #3a3a3a;
 }
 
+.layer-table tbody tr.selected {
+  background-color: #4e5e5c; /* Highlight color */
+}
+
 .layer-name {
   display: flex;
   flex-direction: column;
@@ -70,5 +74,16 @@ thead {
 }
 
 .edit-button mat-icon {
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #ff5722;
+  cursor: pointer;
+}
+
+.close-button mat-icon {
   font-size: 20px;
 }

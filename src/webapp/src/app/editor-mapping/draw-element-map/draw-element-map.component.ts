@@ -13,6 +13,7 @@ export class DrawElementMapComponent implements OnInit {
   layersList: Layer[] = [];
   layersData: Layer_List[] = [];
   layerOld = new Layer_List;
+  selectedLayer: any = null; // Keeps track of the selected layer
   constructor(private sharedService: SharedService, private geoService: GeoServerService) { }
 
   ngOnInit(): void {
@@ -25,7 +26,7 @@ export class DrawElementMapComponent implements OnInit {
     this.sharedService.currentActiveLayerEditor.subscribe(x => { flagActive = x });
     if (flagActive) {
       this.geoService.getLayerListApi().subscribe(async res => {
-        this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:')).map((layer => ({
+        this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:') && !layer.name.includes('drone_images')).map((layer => ({
           ...layer,
           name: layer.name.replace('gis:', ''),  // Remove 'gis:' from layer.name
         })));
@@ -112,4 +113,17 @@ export class DrawElementMapComponent implements OnInit {
       this.sharedService.setLayer(layer);
     }
   }
+
+  selectLayer(layer: Layer_List): void {
+    this.selectedLayer = layer;
+    this.setEditorMap(layer);
+  }
+
+  deselectLayer(event: MouseEvent): void {
+    event.stopPropagation(); // Prevents the row click from firing
+    this.selectedLayer = null;
+    this.layerOld = new Layer_List;
+    this.selectLayer(new Layer_List);
+  }
+
 }
