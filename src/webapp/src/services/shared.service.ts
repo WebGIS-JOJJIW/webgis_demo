@@ -12,7 +12,7 @@ import { Layer, Layer_List, LayerDisplay } from '../models/layer.model';
 export class SharedService {
 
   //#region parameters
-  private PageOnChange = new BehaviorSubject<string>('livemonitor');
+  private PageOnChange = new BehaviorSubject<string>('live');
   private messageMode = new BehaviorSubject<string>('draw_point');
   private pageEditorOn = new BehaviorSubject<boolean>(false);
   private ShowLayerComp = new BehaviorSubject<boolean>(false);

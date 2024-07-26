@@ -12,7 +12,7 @@ export class AppComponent {
    }
 
   ngOnInit() {
-    this.sharedService.changePage(AppConst.LivePage);
+    // this.sharedService.changePage(AppConst.LivePage);
   }
 
 

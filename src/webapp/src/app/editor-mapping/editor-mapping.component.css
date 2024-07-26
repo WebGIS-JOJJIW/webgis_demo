@@ -23,7 +23,7 @@
 
   app-add-layer-list {
     position: absolute;
-    top: 120px;
+    top: 110px;
     right: 10px;
     /* background: #333; */
     padding: 20px;
@@ -34,7 +34,7 @@
 
   app-draw-element-map {
     position: absolute;
-    top: 88px;
+    top: 93px;
     left: 40px;
     /* background: #333; */
     height: 700px;
@@ -46,7 +46,7 @@
 
   app-layer-configuration{
     position: absolute;
-    top: 120px;
+    top: 110px;
     right: 10px;
     /* background: #333; */
     padding: 20px;

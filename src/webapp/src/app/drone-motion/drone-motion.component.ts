@@ -51,7 +51,7 @@ export class DroneMotionComponent implements OnInit, OnDestroy {
       
       res.features.forEach(ele => {
         this.drone.push({
-          imgPath: `${window.location.hostname}/${ele.properties.image_relpath}`, //${this.geoService.getStringBefore8000(url)}
+          imgPath:  `${this.geoService.getStringBefore8000(url)}/${ele.properties.image_relpath}`,//`${window.location.hostname}/${ele.properties.image_relpath}`,
           title: ele.id,
           coordinates: [ele.geometry.coordinates[0],ele.geometry.coordinates[1]]
         })
@@ -117,8 +117,8 @@ export class DroneMotionComponent implements OnInit, OnDestroy {
       imgElement.src = markerData.imgPath;
       imgElement.alt = markerData.title;
       this.setMarkerImageSize(imgElement, this.map.getZoom());
-      imgElement.style.width = '30px';
-      imgElement.style.height = '30px';
+      imgElement.style.width = '40px';
+      imgElement.style.height = '40px';
       imgElement.style.cursor = 'pointer';
       imgElement.style.border = '2px solid #FFFFFF';
       imgElement.style.borderRadius = '30%';
@@ -153,7 +153,7 @@ export class DroneMotionComponent implements OnInit, OnDestroy {
     this.myDialogRef = this.dialog.open(template);
   }
   private setMarkerImageSize(imgElement: HTMLImageElement, zoomLevel: number): void {
-    const size = Math.max(20, 20 * (zoomLevel / 7));
+    const size = Math.max(30, 30 * (zoomLevel / 7));
     imgElement.style.width = `${size}px`;
     imgElement.style.height = `${size}px`;
   }

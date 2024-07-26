@@ -1,9 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
 import { Layer_List } from '../../models/layer.model';
@@ -20,7 +18,9 @@ export class EditorMappingComponent implements OnInit {
   showAddLayer = false;
   showLayerConf = false;
   private layer!: Layer_List;
-  private proxy = ''
+  private proxy = '';
+  private unsavedFeatures: any[] = [];
+
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -29,7 +29,7 @@ export class EditorMappingComponent implements OnInit {
 
   ngOnInit(): void {
     this.proxy = this.geoServerService.GetProxy();
-    this.initializeMap();
+    // this.initializeMap();
     this.subscribeToModeChanges();
     this.sharedService.currentPageOn.subscribe(x => this.showAddLayer = x);
     this.sharedService.currentLayerConf.subscribe(x => this.showLayerConf = x);
@@ -45,7 +45,7 @@ export class EditorMappingComponent implements OnInit {
       zoom: 2,
     });
 
-    this.map.addControl(new NavigationControl(), 'bottom-right');
+    this.map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
     this.map.on('load', () => {
       this.setMultiLayersOnMap();
@@ -57,7 +57,10 @@ export class EditorMappingComponent implements OnInit {
   private initializeDraw(): void {
     this.draw = new MapboxDraw({
       displayControlsDefault: false,
-      controls: {},
+      controls: {
+        point: true,
+        trash: true
+      },
       defaultMode: this.mode
     });
 
@@ -71,22 +74,19 @@ export class EditorMappingComponent implements OnInit {
     this.sharedService.currentMode.subscribe(mode => {
       if (mode != this.mode) {
         this.mode = mode;
-        // this.initializeMap();
       }
     });
 
     this.sharedService.currentLayer.subscribe(x => {
       this.layer = x;
       this.initializeMap();
-      // this.reloadMap();
-    })
-
+    });
   }
   //#endregion
 
   //#region Draw Events
   private onDrawCreate(event: any): void {
-    this.saveFeatureToApi(event);
+    this.unsavedFeatures.push(event.features[0]);
   }
 
   private onDrawUpdate(event: any): void {
@@ -94,20 +94,18 @@ export class EditorMappingComponent implements OnInit {
   }
 
   private onDrawDelete(event: any): void {
-    console.log('Draw delete:', event);
+    this.unsavedFeatures = this.unsavedFeatures.filter(f => !event.features.some((ef: any) => ef.id === f.id));
   }
-
   //#endregion
 
   //#region Map Layers
   private setMultiLayersOnMap(): void {
-    var wrk = 'gis'
-    var ly = this.layer.originalName
+    var wrk = 'gis';
+    var ly = this.layer.originalName;
 
     if (this.layer.name != '') {
       const wfsUrl = `${this.proxy}/${wrk}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${ly}&outputFormat=application/json`;
       const index = `${wrk}-${ly}`;
-      // console.log(wfsUrl);
 
       fetch(wfsUrl)
         .then(response => response.json())
@@ -139,14 +137,14 @@ export class EditorMappingComponent implements OnInit {
   private addLayerToMap(index: string, type: 'fill' | 'circle' | 'line', colorProperty: string, opacityOrRadius: number): void {
     const paint: { [key: string]: any } = {};
     paint[colorProperty] = ['get', 'color'];
-    // console.log(type);
+
     if (this.mode == 'draw_point') {
       this.map.addLayer({
         'id': `wfs-laye-${type}-${index}`,
         type: 'symbol',
         'source': `wfs-layer-${index}`,
         layout: {
-          'icon-image': 'custom-marker', // Change this to your preferred marker icon
+          'icon-image': 'custom-marker',
           'icon-size': 1.5,
           'text-field': '{title}',
           'text-offset': [0, 1.25],
@@ -180,71 +178,26 @@ export class EditorMappingComponent implements OnInit {
         });
       }
     }
-    // console.log(paint);
-
   }
   //#endregion
 
   //#region Save Features
-  private saveFeatureToApi(event: any): void {
-    const data = this.draw.getAll() as FeatureCollection<Geometry, GeoJsonProperties>;
-    const lines = data.features.filter(feature => feature.geometry.type === 'LineString');
-    const polygons = data.features.filter(feature => feature.geometry.type === 'Polygon');
-    const points = data.features.filter(feature => feature.geometry.type === 'Point');
-
-    if (lines.length) {
-      this.sendFeatureDataToGeoServer(lines, 'LineString');
-    }
-    if (polygons.length) {
-      this.sendFeatureDataToGeoServer(polygons, 'Polygon');
-    }
-    if (points.length) {
-      this.sendFeatureDataToGeoServer(points, 'Point');
-    }
-  }
-
-  private sendFeatureDataToGeoServer(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], type: string): void {
-    var wrk = 'gis'; var ly = this.layer.originalName; var type = 'the_geom';
-
-    if (this.layer.originalName != '') {
-      const dict = [wrk, ly, type, 'urn:ogc:def:crs:EPSG::4326'];
-      const dialogRef = this.dialog.open(DialogWarningComponent);
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
-          const wfsUrl = `${this.proxy}/wfs`;
-          // console.log(wfsTransactionXml);
-          // console.log(wfsUrl);
-
-          fetch(wfsUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Basic ' + btoa('admin:geoserver')
-            },
-            body: wfsTransactionXml
-          })
-            .then(response => response.text())
-            .then(() => {
-              this.initializeMap();
-              this.initializeDraw();
-            })
-            .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
-        } else {
-          // console.log('User chose not to save.');
-          // this.cancelDrawing();
-          // this.initializeMap();
-          // this.initializeDraw();
-        }
-      });
+  saveFeatures(): void {
+    if (this.unsavedFeatures.length > 0) {
+      const features = this.unsavedFeatures;
+      this.unsavedFeatures = [];
+      const data = {
+        type: 'FeatureCollection',
+        features: features
+      };
+      // Handle saving `data` to your API or GeoServer
     }
   }
   //#endregion
 
   //#region Helpers
   private cancelDrawing(): void {
-    this.draw.changeMode('simple_select');
+    this.draw.deleteAll();
   }
 
   resetMap(): void {
@@ -272,17 +225,12 @@ export class EditorMappingComponent implements OnInit {
     if (event.key === 'Escape') {
       this.cancelDrawing();
     }
-    if (event.key === 'Backspace') {
-      // console.log(event);
-      // console.log(this.draw);
-    }
   }
   //#endregion
 
   addCustomImages(): void {
-    // Add your custom marker image
-    const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
-    const img = new Image(30, 30); // Adjust the size as needed
+    const imgUrl = 'assets/img/marker_point.png';
+    const img = new Image(30, 30);
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
         this.map.addImage('custom-marker', img);
@@ -290,6 +238,4 @@ export class EditorMappingComponent implements OnInit {
     };
     img.src = imgUrl;
   }
-
-
 }

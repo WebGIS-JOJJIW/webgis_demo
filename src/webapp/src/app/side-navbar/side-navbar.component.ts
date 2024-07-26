@@ -49,6 +49,8 @@ export class SideNavbarComponent implements OnInit{
   }
 
   checkMenuShow(no:number):boolean{
+    // console.log(this.PageLive);
+    
     // console.log(this.appConst.PageShowSideAll[this.PageLive]);
     return this.appConst.PageShowSideAll[this.PageLive].includes(no)
   }

@@ -80,6 +80,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   initailSensorData() {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.getSensorsPoint(res);
+    },err =>{
+      this.getSensorsPoint([]);
     });
   }
 
@@ -87,6 +89,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.clearSensorLayers();
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.getSensorsPoint(res);
+    },err =>{
+      this.getSensorsPoint([]);
     });
   }
 
@@ -202,9 +206,12 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
+    // const url= `http://128.199.168.212:8080/geoserver/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`
     this.http.get<FeatureCollection>(url).subscribe(res => {
+      
       let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
-      if (filteredSensorData.length > 0) {
+      if (filteredSensorData.length > 0 ) {
+        
         filteredSensorData.forEach((ele, inx) => {
           if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
             const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
@@ -245,6 +252,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       latestPhoto: ``,
       previousPhotos: []
     }
+
+    // console.log(sensor_marker);
+    
     // this.lngLat = sensor_marker.coordinates
     // console.log(this.lngLat);
     
@@ -280,7 +290,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   setRaster(layerId: string, url: string) {
     if (!this.map.getLayer(`${layerId}`)) {
-      console.log('addSource');
+      // console.log('addSource');
 
       this.map.addSource(`${layerId}`, {
         type: 'raster',
@@ -379,30 +389,31 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
     // console.log(sensorMarker);
-
-    this.map.addSource(layerId, {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: sensorMarker.coordinates
-          },
-          properties: {
-            title: sensorMarker.title
-          }
-        }]
-      }
-    });
-
-    this.addPoint(layerId).then(() => {
-      this.map.on('click', layerId, (e) => {
-        // Open the dialog with the marker details data
-        this.sharedService.openDialog(sensorMarker, this.dialog);
+    if (!this.map.getLayer(`${layerId}`)) {
+      this.map.addSource(layerId, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: sensorMarker.coordinates
+            },
+            properties: {
+              title: sensorMarker.title
+            }
+          }]
+        }
       });
-    });
+  
+      this.addPoint(layerId).then(() => {
+        this.map.on('click', layerId, (e) => {
+          // Open the dialog with the marker details data
+          this.sharedService.openDialog(sensorMarker, this.dialog);
+        });
+      });
+    }
   }
 
 
