@@ -138,7 +138,7 @@ export class SharedService {
       if (index != 0 && index <= 3) {
         photo.push({
           url: `http://${window.location.hostname}/${value.value}`,
-          time:this.formatDateNoSec(value.dt),
+          time:this.formatDate(value.dt),
           by: value.sensor_name
         });
       }
