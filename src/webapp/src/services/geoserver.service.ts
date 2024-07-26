@@ -13,8 +13,8 @@ import { Layer, LayerResponse } from '../models/layer.model';
 export class GeoServerService {
 
 
-  // private proxy = `http://${window.location.hostname}:8000/geoserver`;
-  private proxy = `http://167.172.94.39:8000/geoserver`;
+  private proxy = `http://${window.location.hostname}:8000/geoserver`;
+  // private proxy = `http://167.172.94.39:8000/geoserver`;
   private httpOptions ={}
   constructor(private http: HttpClient) { 
        this.httpOptions = {
@@ -51,8 +51,8 @@ export class GeoServerService {
   getLayerDetails(url: string): Observable<any> {
     // const url = `${this.proxy}/rest/layers?Accept=application/json`
     const re = /http.*8080/gi;
-    // const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
-    const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
+    const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
+    // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
     return this.http.get<any>(corrected_url,this.httpOptions);
   }
 

@@ -13,7 +13,7 @@ export class SharedService {
 
   //#region parameters
   private PageOnChange = new BehaviorSubject<string>('live');
-  private messageMode = new BehaviorSubject<string>('draw_point');
+  private messageMode = new BehaviorSubject<string>('');
   private pageEditorOn = new BehaviorSubject<boolean>(false);
   private ShowLayerComp = new BehaviorSubject<boolean>(false);
   private layersDisplay = new BehaviorSubject<LayerDisplay[]>([]);
