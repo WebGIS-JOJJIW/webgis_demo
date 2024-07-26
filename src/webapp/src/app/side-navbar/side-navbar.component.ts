@@ -32,7 +32,7 @@ export class SideNavbarComponent implements OnInit{
     let flagLayer = false;
     const url = this.router.url;
 
-    if(url === '/'){
+    if(url === '/live-monitoring'){
       this.sharedService.currentShowLayerComp.subscribe(flag =>{
          flagLayer = flag;
       })
