@@ -26,7 +26,7 @@ export class DrawElementMapComponent implements OnInit {
     this.sharedService.currentActiveLayerEditor.subscribe(x => { flagActive = x });
     if (flagActive) {
       this.geoService.getLayerListApi().subscribe(async res => {
-        this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:') && (!layer.name.includes('drone_images')|| !layer.name.includes('sensors'))).map((layer => ({
+        this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:') && (!layer.name.includes('drone_images')  && !layer.name.includes('sensors'))).map((layer => ({
           ...layer,
           name: layer.name.replace('gis:', ''),  // Remove 'gis:' from layer.name
         })));
