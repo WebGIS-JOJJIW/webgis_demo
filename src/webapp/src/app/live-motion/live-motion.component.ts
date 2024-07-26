@@ -30,7 +30,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   dialogOpen = ''
   dataSensor: MarkerDetailsData | undefined;
 
-  lngLat = [102.375108883211,  13.67923667917]
+  lngLat = [102.375108883211, 13.67923667917]
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -80,7 +80,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   initailSensorData() {
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.getSensorsPoint(res);
-    },err =>{
+    }, err => {
       this.getSensorsPoint([]);
     });
   }
@@ -89,7 +89,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.clearSensorLayers();
     this.http.get<SensorData[]>(`http://${window.location.hostname}:3001/sensor_data`).subscribe(res => {
       this.getSensorsPoint(res);
-    },err =>{
+    }, err => {
       this.getSensorsPoint([]);
     });
   }
@@ -208,34 +208,31 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
     // const url= `http://128.199.168.212:8080/geoserver/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`
     this.http.get<FeatureCollection>(url).subscribe(res => {
-      
-      let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
-      if (filteredSensorData.length > 0 ) {
-        
-        filteredSensorData.forEach((ele, inx) => {
-          if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
-            const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
-            this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
 
-            if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-              this.sharedService.updateSensorData(sensorMarker)
-            }
-          }
-        });
-      }
-      else {
-        let sensors = ['sensor1', 'sensor2']
-        sensors.forEach((ele, inx) => {
-          if (res.features.filter(x => x.properties.name === ele).length > 0) {
-            const sensorMarker = this.getDataSensorFilter(ele, sensorData, res.features.filter(x => x.properties.name === ele));
-            this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+      // let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
+      // if (filteredSensorData.length > 0 ) {
+      //   filteredSensorData.forEach((ele, inx) => {
+      //     if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
+      //       const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
+      //       this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
 
-            if (this.dialogOpen === ele && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-              this.sharedService.updateSensorData(sensorMarker)
-            }
+      //       if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+      //         this.sharedService.updateSensorData(sensorMarker)
+      //       }
+      //     }
+      //   });
+      // }
+      let sensors = ['sensor1', 'sensor2']
+      sensors.forEach((ele, inx) => {
+        if (res.features.filter(x => x.properties.name === ele).length > 0) {
+          const sensorMarker = this.getDataSensorFilter(ele, sensorData, res.features.filter(x => x.properties.name === ele));
+          this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+
+          if (this.dialogOpen === ele && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
+            this.sharedService.updateSensorData(sensorMarker)
           }
-        });
-      }
+        }
+      });
     });
   }
 
@@ -254,10 +251,10 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     }
 
     // console.log(sensor_marker);
-    
+
     // this.lngLat = sensor_marker.coordinates
     // console.log(this.lngLat);
-    
+
     // if (data.length > 0) {
     //   sensor_marker = {
     //     coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
@@ -406,7 +403,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
           }]
         }
       });
-  
+
       this.addPoint(layerId).then(() => {
         this.map.on('click', layerId, (e) => {
           // Open the dialog with the marker details data
