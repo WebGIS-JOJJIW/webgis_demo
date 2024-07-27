@@ -42,7 +42,7 @@ export class AddLayerListComponent {
       const response = new InsertLayer()
       response.workspace = 'gis';
       response.dbName = 'gis_db';
-      response.layerName = this.addLayerForm.controls['layerName'].value;
+      response.layerTitle = this.addLayerForm.controls['layerName'].value;
       response.description = this.addLayerForm.controls['description'].value;
       response.attr.push({
         'name': 'the_geom',

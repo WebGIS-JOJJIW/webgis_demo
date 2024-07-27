@@ -144,7 +144,7 @@ export class GeoServerService {
           "name": "${response.workspace}",
           "href": "${this.proxy}/rest/namespaces/${response.workspace}.json"
         },
-        "title": "${response.layerName}",
+        "title": "${response.layerTitle}",
         "abstract": "${response.description}",
         "keywords": {
           "string": [
