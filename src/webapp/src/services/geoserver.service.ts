@@ -15,15 +15,15 @@ export class GeoServerService {
 
   private proxy = `http://${window.location.hostname}:8000/geoserver`;
   // private proxy = `http://167.172.94.39:8000/geoserver`;
-  private httpOptions ={}
-  constructor(private http: HttpClient) { 
-       this.httpOptions = {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa('admin:geoserver')
-        })
-      };
-    }
+  private httpOptions = {}
+  constructor(private http: HttpClient) {
+    this.httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa('admin:geoserver')
+      })
+    };
+  }
 
   postDataOnLayer(payload: string): Observable<any> {
     return this.http.post(this.proxy + '/wfs', payload, this.httpOptions);
@@ -36,16 +36,16 @@ export class GeoServerService {
     return this.http.post(url, payload, this.httpOptions);
   }
 
-  PutLayer(payload: string, res:InsertLayer ){
+  PutLayer(payload: string, res: InsertLayer) {
     const url = `${this.proxy}/rest/workspaces/${res.workspace}/datastores/${res.dbName}/featuretypes/${res.layerName}`
     return this.http.put(url, payload, this.httpOptions);
   }
 
   getLayerListApi(): Observable<LayerResponse> {
-    console.log(this.httpOptions);
-    
+    // console.log(this.httpOptions);
+
     const url = `${this.proxy}/rest/layers?Accept=application/json`
-    return this.http.get<LayerResponse>(url,this.httpOptions);
+    return this.http.get<LayerResponse>(url, this.httpOptions);
   }
 
   getLayerDetails(url: string): Observable<any> {
@@ -53,7 +53,7 @@ export class GeoServerService {
     const re = /http.*8080/gi;
     const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
     // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
-    return this.http.get<any>(corrected_url,this.httpOptions);
+    return this.http.get<any>(corrected_url, this.httpOptions);
   }
 
   getAbstract(layerName: string): Observable<string> {
@@ -72,11 +72,6 @@ export class GeoServerService {
   }
 
   convertGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
-    // const featureType = 'frvk:ply_frv'; // replace with your feature type
-    // const xmlns = 'frvk'; // replace with your type name
-    // const typeSource = 'frvk:ply_frv'
-    // const srsName = 'urn:ogc:def:crs:EPSG::4326'; // replace with your SRS name
-
     let transactionXml = `
        <wfs:Transaction service="WFS" version="1.1.0"
        xmlns:wfs="http://www.opengis.net/wfs"
@@ -87,11 +82,11 @@ export class GeoServerService {
                            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
   
           <wfs:Insert>
-           <${dict[0] + ':' + dict[1]} xmlns:${dict[0]}="${dict[0]}">
+           
       `;
 
     features.forEach((feature) => {
-
+      transactionXml += `<${dict[0] + ':' + dict[1]} xmlns:${dict[0]}="${dict[0]}">` //open tag one element 
       if (feature.geometry.type === 'Polygon') {
         transactionXml += `
           <${dict[0] + ':' + dict[2]}>
@@ -103,11 +98,11 @@ export class GeoServerService {
           ${this.geometryToGml(feature.geometry, dict[3])}
           </${dict[0] + ':' + dict[2]}>`;
       }
+      transactionXml += `</${dict[0] + ':' + dict[1]}>` // end tag element 
     });
     // <gis:name>Sensor002</gis:name>
     // <gis:vector_type>STANDARD_POI</gis:vector_type>
     transactionXml += `
-      </${dict[0] + ':' + dict[1]}>
           </wfs:Insert>
         </wfs:Transaction>
       `;
@@ -142,7 +137,7 @@ export class GeoServerService {
   }
 
   xmlInsertLayerToPayload(response: InsertLayer): string {
-    console.log(response);
+    // console.log(response);
 
     var res = `{
       "featureType": {
@@ -210,7 +205,7 @@ export class GeoServerService {
     var vector_text = ''
     attr.forEach(res => {
       var type = '"binding": "java.lang.String"'
-      
+
       if (res.type?.toLowerCase() == 'polygon') {
         type = `"binding": "org.locationtech.jts.geom.Polygon"`
         vector_text = 'polygon'
@@ -229,7 +224,7 @@ export class GeoServerService {
         "nillable": true,
         ${type} , 
         "description": {
-            "en-US": "${res.name === 'vector_type'? vector_text : ''}"
+            "en-US": "${res.name === 'vector_type' ? vector_text : ''}"
           }
       } `
 

@@ -91,8 +91,6 @@ h3 {
   opacity: 0.5;
 }
 
-
-
 /* snack bar color */
 ::ng-deep .custom-snackbar {
   margin: 0 !important;

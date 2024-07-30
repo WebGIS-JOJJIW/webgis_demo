@@ -73,6 +73,17 @@ thead {
   cursor: pointer;
 }
 
+.edit-button[disabled] {
+  /* background-color: #f0f0f0;  */
+  color: #a0a0a0; /* Gray text for disabled button */
+  cursor: not-allowed; /* Not-allowed cursor for disabled button */
+}
+.disabled {
+  opacity: 0.5; /* Reduce opacity for faded effect */
+  pointer-events: none; /* Disable click events */
+}
+
+
 .edit-button mat-icon {
   font-size: 20px;
 }
@@ -86,4 +97,31 @@ thead {
 
 .close-button mat-icon {
   font-size: 20px;
+}
+
+
+/* snack bar color */
+::ng-deep .custom-snackbar {
+  margin: 0 !important;
+  position: absolute;
+  right: 40%;
+  top: 130px;
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    border-radius: 8px !important;
+  }
+
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+::ng-deep.snackbar-success {
+  border-radius: 8px;
+  margin-top: 10%;
+  --mdc-snackbar-container-color : #148c73
+}
+
+::ng-deep.snackbar-error {
+  border-radius: 8px;
+  --mdc-snackbar-container-color : #b72020
 }

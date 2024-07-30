@@ -1,10 +1,12 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import maplibregl from 'maplibre-gl';
+import maplibregl, { MapMouseEvent } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
 import { Layer_List } from '../../models/layer.model';
+import { DialogWarningComponent } from '../dialog-warning/dialog-warning.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-editor-mapping',
@@ -18,14 +20,15 @@ export class EditorMappingComponent implements OnInit {
   private mode = '';
   showAddLayer = false;
   showLayerConf = false;
+  activeEdit = false;
   private layer!: Layer_List;
   private proxy = '';
   private unsavedFeatures: any[] = [];
-
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
-    private geoServerService: GeoServerService
+    private geoServerService: GeoServerService,
+    private snackBar:MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -54,29 +57,31 @@ export class EditorMappingComponent implements OnInit {
     });
 
     this.map.on('click', (event) => {
-      if (this.mode === 'draw_point') {
+      if (this.mode === 'draw_point' && this.activeEdit) {
         this.addPointAtClick(event);
       }
     });
   }
 
   private initializeDraw(): void {
-    if (this.mode != '' && this.mode != 'draw_point') {
+    if (this.draw) {
+      // Remove the existing control
+      (this.map as any).removeControl(this.draw);
+    }
+  
+    if (this.mode && this.mode !== 'draw_point') {
       this.draw = new MapboxDraw({
         displayControlsDefault: false,
-        // controls: {
-        //   point: true,
-        //   trash: true
-        // },
-        defaultMode: this.mode
+        defaultMode: this.mode,
       });
-
-      (this.map as any).addControl(this.draw as any);
+  
+      this.map.addControl(this.draw as any);
+  
       this.map.on('draw.create', this.onDrawCreate.bind(this));
       this.map.on('draw.update', this.onDrawUpdate.bind(this));
       this.map.on('draw.delete', this.onDrawDelete.bind(this));
+  
     }
-
   }
 
   private subscribeToModeChanges(): void {
@@ -86,12 +91,33 @@ export class EditorMappingComponent implements OnInit {
       }
     });
 
+    this.sharedService.currentActiveEdit.subscribe(x => this.activeEdit = x);  // get active add element
+
+    this.sharedService.currentActiveSave.subscribe(x => {
+      if (x) {
+        // write save to api with option 
+        const dialogRef = this.dialog.open(DialogWarningComponent);
+        dialogRef.afterClosed().subscribe(result => {
+          // console.log(result);
+
+          if (result) {
+            // console.log('save');
+            this.saveFeatures();
+          } else {
+            console.log('User chose not to save.');
+            // this.cancelDrawing();
+          }
+        });
+      }
+    });
+
     this.sharedService.currentLayer.subscribe(x => {
       this.layer = x;
       this.initializeMap();
     });
   }
   //#endregion
+
 
   //#region Draw Events
   private onDrawCreate(event: any): void {
@@ -211,6 +237,8 @@ export class EditorMappingComponent implements OnInit {
 
   //#region Save Features
   saveFeatures(): void {
+    console.log(this.unsavedFeatures);
+
     if (this.unsavedFeatures.length > 0) {
       const features = this.unsavedFeatures;
       this.unsavedFeatures = [];
@@ -218,15 +246,34 @@ export class EditorMappingComponent implements OnInit {
         type: 'FeatureCollection',
         features: features
       };
+      var type = 'the_geom'
+      const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
+      const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
+      const wfsUrl = `${this.proxy}/wfs`;
+      console.log(wfsTransactionXml);
+      console.log(wfsUrl);
+
+      fetch(wfsUrl, {
+        method: 'POST',
+        headers: {},
+        body: wfsTransactionXml
+      })
+        .then(response => response.text())
+        .then(() => {
+          this.snackBar.open('Insert Layer success', 'Close', {
+            duration: 3000,
+            panelClass: ['custom-snackbar' ,'snackbar-success']
+          });
+          this.initializeMap();
+          // this.initializeDraw();
+        })
+        .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
       // Handle saving `data` to your API or GeoServer
     }
   }
   //#endregion
 
   //#region Helpers
-  // private cancelDrawing(): void {
-  //   this.draw.deleteAll();
-  // }
 
   resetMap(): void {
     const layers = this.map.getStyle().layers;
@@ -251,7 +298,7 @@ export class EditorMappingComponent implements OnInit {
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent): void {
     // console.log(event); 
-     if (event.key === 'Backspace') {
+    if (event.key === 'Backspace') {
       this.deleteSelectedFeature();
     }
   }
@@ -277,29 +324,31 @@ export class EditorMappingComponent implements OnInit {
     img2.src = imgUrl2;
   }
 
-  /////////////////////////////////////////////////////////// new open ai //////////////////////////////////////////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////////////// new add element //////////////////////////////////////////////////////////////////////////////////////
+  //#region  add point
   private addPointAtClick(event: maplibregl.MapMouseEvent): void {
     const lngLat = event.lngLat;
     const clickPoint: [number, number] = [lngLat.lng, lngLat.lat];
     const minDistance = 200; // Minimum distance in kilometers to prevent adding points (adjust as needed)
-  
+
     // Retrieve the source
     const source = this.map.getSource(`wfs-layer-${this.layer.originalName}`) as maplibregl.GeoJSONSource;
-  
+
     if (source) {
       const data = source._data as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
       let isTooClose = false;
-  
+
       // Check if the click location is too close to any existing features
       for (const feature of data.features) {
         if (feature.geometry.type === 'Point') {
           const coordinates = feature.geometry.coordinates;
-  
+
           if (coordinates.length === 2) {
             const featurePoint: [number, number] = coordinates as [number, number];
             const distance = this.calculateDistance(clickPoint, featurePoint);
             // console.log(distance);
-            
+
             if (distance < minDistance) {
               isTooClose = true;
               break;
@@ -308,8 +357,8 @@ export class EditorMappingComponent implements OnInit {
             console.error('Feature coordinates are not in the expected format.');
           }
         }
-      }  
-      
+      }
+
       if (!isTooClose) {
         // Create a new feature with the clicked coordinates
         const feature: GeoJSON.Feature<GeoJSON.Point> = {
@@ -325,32 +374,35 @@ export class EditorMappingComponent implements OnInit {
             id: this.generateFeatureId() // Generate a unique ID for the feature
           }
         };
-  
+
         // Add the new feature to the data
         data.features.push(feature);
-  
+
         // Update the source with the new data
         source.setData(data);
+
+        // Add the new feature to the unsavedFeatures array
+        this.unsavedFeatures.push(feature);
       } else {
         // console.log('Click location is too close to an existing marker.');
         this.selectFeatureAtClick(event);
       }
-    } 
+    }
     else {
       // If the source does not exist, create it
       const feature: GeoJSON.Feature<GeoJSON.Point> = {
         type: 'Feature',
-          id: this.generateFeatureId(),
-          geometry: {
-            type: 'Point',
-            coordinates: [lngLat.lng, lngLat.lat]
-          },
-          properties: {
-            color: this.sharedService.getRandomColor(),
-            title: 'New Point',
-            id: this.generateFeatureId() // Generate a unique ID for the feature
-          }
-        };
+        id: this.generateFeatureId(),
+        geometry: {
+          type: 'Point',
+          coordinates: [lngLat.lng, lngLat.lat]
+        },
+        properties: {
+          color: this.sharedService.getRandomColor(),
+          title: 'New Point',
+          id: this.generateFeatureId() // Generate a unique ID for the feature
+        }
+      };
       this.map.addSource(`wfs-layer-${this.layer.originalName}`, {
         type: 'geojson',
         data: {
@@ -358,7 +410,9 @@ export class EditorMappingComponent implements OnInit {
           features: [feature] // Initialize with the new feature
         }
       });
-  
+      // Add the new feature to the unsavedFeatures array
+      this.unsavedFeatures.push(feature);
+
       // Add the appropriate layer if needed
       this.addLayerToMap(this.layer.originalName, 'symbol', 'icon-color', 1);
     }
@@ -369,30 +423,28 @@ export class EditorMappingComponent implements OnInit {
   }
   private selectedFeatureId: string | null = null;
   private deleteSelectedFeature(): void {
-    // console.log(this.selectedFeatureId);
-    
     if (this.selectedFeatureId) {
-      // console.log(this.selectedFeatureId);
-      
+
       const source = this.map.getSource(`wfs-layer-${this.layer.originalName}`) as maplibregl.GeoJSONSource;
 
       if (source) {
-        // console.log(source);
-        
         // Get the current data from the source
         const currentData = source._data as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-        // Filter out the selected feature
-        // console.log(currentData);
-        
+
+        // Find the feature to be deleted
+        const featureToDelete = currentData.features.find(feature => feature.id === this.selectedFeatureId);
         const updatedFeatures = currentData.features.filter(feature => feature.id !== this.selectedFeatureId);
-        // console.log(updatedFeatures);
-        
+
         // Update the source with the new data
         source.setData({
           type: 'FeatureCollection',
           features: updatedFeatures
         });
 
+        // Remove the deleted feature from the unsavedFeatures array
+        if (featureToDelete) {
+          this.unsavedFeatures = this.unsavedFeatures.filter(feature => feature.id !== featureToDelete.id);
+        }
         // Clear the selected feature
         this.selectedFeatureId = null;
       }
@@ -419,14 +471,15 @@ export class EditorMappingComponent implements OnInit {
     const dLat = this.degreesToRadians(lngLat2[1] - lngLat1[1]);
     const dLng = this.degreesToRadians(lngLat2[0] - lngLat1[0]);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(this.degreesToRadians(lngLat1[1])) * Math.cos(this.degreesToRadians(lngLat2[1])) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      Math.cos(this.degreesToRadians(lngLat1[1])) * Math.cos(this.degreesToRadians(lngLat2[1])) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in kilometers
   }
-  
+
   private degreesToRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
   }
+  //#endregion
 
 }

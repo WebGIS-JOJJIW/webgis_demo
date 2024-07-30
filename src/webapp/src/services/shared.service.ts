@@ -22,6 +22,14 @@ export class SharedService {
   private dialogOpen = new BehaviorSubject<string>('');
   private layer = new BehaviorSubject<Layer_List>(new Layer_List)
   private activeLayerEditor = new BehaviorSubject<boolean>(false);
+
+  private activeEdit = new BehaviorSubject<boolean>(false);   //accept to add new element on map
+  private activeSave = new BehaviorSubject<boolean>(false);  //save to element api geoserver
+  private layerAfterSave = new BehaviorSubject<string>('');  //when add new layer used for get layer for edit 
+  currentActiveEdit = this.activeEdit.asObservable();
+  currentActiveSave = this.activeSave.asObservable();
+  currentLayerAfterSave = this.layerAfterSave.asObservable();
+  
   currentPageLive = this.PageOnChange.asObservable();
   currentMode = this.messageMode.asObservable();
   currentPageOn = this.pageEditorOn.asObservable();
@@ -70,9 +78,23 @@ export class SharedService {
     this.messageMode.next(mode);
   }
 
+  setActiveSave(sw:boolean){
+    this.activeSave.next(sw);
+  }
+
+  setActiveEdit(sw:boolean){
+    this.activeEdit.next(sw);
+  }
+
   TurnOnOrOff(sw : boolean){
     this.pageEditorOn.next(sw);
     // if(!sw){this.ShowLayerComp.next(sw);}
+  }
+
+  setLayerAfterSaved(name:string){
+    console.log(name);
+    
+    this.layerAfterSave.next(name);
   }
 
   setFlagLayerConf(sw : boolean){
