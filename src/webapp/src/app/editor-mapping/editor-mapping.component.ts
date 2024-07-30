@@ -255,7 +255,10 @@ export class EditorMappingComponent implements OnInit {
 
       fetch(wfsUrl, {
         method: 'POST',
-        headers: {},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa('admin:geoserver')
+        },
         body: wfsTransactionXml
       })
         .then(response => response.text())
