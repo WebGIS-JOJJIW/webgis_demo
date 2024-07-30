@@ -14,25 +14,28 @@ import { AppConst } from '../../models/AppConst';
 })
 export class SideNavbarComponent implements OnInit{
   layers: Layer[] = [];
-  PageLive= '';
+  PageLive: string = '';
   appConst = AppConst;
   constructor(
     private sharedService: SharedService,
     private router : Router
   ) { }
   ngOnInit(): void {
-    this.sharedService.currentPageLive.subscribe(x=> this.PageLive = x);
+    this.sharedService.currentPageLive.subscribe(x=> {
+      this.PageLive = x;
+    }
+      
+    );
   }
 
   openListLayer() {
     let flagLayer = false;
     const url = this.router.url;
 
-    if(url === '/'){
+    if(url === '/live-monitoring'){
       this.sharedService.currentShowLayerComp.subscribe(flag =>{
          flagLayer = flag;
       })
-
       if(flagLayer){
         this.sharedService.ChangeShowLayerComp(false);
       }else{
@@ -44,6 +47,14 @@ export class SideNavbarComponent implements OnInit{
   openLastEvent(){
     this.router.navigate(['/lastest-events', true]);
   }
+
+  checkMenuShow(no:number):boolean{
+    // console.log(this.PageLive);
+    
+    // console.log(this.appConst.PageShowSideAll[this.PageLive]);
+    return this.appConst.PageShowSideAll[this.PageLive].includes(no)
+  }
+
 
 
 

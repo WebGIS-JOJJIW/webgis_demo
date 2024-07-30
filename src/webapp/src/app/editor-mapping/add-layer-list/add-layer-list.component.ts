@@ -64,17 +64,15 @@ export class AddLayerListComponent {
 
       
       let payload = this.geoService.xmlInsertLayerToPayload(response);
-      // console.log('payload :', payload);
 
       this.geoService.InsertLayer(payload, response.workspace, response.dbName).pipe(
         switchMap(res => this.geoService.PutLayer(payload, response))
       ).subscribe(res => {
         this.snackBar.open('Insert Layer success', 'Close', {
           duration: 3000,
-          // horizontalPosition: 'end',
-          // verticalPosition: 'top',
           panelClass: ['custom-snackbar' ,'snackbar-success']
         });
+        this.sharedService.setLayerAfterSaved(response.layerName);
         this.onClose();
       }, err => {
         this.errMss(err+'');
@@ -83,10 +81,6 @@ export class AddLayerListComponent {
     } else {
       this.errMss('validate field')
     }
-    // Handle form submission
-    // console.log('onSubmit');
-
-    // this.sharedService.setFlagLayerConf(true);
     
   }
   onClose() {

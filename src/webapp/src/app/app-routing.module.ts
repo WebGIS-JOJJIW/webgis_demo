@@ -6,10 +6,11 @@ import { EditorMappingComponent } from './editor-mapping/editor-mapping.componen
 import { LastestEventsComponent } from './lastest-events/lastest-events.component';
 
 const routes: Routes = [ 
-  {path: '', component: LiveMotionComponent},
+  {path: 'live-monitoring', component: LiveMotionComponent},
   {path: 'drone-patrol', component: DroneMotionComponent},
   {path: 'map-editor',   component: EditorMappingComponent},
-  {path: 'lastest-events/:flag',   component: LastestEventsComponent}
+  {path: 'lastest-events/:flag',   component: LastestEventsComponent},
+  { path: '', redirectTo: '/live-monitoring', pathMatch: 'full' },
 ];
 
 @NgModule({

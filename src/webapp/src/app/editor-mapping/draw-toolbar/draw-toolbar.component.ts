@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, input, OnInit } from '@angular/core';
 import { SharedService } from '../../../services/shared.service';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
@@ -7,26 +7,34 @@ import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dial
   templateUrl: './draw-toolbar.component.html',
   styleUrls: ['./draw-toolbar.component.css']
 })
-export class DrawToolbarComponent implements OnInit{
+export class DrawToolbarComponent implements OnInit {
+  @Input() pageLive: string = '';
   isAddLayerDisabled: boolean = false;
-  isPoint : boolean =true;
-  isPolygon : boolean =true;
-  isPolyline : boolean =true;
+  isPoint: boolean = true;
+  isPolygon: boolean = true;
+  isPolyline: boolean = true;
+  datetimeValue: string = '';
 
-  constructor(private sharedService: SharedService) {}
+  constructor(private sharedService: SharedService) { }
   ngOnInit(): void {
     this.setSubscriptions();
   }
-  setSubscriptions(){
-    this.sharedService.currentIsPoint.subscribe(x=> this.isPoint = !x);
-    this.sharedService.currentIsPolygon.subscribe(x=> this.isPolygon = !x);
-    this.sharedService.currentIsPolyline.subscribe(x=> this.isPolyline = !x);
+  setSubscriptions() {
+    this.sharedService.currentIsPoint.subscribe(x => this.isPoint = !x);
+    this.sharedService.currentIsPolygon.subscribe(x => this.isPolygon = !x);
+    this.sharedService.currentIsPolyline.subscribe(x => this.isPolyline = !x);
+    this.sharedService.currentActiveEdit.subscribe(x => {
+      this.isAddLayerDisabled = x;
+      if (x) {this.sharedService.TurnOnOrOff(false);}
+
+    });
   }
-  
+
   inputSearch = "";
 
   changeMode(mode: 'draw_polygon' | 'draw_line_string' | 'draw_point') {
     this.sharedService.changeMode(mode);
+
   }
 
   onClickAddLayer() {

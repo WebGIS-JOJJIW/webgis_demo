@@ -8,7 +8,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let layer of layersData">
+        <tr *ngFor="let layer of layersData"
+            [class.selected]="selectedLayer === layer"
+            [class.disabled]="selectedLayer != layer && selectedLayer != null && activeBt"
+            (click)="selectLayer(layer)">
           <td>
             <div class="layer-name">
               <div>{{ layer.name }}</div>
@@ -16,14 +19,18 @@
             </div>
           </td>
           <td>
-            <div class="layer-type">
+            <div class="layer-type" >
               <div>{{ layer.type }}</div>
               <div class="layer-subtype">{{ layer.subtype }}</div>
             </div>
           </td>
           <td>
-            <button class="edit-button" (click)="setEditorMap(layer)">
-              <mat-icon>edit</mat-icon>
+            <button class="edit-button" (click)="setButton()" [disabled]="selectedLayer != layer" >
+              <mat-icon *ngIf="layer.name != this.layerOld.name || !activeBt">edit</mat-icon>
+              <mat-icon *ngIf="layer.name == this.layerOld.name && activeBt" style="color: yellow;">save</mat-icon>
+            </button>
+            <button *ngIf="selectedLayer === layer && activeBt" class="edit-button" (click)="deselectLayer($event)">
+              <mat-icon>clear</mat-icon>
             </button>
           </td>
         </tr>

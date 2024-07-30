@@ -1,9 +1,11 @@
 <div class="main-container">
+  <app-draw-toolbar [pageLive]="'drone'"></app-draw-toolbar>
     <div class="content-wrapper">
-      <!-- <app-layers-display *ngIf="activeFlag"></app-layers-display> -->
-      <!-- <nav id="filter-group" class="filter-group"></nav> -->
       <div id="map" class="map-content"></div>
-      <!-- <nav></nav> -->
       <app-lastest-events #latestEvents></app-lastest-events>
+      <ng-template #myTemplate>
+        <img src="{{pathImg}}" style="height:600px; width:900px">
+        <!-- <button (click)="myDialogRef?.close()">this close button is optional</button> -->
+      </ng-template>
     </div>
   </div>

@@ -1,6 +1,12 @@
 export class AppConst{
-    public static  LivePage = 'live';
-    public static  DronePage = 'drone';
-
-    public static PageShowSideAll = ['live', '']
+    public static  LivePage: string = 'live';
+    public static  DronePage: string = 'drone';
+    public static  MapEditorPage: string = 'map-editor';
+    
+    public static PageShowSideAll: { [key: string]: number[] } = {
+        [AppConst.LivePage]: [1, 2, 3, 4, 5],
+        [AppConst.MapEditorPage]: [1, 2, 3, 4, 5],
+        [AppConst.DronePage]: [1]
+    };
+                                    
 }

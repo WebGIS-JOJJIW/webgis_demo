@@ -17,6 +17,12 @@ export interface Sensor {
     previousPhotos: Photo[];
 }
 
+export class DroneModel{
+  title:string ='';
+  imgPath :string = '';
+  coordinates: [number, number] = [0,0];
+}
+
 
 export interface MarkerDetailsData {
     title: string;
@@ -39,6 +45,7 @@ export interface Geometry {
   export interface Properties {
     name: string | null;
     vector_type: string | null;
+    image_relpath: string | null;
   }
   
   export interface Feature {

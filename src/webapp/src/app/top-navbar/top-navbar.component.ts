@@ -28,11 +28,9 @@ export class TopNavbarComponent {
 
   setCloseAll(str: string) {
     this.sharedService.setCloseAll();
-    if (str === appConst.LivePage) {
-      this.sharedService.changePage(appConst.LivePage);
-    } else if (str === appConst.DronePage) {
-      this.sharedService.changePage(appConst.DronePage);
-    }
+    
+    this.sharedService.changePage(str);
+    
   }
 
 
