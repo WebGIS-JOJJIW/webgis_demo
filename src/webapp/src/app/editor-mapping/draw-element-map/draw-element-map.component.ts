@@ -136,8 +136,12 @@ export class DrawElementMapComponent implements OnInit {
   }
 
   setEditorMap(layer: Layer_List,canEdit :boolean=false) {
-    if (layer != this.layerOld) {
-
+    // console.log(this.layerOld);
+    // console.log(layer);
+    
+    if (layer.name !== this.layerOld.name) {
+      // console.log(true);
+      
       if (layer.typeID.endsWith('POI')) {
         this.sharedService.changeMode('draw_point');
         this.sharedService.setIsMode('draw_point');
@@ -151,6 +155,7 @@ export class DrawElementMapComponent implements OnInit {
       // console.log(canEdit);
       
       this.activeBt = canEdit;
+      this.selectedLayer = layer;
       this.sharedService.setActiveEdit(canEdit);
       this.sharedService.setLayer(layer);
     }
@@ -170,15 +175,15 @@ export class DrawElementMapComponent implements OnInit {
 
   selectLayer(layer: Layer_List,canEdit :boolean=false): void {
     // console.log(layer);
-    this.selectedLayer = layer;
-    this.sharedService.setLayer(layer);
     this.setEditorMap(layer,canEdit);
+    // this.selectedLayer = layer;
+    // this.sharedService.setLayer(layer);
     // this.sharedService.setActiveEdit(true)
   }
 
   deselectLayer(event: MouseEvent): void {
     event.stopPropagation(); // Prevents the row click from firing
-    this.selectedLayer = null;
+    // this.selectedLayer = null;
     this.activeBt = false;
     this.sharedService.setActiveEdit(false);
     this.sharedService.setActiveSave(false);
