@@ -28,7 +28,7 @@ export class EditorMappingComponent implements OnInit {
     public dialog: MatDialog,
     private sharedService: SharedService,
     private geoServerService: GeoServerService,
-    private snackBar:MatSnackBar
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -54,41 +54,56 @@ export class EditorMappingComponent implements OnInit {
       this.setMultiLayersOnMap();
       this.addCustomImages();
       this.initializeDraw();
+
     });
 
     this.map.on('click', (event) => {
       if (this.mode === 'draw_point' && this.activeEdit) {
         this.addPointAtClick(event);
       }
+
     });
   }
 
   private initializeDraw(): void {
-    if (this.draw) {
-      // Remove the existing control
-      (this.map as any).removeControl(this.draw);
-    }
-  
-    if (this.mode && this.mode !== 'draw_point') {
-      this.draw = new MapboxDraw({
-        displayControlsDefault: false,
-        defaultMode: this.mode,
+
+
+    this.draw = new MapboxDraw({
+      displayControlsDefault: false
+    });
+    this.map.addControl(this.draw as any);
+
+    // Subscribe to drawing mode changes
+    this.sharedService.currentMode.subscribe(mode => {
+      if (mode && mode != 'draw_point') {
+        this.draw.changeMode(mode);
+      }
+    });
+
+    this.map.on('draw.create', this.updateDrawnPolyFeatures.bind(this));
+    this.map.on('draw.update', this.updateDrawnPolyFeatures.bind(this));
+    this.map.on('draw.delete', this.updateDrawnPolyFeatures.bind(this));
+
+    if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
+      this.map.once('sourcedata', () => {
+        const layers = this.map.getStyle().layers;
+
+        // Add click handler for each Mapbox Draw layer
+        if (layers) {
+          layers.forEach(layer => {
+            this.map.on('click', layer.id, (event: MapMouseEvent) => this.handleFeatureClick(event, layer.id));
+            // }
+          });
+        }
       });
-  
-      this.map.addControl(this.draw as any);
-  
-      this.map.on('draw.create', this.onDrawCreate.bind(this));
-      this.map.on('draw.update', this.onDrawUpdate.bind(this));
-      this.map.on('draw.delete', this.onDrawDelete.bind(this));
-  
     }
   }
 
   private subscribeToModeChanges(): void {
     this.sharedService.currentMode.subscribe(mode => {
-      if (mode != this.mode) {
-        this.mode = mode;
-      }
+      // if (mode != this.mode) {
+      this.mode = mode;
+      // }
     });
 
     this.sharedService.currentActiveEdit.subscribe(x => this.activeEdit = x);  // get active add element
@@ -98,10 +113,10 @@ export class EditorMappingComponent implements OnInit {
         // write save to api with option 
         const dialogRef = this.dialog.open(DialogWarningComponent);
         dialogRef.afterClosed().subscribe(result => {
-          // console.log(result);
+          console.log(result);
 
           if (result) {
-            // console.log('save');
+            console.log('save');
             this.saveFeatures();
           } else {
             console.log('User chose not to save.');
@@ -163,6 +178,8 @@ export class EditorMappingComponent implements OnInit {
           }
 
           if (this.mode == 'draw_point') {
+            // console.log(this.mode);
+
             this.addLayerToMap(index, 'point', 'circle-color', 6);
           } else {
             this.addLayerToMap(index, 'circle', 'circle-color', 3);
@@ -237,21 +254,23 @@ export class EditorMappingComponent implements OnInit {
 
   //#region Save Features
   saveFeatures(): void {
-    console.log(this.unsavedFeatures);
+    // console.log('save feature',this.unsavedFeatures);
 
     if (this.unsavedFeatures.length > 0) {
       const features = this.unsavedFeatures;
       this.unsavedFeatures = [];
-      const data = {
-        type: 'FeatureCollection',
-        features: features
-      };
+      // console.log(features);
+      
+      // const data = {
+      //   type: 'FeatureCollection',
+      //   features: features
+      // };
       var type = 'the_geom'
       const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
       const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
       const wfsUrl = `${this.proxy}/wfs`;
-      console.log(wfsTransactionXml);
-      console.log(wfsUrl);
+      // console.log(wfsTransactionXml);
+      // console.log(wfsUrl);
 
       fetch(wfsUrl, {
         method: 'POST',
@@ -265,7 +284,7 @@ export class EditorMappingComponent implements OnInit {
         .then(() => {
           this.snackBar.open('Insert Layer success', 'Close', {
             duration: 3000,
-            panelClass: ['custom-snackbar' ,'snackbar-success']
+            panelClass: ['custom-snackbar', 'snackbar-success']
           });
           this.initializeMap();
           // this.initializeDraw();
@@ -302,7 +321,15 @@ export class EditorMappingComponent implements OnInit {
   handleKeyDown(event: KeyboardEvent): void {
     // console.log(event); 
     if (event.key === 'Backspace') {
-      this.deleteSelectedFeature();
+      if (this.mode === 'draw_point') {
+        this.deleteSelectedFeature();
+      }
+      if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
+        if (this.selectedFeatureId) {
+          this.draw.delete(this.selectedFeatureId);
+          this.selectedFeatureId = null;
+        }
+      }
     }
   }
   //#endregion
@@ -485,4 +512,39 @@ export class EditorMappingComponent implements OnInit {
   }
   //#endregion
 
+
+  //#region  polyline 
+  selectPolyFeature(featureId: string) {
+    this.selectedFeatureId = featureId;
+  }
+
+  updateDrawnPolyFeatures() {
+    const data = this.draw.getAll();
+    this.unsavedFeatures = []
+    this.unsavedFeatures = data.features;
+    // console.log('unsavedFeatures',this.unsavedFeatures); // Handle the drawn data as needed
+    // console.log(data.features);
+    
+  }
+
+
+  handleFeatureClick(event: MapMouseEvent, layerId: string) {
+    // Query features at the click location
+    const features = this.map.queryRenderedFeatures(event.point, {
+      layers: [layerId]
+    });
+
+    if (features.length > 0) {
+
+      const feature = features[0];
+      const featureId = feature.properties['id'] != undefined ? feature.properties['id'] : null;
+      // console.log( typeof featureId, featureId);
+
+      // Ensure featureId is a string before calling selectFeature
+      if (typeof featureId === 'string') {
+        this.selectPolyFeature(featureId);
+      }
+    }
+  }
+  //#endregion
 }

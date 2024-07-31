@@ -1,6 +1,6 @@
+<div class="header">Layers Display</div>
 <div class="layers-display">
   <div class="sidebar">
-    <div class="header">Layers Display</div>
     <div class="section">
       <div class="section-title" (click)="toggleSection('vectors')">
         <mat-icon>{{
@@ -64,7 +64,7 @@
     </div>
   </div>
 
-  <div class="selected-layers container">
+  <div class="selected-layers">
     <div class="header">Selected Layers</div>
     <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
       <div *ngFor="let layer of selectedLayers" class="example-box" cdkDrag>

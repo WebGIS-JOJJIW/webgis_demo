@@ -35,12 +35,14 @@
   justify-content: space-between;
 }
 
-.sidebar .header {
+ .header {
   font-size: 1.2em;
-  background-color: #6a1b9a;
-  padding: 10px;
+  background-color: #3D73A6;
+  padding: 4px;
   text-align: center;
-  font-weight: bold;
+  color: white;
+  font-weight: 600  ;
+  /* font-weight: bold; */
 }
 
 .section {
@@ -83,17 +85,17 @@
 .selected-layers {
   background-color: #34495e;
   width: 300px;
-  padding: 10px;
+  /* padding: 10px; */
 }
 
 
 
 .selected-layers .header {
   font-size: 1.2em;
-  background-color: #6a1b9a;
-  padding: 10px;
+  background-color: #75A9D9;
+  /* padding: 10px; */
   text-align: center;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .selected-layers .layer-item {

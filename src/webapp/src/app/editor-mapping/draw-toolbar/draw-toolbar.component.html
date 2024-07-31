@@ -55,7 +55,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_line_string')"
-          [class.disabled]="isPolyline"
+          [class.disabled]="isPolyline || !isAddLayerDisabled"
           [attr.aria-disabled]="isPolyline ? true : null"
         >
           <mat-icon>timeline</mat-icon>
@@ -65,7 +65,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_point')"
-          [class.disabled]="isPoint"
+          [class.disabled]="isPoint || !isAddLayerDisabled"
           [attr.aria-disabled]="isPoint ? true : null"
         >
           <i class="fa-solid fa-location-dot"></i>
@@ -74,6 +74,7 @@
       <li class="nav-item">
         <a
           class="nav-link"
+          (click)="changeMode('draw_shape_polygon')"
           [class.disabled]="true"
           [attr.aria-disabled]="true ? true : null"
         >
@@ -84,7 +85,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_polygon')"
-          [class.disabled]="isPolygon"
+          [class.disabled]="isPolygon || !isAddLayerDisabled"
           [attr.aria-disabled]="isPolygon ? true : null"
         >
           <i class="fa-solid fa-draw-polygon"></i>
