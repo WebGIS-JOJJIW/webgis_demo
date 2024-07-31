@@ -208,25 +208,11 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
     // const url= `http://128.199.168.212:8080/geoserver/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`
     this.http.get<FeatureCollection>(url).subscribe(res => {
-
-      // let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
-      // if (filteredSensorData.length > 0 ) {
-      //   filteredSensorData.forEach((ele, inx) => {
-      //     if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
-      //       const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
-      //       this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
-
-      //       if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-      //         this.sharedService.updateSensorData(sensorMarker)
-      //       }
-      //     }
-      //   });
-      // }
       let sensors = ['sensor1', 'sensor2']
       sensors.forEach((ele, inx) => {
         if (res.features.filter(x => x.properties.name === ele).length > 0) {
           const sensorMarker = this.getDataSensorFilter(ele, sensorData, res.features.filter(x => x.properties.name === ele));
-          this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+          this.addSensorMarkerToMap(`sensor-layer-${ele}`, sensorMarker);
 
           if (this.dialogOpen === ele && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
             this.sharedService.updateSensorData(sensorMarker)
@@ -249,26 +235,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       latestPhoto: ``,
       previousPhotos: []
     }
-
-    // console.log(sensor_marker);
-
-    // this.lngLat = sensor_marker.coordinates
-    // console.log(this.lngLat);
-
-    // if (data.length > 0) {
-    //   sensor_marker = {
-    //     coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
-    //     title: data[0].properties.name??'',
-    //     humanCount: this.getRandomInt(4),
-    //     vehicleCount: this.getRandomInt(4),
-    //     otherCount: this.getRandomInt(4),
-    //     healthStatus: 'Good',
-    //     healthTime: '',
-    //     latestPhotoTime: '',
-    //     latestPhoto: ``,
-    //     previousPhotos: []
-    //   }
-    // }
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
@@ -425,7 +391,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   addCustomImages(): void {
     // Add your custom marker image
     const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
-    const img = new Image(15, 15); // Adjust the size as needed
+    const img = new Image(25, 25); // Adjust the size as needed
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
         this.map.addImage('custom-marker', img);
