@@ -37,6 +37,12 @@
   height: 30px;
 }
 
+.icon-top-1 {
+  width: 30px;
+  height: 35px;
+  position: relative;
+}
+
 .icon-side-2 {
   width: 20px;
   height: 20px;

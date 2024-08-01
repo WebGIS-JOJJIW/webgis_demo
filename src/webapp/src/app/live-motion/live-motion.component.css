@@ -95,3 +95,16 @@ app-layers-display{
   background-color: #4ea0da;
 }
 
+
+.ontop{
+  position: absolute;
+  top: 73px;
+  /* right: 10px; */
+  /* background: #333; */
+  /* padding: 20px; */
+  border-radius: 8px;
+  width: 97%;
+  /* height: 80%; */
+  z-index: 777;
+  /* Ensure it's above other map elements */
+}

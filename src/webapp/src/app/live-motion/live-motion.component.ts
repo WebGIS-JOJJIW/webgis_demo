@@ -31,7 +31,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   dataSensor: MarkerDetailsData | undefined;
   activeEventFull = false;
 
-  lngLat = [102.375108883211, 13.67923667917]
+  lngLat = [102.5552, 13.6600]
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -44,7 +44,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: this.lngLat as [number, number], // starting position [lng, lat]
-      zoom: 10, // starting zoom
+      zoom: 14, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }

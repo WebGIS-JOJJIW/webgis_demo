@@ -19,7 +19,7 @@ body {
 }
 
 body, h1, h2, h3, h4, h5, h6, p, a, span, div {
-  font-family: 'Noto Sans Thai', sans-serif !important;
+  font-family: 'Noto Sans Thai Looped', sans-serif !important;
 }
 
 .mdc-dialog--open .mat-mdc-dialog-surface,

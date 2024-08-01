@@ -9,7 +9,7 @@ const routes: Routes = [
   {path: 'live-monitoring', component: LiveMotionComponent},
   {path: 'drone-patrol', component: DroneMotionComponent},
   {path: 'map-editor',   component: EditorMappingComponent},
-  {path: 'lastest-events/:flag',   component: LastestEventsComponent},
+  // {path: 'lastest-events/:flag',   component: LastestEventsComponent},
   { path: '', redirectTo: '/live-monitoring', pathMatch: 'full' },
 ];
 

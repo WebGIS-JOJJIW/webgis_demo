@@ -108,18 +108,23 @@ export class EditorMappingComponent implements OnInit {
 
     this.sharedService.currentActiveEdit.subscribe(x => {
       this.activeEdit = x
-      const mapContainer = document.getElementById('map');
-      if (mapContainer) {
-        if (this.activeEdit) {
-          mapContainer.classList.add('pencil-cursor');
-          // console.log('pencil add');
-        } else {
-          mapContainer.classList.remove('pencil-cursor');
-          // console.log('pencil remove');
-        }
+      if(x){
+        this.sharedService.setActiveAllowDraw(true);
+      }else{
+        this.sharedService.setActiveAllowDraw(false);
       }
     });  // get active add element
 
+    this.sharedService.currentActiveAllowDraw.subscribe(x=>{
+      const mapContainer = document.getElementById('map');      
+      if (mapContainer) {
+        if (x && this.activeEdit) {
+          mapContainer.classList.add('pencil-cursor');
+        } else {
+          mapContainer.classList.remove('pencil-cursor');
+        }
+      }
+    })
     this.sharedService.currentActiveSave.subscribe(x => {
       if (x) {
         // write save to api with option 
@@ -534,8 +539,10 @@ export class EditorMappingComponent implements OnInit {
     const data = this.draw.getAll();
     this.unsavedFeatures = []
     this.unsavedFeatures = data.features;
+    
     if (this.mode && this.mode != 'draw_point'){
       this.sharedService.setActiveAllowDraw(false);
+      
     }
     // console.log('unsavedFeatures',this.unsavedFeatures); // Handle the drawn data as needed
     // console.log(data.features);

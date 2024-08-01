@@ -33,7 +33,7 @@ export class SharedService {
   private activeEventFull = new BehaviorSubject<boolean>(false);   // active event full page on live 
   currentActiveEventFull = this.activeEventFull.asObservable();
 
-  private activeAllowDraw = new BehaviorSubject<boolean>(true);  //  use for highlight icon on drawtools 
+  private activeAllowDraw = new BehaviorSubject<boolean>(false);  //  use for highlight icon on drawtools 
   currentActiveAllowDraw = this.activeAllowDraw.asObservable();
   
   currentPageLive = this.PageOnChange.asObservable();

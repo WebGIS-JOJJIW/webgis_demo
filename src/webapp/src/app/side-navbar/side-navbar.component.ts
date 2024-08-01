@@ -16,6 +16,7 @@ export class SideNavbarComponent implements OnInit{
   layers: Layer[] = [];
   PageLive: string = '';
   appConst = AppConst;
+  isActiveListLayer = false;
   activeEventFull = false;
   constructor(
     private sharedService: SharedService,
@@ -25,14 +26,13 @@ export class SideNavbarComponent implements OnInit{
     this.sharedService.currentPageLive.subscribe(x=> {
       this.PageLive = x;
     }
-      
     );
   }
 
   openListLayer() {
     let flagLayer = false;
     const url = this.router.url;
-
+    this.isActiveListLayer = !this.isActiveListLayer;
     if(url === '/live-monitoring'){
       this.sharedService.currentShowLayerComp.subscribe(flag =>{
          flagLayer = flag;

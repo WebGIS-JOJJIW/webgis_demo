@@ -166,7 +166,7 @@ export class DrawElementMapComponent implements OnInit {
     if (this.activeBt) {
       this.sharedService.setActiveSave(this.activeBt);
       this.sharedService.setActiveEdit(this.activeBt);
-
+      // this,this.sharedService.setActiveAllowDraw(false);
     } else {
       this.activeBt = !this.activeBt
       this.sharedService.setActiveEdit(this.activeBt);

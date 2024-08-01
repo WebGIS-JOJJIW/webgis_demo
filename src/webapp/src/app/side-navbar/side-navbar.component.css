@@ -36,3 +36,10 @@
   color: #fff;
   /* Change text color if needed */
 }
+
+
+.highlight-button {
+  background-color: #58564a; /* Example highlight color */
+  color: white; /* Text color */
+  border-radius: 5px; /* Optional: add some border radius */
+}
