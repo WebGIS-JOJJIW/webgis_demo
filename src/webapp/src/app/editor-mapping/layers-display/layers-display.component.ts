@@ -146,7 +146,7 @@ export class LayersDisplayComponent {
 
   onCancel(){
     this.sharedService.setLayersDisplay([]);
-    this.sharedService.ChangeShowLayerComp(false);
-    this.sharedService.onSaveChangeLayer(false);
+    // this.sharedService.ChangeShowLayerComp(false);
+    // this.sharedService.onSaveChangeLayer(false);
   }
 }

@@ -25,4 +25,5 @@ export interface SensorData {
     system: string;
     sensorName : string;
     description: string;
+    pathIMG : string;
   }

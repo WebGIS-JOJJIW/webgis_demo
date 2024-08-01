@@ -1,69 +1,83 @@
-
 .main-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  
-  .content-wrapper {
-    display: flex;
-    flex: 1;
-  }
-  
-  #map {
-    flex: 1;
-    position: relative;
-  }
-  
-  .map-content {
-    width: calc(100% - 300px); /* Adjust width based on sidebar */
-    height: calc(100vh - 105px); /* Adjust height based on toolbar */
-  }
-  
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* cursor: url('http://65.media.tumblr.com/avatar_91989eab746d_96.png')16 16, auto; */
+}
 
-  app-add-layer-list {
-    position: absolute;
-    top: 110px;
-    right: 10px;
-    /* background: #333; */
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    z-index: 999; /* Ensure it's above other map elements */
-  }
+.content-wrapper {
+  display: flex;
+  flex: 1;
+}
 
-  app-draw-element-map {
-    position: absolute;
-    top: 93px;
-    left: 40px;
-    /* background: #333; */
-    height: 700px;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    z-index: 888; /* Ensure it's above other map elements */
-  }
+#map {
+  flex: 1;
+  position: relative;
+}
 
-  app-layer-configuration{
-    position: absolute;
-    top: 110px;
-    right: 10px;
-    /* background: #333; */
-    padding: 20px;
-    border-radius: 8px;
-    width: 680px;
-    /* height: 80%; */
-    z-index: 888; /* Ensure it's above other map elements */
-  }
+.map-content {
+  width: calc(100% - 300px);
+  /* Adjust width based on sidebar */
+  height: calc(100vh - 105px);
+  /* Adjust height based on toolbar */
+}
 
-  app-lastest-events{
-    position: absolute;
-    bottom: 0px;
-    /* right: 10px; */
-    /* background: #333; */
-    /* padding: 20px; */
-    border-radius: 8px;
-    width: 97%;
-    /* height: 80%; */
-    z-index: 998; /* Ensure it's above other map elements */
-  }
+
+app-add-layer-list {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  /* background: #333; */
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  z-index: 999;
+  /* Ensure it's above other map elements */
+}
+
+app-draw-element-map {
+  position: absolute;
+  top: 93px;
+  left: 40px;
+  /* background: #333; */
+  height: 700px;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  z-index: 888;
+  /* Ensure it's above other map elements */
+}
+
+app-layer-configuration {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  /* background: #333; */
+  padding: 20px;
+  border-radius: 8px;
+  width: 680px;
+  /* height: 80%; */
+  z-index: 888;
+  /* Ensure it's above other map elements */
+}
+
+app-lastest-events {
+  position: absolute;
+  bottom: 0px;
+  /* right: 10px; */
+  /* background: #333; */
+  /* padding: 20px; */
+  border-radius: 8px;
+  width: 97%;
+  /* height: 80%; */
+  z-index: 998;
+  /* Ensure it's above other map elements */
+}
+
+/* ::ng-deep canvas {
+  cursor: url('../../assets/icons/pencil.svg') 16 16, auto !important;
+} */
+
+::ng-deep .pencil-cursor canvas {
+  cursor: url('../../assets/icons/pencil.svg') 16 16, auto !important;
+}

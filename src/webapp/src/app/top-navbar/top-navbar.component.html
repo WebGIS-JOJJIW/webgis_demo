@@ -29,24 +29,24 @@
   </div>
   <div class="collapse navbar-collaps-2 " id="navbarNav">
     <ul class="navbar-nav">
-      <li class="nav-item" >
-        <a class="nav-link" [routerLink]="'/map-editor'" (click)="setCloseAll(appConst.MapEditorPage)">
-          <img class="icon-top" style="margin-top: -5px; position: inherit;" src="assets/icons/map-editing.png" alt="Summary"> 
+      <li class="nav-item" routerLinkActive="active" [routerLink]="['/map-editor']" (click)="setCloseAll(appConst.MapEditorPage)">
+        <a class="nav-link space-line2" >
+          <img class="icon-top"  src="assets/menuIcons/map-editing.png" alt="Map Editor"> 
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">
-          <i class="fas fa-user end-font"></i>
+        <a class="nav-link space-line2" >
+          <img class="icon-top"  src="assets/menuIcons/setting.png" alt="Setting"> 
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">
-          <i class="fa-solid fa-gear end-font"></i>
+        <a class="nav-link space-line2">
+          <img class="icon-top"  src="assets/menuIcons/user.png" alt="User"> 
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">
-          <i class="fa-solid fa-power-off end-font"></i>
+        <a class="nav-link" >
+          <img class="icon-top"  src="assets/menuIcons/logout.png" alt="Logout"> 
         </a>
       </li>
     </ul>

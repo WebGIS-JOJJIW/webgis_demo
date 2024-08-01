@@ -1,28 +1,28 @@
-<nav id="sidebar" class="d-flex flex-column bg-dark text-white" style="height: 100% !important;">
+<nav id="sidebar" class="d-flex flex-column bg-dark text-white" style="height: 110% !important;">
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
       <a  class="nav-link text-white " *ngIf="checkMenuShow(1)">
-          <img class="icon-side" src="assets/icons/map-marker.png" alt="Map Marker">
+          <img class="icon-side" src="assets/menuIcons/map-marker.png" alt="Map Marker">
       </a>
     </li>
     <li class="nav-item">
       <a  class="nav-link text-white" *ngIf="checkMenuShow(2)" (click)="openLastEvent()" (keydown.enter)="openLastEvent()">
-        <img class="icon-side" src="assets/icons/system-task.png" alt="Map Marker">
+        <img class="icon-side" src="assets/menuIcons/system-task.png" alt="System Task">
       </a>
     </li>
     <li>
       <a class="nav-link text-white" *ngIf="checkMenuShow(3)">
-        <img class="icon-side" src="assets/icons/slider.png" alt="Map Marker">
+        <img class="icon-side" src="assets/menuIcons/slider.png" alt="Slider">
       </a>
     </li>
     <li class="nav-item" *ngIf="checkMenuShow(4)">
       <a class="nav-link text-white" (click)="openListLayer()" (keydown.enter)="openListLayer()">
-        <img class="icon-side" src="assets/icons/layers.png" alt="Layers">
+        <img class="icon-side" src="assets/menuIcons/layers.png" alt="Layers">
       </a>
     </li>
     <li *ngIf="checkMenuShow(5)">
-      <a href="#" class="nav-link text-white">
-        <i class="bi bi-clipboard"></i>
+      <a class="nav-link text-white">
+        <img class="icon-side" src="assets/menuIcons/health-graph.png" alt="Graph">
       </a>
     </li>
   </ul>

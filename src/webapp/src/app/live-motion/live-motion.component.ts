@@ -29,6 +29,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   sensor: Sensor[] = [];
   dialogOpen = ''
   dataSensor: MarkerDetailsData | undefined;
+  activeEventFull = false;
 
   lngLat = [102.375108883211, 13.67923667917]
 
@@ -43,7 +44,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: this.lngLat as [number, number], // starting position [lng, lat]
-      zoom: 9, // starting zoom
+      zoom: 10, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }
@@ -52,6 +53,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.sharedService.currentDialogOpen.subscribe(res => {
       this.dialogOpen = res;
     })
+
+    this.sharedService.currentActiveEventFull.subscribe(x=>this.activeEventFull=x);
 
     this.sharedService.currentSensorData.subscribe(res => {
       this.dataSensor = res;

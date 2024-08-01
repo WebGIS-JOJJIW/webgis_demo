@@ -91,5 +91,7 @@ app-lastest-events {
 
 app-layers-display{
   z-index: 888;
+  max-height: calc(100vh - 240px) ;
+  background-color: #4ea0da;
 }
 

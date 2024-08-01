@@ -48,6 +48,7 @@ mat-dialog-content {
   .photo-text {
     display: flex;
     flex-direction: column;
+    padding-left: 10px;
   }
   
   .health-status {
@@ -72,7 +73,7 @@ mat-dialog-content {
 
   p {
     color: white  ;
-    padding-left: 10px;
+    /* padding-left: 10px; */
     font-size: medium;
   }
 

@@ -16,6 +16,7 @@ export class SideNavbarComponent implements OnInit{
   layers: Layer[] = [];
   PageLive: string = '';
   appConst = AppConst;
+  activeEventFull = false;
   constructor(
     private sharedService: SharedService,
     private router : Router
@@ -40,12 +41,14 @@ export class SideNavbarComponent implements OnInit{
         this.sharedService.ChangeShowLayerComp(false);
       }else{
         this.sharedService.ChangeShowLayerComp(true);
-      }
+      } 
     }
   }
 
   openLastEvent(){
-    this.router.navigate(['/lastest-events', true]);
+    this.activeEventFull = !this.activeEventFull;
+    this.sharedService.setEventActiveFull(this.activeEventFull);
+    // this.router.navigate(['/lastest-events', true]);
   }
 
   checkMenuShow(no:number):boolean{

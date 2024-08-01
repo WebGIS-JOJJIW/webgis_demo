@@ -1,6 +1,6 @@
 .layers-display {
   display: flex;
-  height: 82%;
+  /* height: 76%; */
   color: white;
   /* font-family: 'Arial, sans-serif'; */
 }
@@ -48,6 +48,16 @@
 .section {
   margin: 10px 0;
   border-bottom: 1px solid #ffffff;
+  height: 450px;
+  overflow-x: scroll;
+  /* Add bottom border here */
+}
+
+.section2 {
+  margin: 10px 0;
+  border-bottom: 1px solid #ffffff;
+  height: 200px;
+  overflow-x: scroll;
   /* Add bottom border here */
 }
 
