@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ObservableInput, map } from 'rxjs';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { MatDialog } from '@angular/material/dialog';
-import { SharedService } from './shared.service';
 import { InsertLayer, attr } from '../models/geo.model';
 import { Layer, LayerResponse } from '../models/layer.model';
 
