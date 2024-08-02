@@ -5,17 +5,6 @@ RUN mkdir -p /artifact_serve && mkdir -p /data
 WORKDIR artifact_serve
 COPY package.json .
 COPY package-lock.json .
+COPY server.js .
 RUN npm install
-CMD [\
-    "npx",\
-    "http-server",\
-    "-a", "0.0.0.0",\
-    "-p", "8080",\
-    "-d",\
-    "--cors",\
-    "--gzip",\
-    "--utc",\
-    "--log-ip",\
-    "--no-dot-files",\
-    "/data"\
-]
+CMD ["node", "server.js"]
