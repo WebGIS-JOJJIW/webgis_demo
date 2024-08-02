@@ -55,6 +55,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_line_string')"
+          [class.highlight-button]="!isPolyline && isAddLayerDisabled && activeAllowDraw"
           [class.disabled]="isPolyline || !isAddLayerDisabled"
           [attr.aria-disabled]="isPolyline ? true : null"
         >
@@ -65,6 +66,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_point')"
+          [class.highlight-button]="!isPoint && isAddLayerDisabled "
           [class.disabled]="isPoint || !isAddLayerDisabled"
           [attr.aria-disabled]="isPoint ? true : null"
         >
@@ -85,6 +87,7 @@
         <a
           class="nav-link"
           (click)="changeMode('draw_polygon')"
+          [class.highlight-button]="!isPolygon && isAddLayerDisabled && activeAllowDraw"
           [class.disabled]="isPolygon || !isAddLayerDisabled"
           [attr.aria-disabled]="isPolygon ? true : null"
         >
@@ -144,8 +147,8 @@
       </li>
       <li class="nav-item">
         <input
-        style="height: 27px"
-        class="form-control"
+          style="height: 27px"
+          class="form-control"
           id="datetime"
           type="datetime-local"
           [(ngModel)]="datetimeValue"
@@ -160,7 +163,7 @@
         <input
           id="datetime"
           style="height: 27px"
-        class="form-control"
+          class="form-control"
           type="datetime-local"
           [(ngModel)]="datetimeValue"
         />

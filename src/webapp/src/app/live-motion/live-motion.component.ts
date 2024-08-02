@@ -29,8 +29,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   sensor: Sensor[] = [];
   dialogOpen = ''
   dataSensor: MarkerDetailsData | undefined;
+  activeEventFull = false;
 
-  lngLat = [102.375108883211, 13.67923667917]
+  lngLat = [102.5552, 13.6600]
 
   ngOnInit(): void {
     this.addCustomImages();
@@ -43,7 +44,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
       center: this.lngLat as [number, number], // starting position [lng, lat]
-      zoom: 9, // starting zoom
+      zoom: 14, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
   }
@@ -53,28 +54,39 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       this.dialogOpen = res;
     })
 
+    this.sharedService.currentActiveEventFull.subscribe(x=>this.activeEventFull=x);
+
     this.sharedService.currentSensorData.subscribe(res => {
       this.dataSensor = res;
     })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
-      if (this.layersDisplay.length > 0 && res.length == 0) {
         this.removeLayersFromMap();
-      } else {
         this.layersDisplay = res;
         this.showLayerDataOnMap(this.layersDisplay);
-      }
     });
     this.initailSensorData();
     this.sensorDataService.subscribeToMainChannel().subscribe(data => {
       this.refreshSensorPoints();
     });
 
+    
+
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
         this.activeFlag = flag;
       }
+
+      if(flag){
+        this.dialog.closeAll()
+      }
     });
+
+    this.sharedService.currentActiveEventFull.subscribe(x=>{
+      if(x){
+        this.dialog.closeAll()
+      }
+    })
   }
 
   initailSensorData() {
@@ -108,6 +120,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   showLayerDataOnMap(layers: LayerDisplay[]): void {
     if (layers.length > 0) {
       const filterGroup = document.getElementById('filter-group');
+      
       if (!filterGroup) {
         console.error('Filter group element not found');
         return;
@@ -156,7 +169,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
                   this.addFilterCheckbox(filterGroup, layerId, ele.name);
                 }
               } else {
-                this.addFilterCheckbox(filterGroup, '', ele.name);
+                this.addFilterCheckbox(filterGroup, layerId, ele.name);
               }
 
             },
@@ -208,25 +221,11 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
     // const url= `http://128.199.168.212:8080/geoserver/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`
     this.http.get<FeatureCollection>(url).subscribe(res => {
-
-      // let filteredSensorData = this.sharedService.filterUniqueSensorPoiId(sensorData.filter(x => x.sensor_name === 'sensor1' || x.sensor_name === 'sensor2'));
-      // if (filteredSensorData.length > 0 ) {
-      //   filteredSensorData.forEach((ele, inx) => {
-      //     if (res.features.filter(x => x.properties.name === ele.sensor_poi_id).length > 0) {
-      //       const sensorMarker = this.getDataSensorFilter(ele.sensor_poi_id, sensorData, res.features.filter(x => x.properties.name === ele.sensor_poi_id));
-      //       this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
-
-      //       if (this.dialogOpen === ele.sensor_name && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
-      //         this.sharedService.updateSensorData(sensorMarker)
-      //       }
-      //     }
-      //   });
-      // }
       let sensors = ['sensor1', 'sensor2']
       sensors.forEach((ele, inx) => {
         if (res.features.filter(x => x.properties.name === ele).length > 0) {
           const sensorMarker = this.getDataSensorFilter(ele, sensorData, res.features.filter(x => x.properties.name === ele));
-          this.addSensorMarkerToMap(`sensor-layer-${inx}`, sensorMarker);
+          this.addSensorMarkerToMap(`sensor-layer-${ele}`, sensorMarker);
 
           if (this.dialogOpen === ele && this.dataSensor?.latestPhotoTime != sensorMarker.latestPhoto) {
             this.sharedService.updateSensorData(sensorMarker)
@@ -249,26 +248,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       latestPhoto: ``,
       previousPhotos: []
     }
-
-    // console.log(sensor_marker);
-
-    // this.lngLat = sensor_marker.coordinates
-    // console.log(this.lngLat);
-
-    // if (data.length > 0) {
-    //   sensor_marker = {
-    //     coordinates: [data[0].geometry.coordinates[0], data[0].geometry.coordinates[1]],
-    //     title: data[0].properties.name??'',
-    //     humanCount: this.getRandomInt(4),
-    //     vehicleCount: this.getRandomInt(4),
-    //     otherCount: this.getRandomInt(4),
-    //     healthStatus: 'Good',
-    //     healthTime: '',
-    //     latestPhotoTime: '',
-    //     latestPhoto: ``,
-    //     previousPhotos: []
-    //   }
-    // }
     let dataFilter = sensorData.filter(x => x.sensor_poi_id === sensor_id);
     if (dataFilter.length > 0) {
       dataFilter = this.sharedService.sortEventsByDateTime(dataFilter);
@@ -359,6 +338,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   }
 
   addFilterCheckbox(filterGroup: HTMLElement, layerId: string, name: string): void {
+    
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = layerId;
@@ -408,9 +388,16 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         this.map.on('click', layerId, (e) => {
           // Open the dialog with the marker details data
           this.sharedService.openDialog(sensorMarker, this.dialog);
+          this.setCloseAllPanel();
+          
         });
       });
     }
+  }
+
+  setCloseAllPanel(){
+    this.sharedService.setEventActiveFull(false);
+    this.sharedService.ChangeShowLayerComp(false);
   }
 
 
@@ -424,8 +411,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   addCustomImages(): void {
     // Add your custom marker image
-    const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
-    const img = new Image(15, 15); // Adjust the size as needed
+    const imgUrl = 'assets/img/location.svg'; // Replace with your image URL
+    const img = new Image(25, 25); // Adjust the size as needed
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
         this.map.addImage('custom-marker', img);
@@ -436,13 +423,18 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
 
   removeLayersFromMap(): void {
+    // console.log('removeLayersFromMap');
+    
     const filterGroup = document.getElementById('filter-group');
     if (!filterGroup) {
       console.error('Filter group element not found');
       return;
     }
-
-    this.layersId.forEach(layerId => {
+    
+    this.layersDisplay.forEach(ele => {
+      const layerId = `id-${ele.name}`;
+      // console.log(this.map.getLayer(layerId));
+      
       if (this.map.getLayer(layerId)) {
         this.map.removeLayer(layerId);
       }
@@ -461,8 +453,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Clear the layersId array
-    this.layersId = [];
+    // Clear the layersDisplay array
+    this.layersDisplay = [];
   }
 
 }

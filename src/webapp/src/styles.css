@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap');
 html,
 body,
 #app {
@@ -15,7 +16,10 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, a, span, div {
+  font-family: 'Noto Sans Thai Looped', sans-serif !important;
 }
 
 .mdc-dialog--open .mat-mdc-dialog-surface,
@@ -24,6 +28,11 @@ body {
   padding: 16px !important;
   background-color: #1f2834;
   color: white;
+}
+
+.mat-mdc-dialog-surface {
+  height: auto !important; 
+  
 }
 
 

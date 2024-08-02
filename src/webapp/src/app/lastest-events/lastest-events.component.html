@@ -1,4 +1,4 @@
-<div class="latest-events" [class.collapsed]="isCollapsed" *ngIf="!ActiveFull">
+<div class="latest-events" [class.collapsed]="isCollapsed" *ngIf="!ActiveFull && !fullpage">
   <div class="header">
     <span>Latest Events</span>
     <div class="filters">
@@ -67,9 +67,9 @@
   </div>
 </div>
 
-<div class="full-page" *ngIf="ActiveFull">
+<div class="full-page" *ngIf="ActiveFull || fullpage">
   <div class="header">
-    <span>Latest Events</span>
+    <span style="font-weight: 600; font-size: 20px;">Sensor Table View</span>
     <div class="filters">
       <label
         ><input
@@ -130,10 +130,10 @@
             <td class="col-description-full">{{ event.sensorName }}</td>
             <td class="col-photo-full">
               <div class="thumbnail">
-                <img src="{{ event.description }}" alt="Thumbnail Image"(click)="openDialog(myTemplate)" />
+                <img src="{{ event.pathIMG }}" alt="Thumbnail Image"(click)="openDialog(myTemplate)" />
               </div>
               <ng-template #myTemplate>
-                <img src="{{ event.description }}" style="height:600px; width:900px">
+                <img src="{{ event.pathIMG }}" style="height:600px; width:900px">
                 <!-- <button (click)="myDialogRef?.close()">this close button is optional</button> -->
               </ng-template>
             </td>

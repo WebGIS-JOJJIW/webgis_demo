@@ -5,7 +5,7 @@ export class AppConst{
     
     public static PageShowSideAll: { [key: string]: number[] } = {
         [AppConst.LivePage]: [1, 2, 3, 4, 5],
-        [AppConst.MapEditorPage]: [1, 2, 3, 4, 5],
+        [AppConst.MapEditorPage]: [1],
         [AppConst.DronePage]: [1]
     };
                                     

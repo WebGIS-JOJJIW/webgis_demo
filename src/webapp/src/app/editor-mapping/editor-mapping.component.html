@@ -1,7 +1,7 @@
 <div class="main-container">
     <app-draw-toolbar [pageLive]="'map-editor'"></app-draw-toolbar>
     <div class="content-wrapper">
-      <div id="map" class="map-content"></div>
+      <div id="map" class="map-content pencil-cursor"></div>
       <app-add-layer-list *ngIf="showAddLayer"></app-add-layer-list>
       <app-layer-configuration *ngIf="showLayerConf"></app-layer-configuration>
       <app-draw-element-map></app-draw-element-map>

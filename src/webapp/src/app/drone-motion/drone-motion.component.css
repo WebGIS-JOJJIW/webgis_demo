@@ -7,7 +7,7 @@
 
 .map-content {
     width: 100% !important;
-    height: calc(100vh - 74px) !important;
+    height: calc(100vh - 117px) !important;
 }
 
 .content-wrapper {
@@ -23,7 +23,7 @@
 .map-content {
     width: calc(100% - 300px);
     /* Adjust width based on sidebar */
-    height: calc(100vh - 105px);
+    height: calc(100vh - 110px);
     /* Adjust height based on toolbar */
 }
 

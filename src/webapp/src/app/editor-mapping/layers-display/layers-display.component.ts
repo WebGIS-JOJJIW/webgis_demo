@@ -76,14 +76,6 @@ export class LayersDisplayComponent {
         this.polygon_list = this.layersList.filter(x=> x.vector_type === 'POLYGON')
         this.polyline_list = this.layersList.filter(x=> x.vector_type === 'POLYLINE')
         this.raster_list = this.layersList.filter(x=> x.type === 'RASTER')
-        // console.log(this.standard_list);
-        // console.log(this.camera_list);
-        // console.log(this.communication_list);
-        // console.log(this.polygon_list);
-        // console.log(this.layersList.filter(x=>x.type != 'RASTER' && x.vector_type != 'NO_LAYER_TYPE'));
-        
-        // console.log(this.polyline_list);
-        // console.log(this.raster_list);
         
         
       });
@@ -146,7 +138,7 @@ export class LayersDisplayComponent {
 
   onCancel(){
     this.sharedService.setLayersDisplay([]);
-    this.sharedService.ChangeShowLayerComp(false);
-    this.sharedService.onSaveChangeLayer(false);
+    // this.sharedService.ChangeShowLayerComp(false);
+    // this.sharedService.onSaveChangeLayer(false);
   }
 }

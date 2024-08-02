@@ -33,8 +33,14 @@
 }
 
 .icon-top {
-  width: 27px;
-  height: 27px;
+  width: 30px;
+  height: 30px;
+}
+
+.icon-top-1 {
+  width: 30px;
+  height: 35px;
+  position: relative;
 }
 
 .icon-side-2 {
@@ -85,4 +91,8 @@
 
 .space-line {
   padding-inline: 20px !important;
+}
+
+.space-line2 {
+  padding-inline: 7px !important;
 }

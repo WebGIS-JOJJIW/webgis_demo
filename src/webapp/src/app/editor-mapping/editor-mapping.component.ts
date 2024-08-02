@@ -24,6 +24,7 @@ export class EditorMappingComponent implements OnInit {
   private layer!: Layer_List;
   private proxy = '';
   private unsavedFeatures: any[] = [];
+  activeDialog = false;
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -106,15 +107,33 @@ export class EditorMappingComponent implements OnInit {
       // }
     });
 
-    this.sharedService.currentActiveEdit.subscribe(x => this.activeEdit = x);  // get active add element
+    this.sharedService.currentActiveEdit.subscribe(x => {
+      this.activeEdit = x
+      if(x){
+        this.sharedService.setActiveAllowDraw(true);
+      }else{
+        this.sharedService.setActiveAllowDraw(false);
+      }
+    });  // get active add element
+
+    this.sharedService.currentActiveAllowDraw.subscribe(x=>{
+      const mapContainer = document.getElementById('map');      
+      if (mapContainer) {
+        if (x && this.activeEdit) {
+          mapContainer.classList.add('pencil-cursor');
+        } else {
+          mapContainer.classList.remove('pencil-cursor');
+        }
+      }
+    })
 
     this.sharedService.currentActiveSave.subscribe(x => {
-      if (x) {
+      if (x && !this.activeDialog) {
         // write save to api with option 
+        this.activeDialog = true;
         const dialogRef = this.dialog.open(DialogWarningComponent);
         dialogRef.afterClosed().subscribe(result => {
-          console.log(result);
-
+          this.activeDialog = false;
           if (result) {
             console.log('save');
             this.saveFeatures();
@@ -135,21 +154,21 @@ export class EditorMappingComponent implements OnInit {
 
 
   //#region Draw Events
-  private onDrawCreate(event: any): void {
-    this.unsavedFeatures.push(event.features[0]);
-  }
+  // private onDrawCreate(event: any): void {
+  //   this.unsavedFeatures.push(event.features[0]);
+  // }
 
-  private onDrawUpdate(event: any): void {
-    if (!event || !event.features) {
-      console.error('Draw update event is invalid');
-      return;
-    }
-    console.log('Draw update:', event);
-  }
+  // private onDrawUpdate(event: any): void {
+  //   if (!event || !event.features) {
+  //     console.error('Draw update event is invalid');
+  //     return;
+  //   }
+  //   console.log('Draw update:', event);
+  // }
 
-  private onDrawDelete(event: any): void {
-    this.unsavedFeatures = this.unsavedFeatures.filter(f => !event.features.some((ef: any) => ef.id === f.id));
-  }
+  // private onDrawDelete(event: any): void {
+  //   this.unsavedFeatures = this.unsavedFeatures.filter(f => !event.features.some((ef: any) => ef.id === f.id));
+  // }
   //#endregion
 
   //#region Map Layers
@@ -260,7 +279,7 @@ export class EditorMappingComponent implements OnInit {
       const features = this.unsavedFeatures;
       this.unsavedFeatures = [];
       // console.log(features);
-      
+
       // const data = {
       //   type: 'FeatureCollection',
       //   features: features
@@ -287,11 +306,19 @@ export class EditorMappingComponent implements OnInit {
             panelClass: ['custom-snackbar', 'snackbar-success']
           });
           this.initializeMap();
+          this.sharedService.setActiveLayerEditor(false);
           // this.initializeDraw();
         })
         .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
       // Handle saving `data` to your API or GeoServer
+      
+    }else{
+      console.log('no data  save change');
+      this.sharedService.setActiveEdit(false);
+      this.sharedService.setActiveSave(false);
+      
     }
+    // this.sharedService.setActiveEdit(false);
   }
   //#endregion
 
@@ -335,7 +362,7 @@ export class EditorMappingComponent implements OnInit {
   //#endregion
 
   addCustomImages(): void {
-    const imgUrl = 'assets/img/marker_point.png';
+    const imgUrl = 'assets/img/location.svg'; // Replace with your image URL
     const img = new Image(30, 30);
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
@@ -522,9 +549,14 @@ export class EditorMappingComponent implements OnInit {
     const data = this.draw.getAll();
     this.unsavedFeatures = []
     this.unsavedFeatures = data.features;
+    
+    if (this.mode && this.mode != 'draw_point'){
+      this.sharedService.setActiveAllowDraw(false);
+      
+    }
     // console.log('unsavedFeatures',this.unsavedFeatures); // Handle the drawn data as needed
     // console.log(data.features);
-    
+
   }
 
 

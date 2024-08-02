@@ -29,6 +29,12 @@ export class SharedService {
   currentActiveEdit = this.activeEdit.asObservable();
   currentActiveSave = this.activeSave.asObservable();
   currentLayerAfterSave = this.layerAfterSave.asObservable();
+
+  private activeEventFull = new BehaviorSubject<boolean>(false);   // active event full page on live 
+  currentActiveEventFull = this.activeEventFull.asObservable();
+
+  private activeAllowDraw = new BehaviorSubject<boolean>(false);  //  use for highlight icon on drawtools 
+  currentActiveAllowDraw = this.activeAllowDraw.asObservable();
   
   currentPageLive = this.PageOnChange.asObservable();
   currentMode = this.messageMode.asObservable();
@@ -68,6 +74,14 @@ export class SharedService {
   //#endregion
   updateSensorData(data: MarkerDetailsData): void {
     this.sensorDataSource.next(data);
+  }
+
+  setEventActiveFull(sw :boolean){
+    this.activeEventFull.next(sw);
+  }
+
+  setActiveAllowDraw(sw:boolean){
+    this.activeAllowDraw.next(sw);
   }
 
   changePage(message: string) {

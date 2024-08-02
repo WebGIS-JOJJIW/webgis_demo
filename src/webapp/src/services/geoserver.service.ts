@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ObservableInput, map } from 'rxjs';
 import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { MatDialog } from '@angular/material/dialog';
-import { SharedService } from './shared.service';
 import { InsertLayer, attr } from '../models/geo.model';
 import { Layer, LayerResponse } from '../models/layer.model';
 
@@ -15,6 +13,7 @@ export class GeoServerService {
 
   private proxy = `http://${window.location.hostname}:8000/geoserver`;
   // private proxy = `http://167.172.94.39:8000/geoserver`;
+  // private proxy = `http://138.197.138.95:8080/geoserver`;
   private httpOptions = {}
   constructor(private http: HttpClient) {
     this.httpOptions = {
@@ -53,6 +52,7 @@ export class GeoServerService {
     const re = /http.*8080/gi;
     const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
     // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
+    //const corrected_url = `http://138.197.138.95:8080`;
     return this.http.get<any>(corrected_url, this.httpOptions);
   }
 
