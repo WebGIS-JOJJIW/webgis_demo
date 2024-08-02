@@ -362,7 +362,7 @@ export class EditorMappingComponent implements OnInit {
   //#endregion
 
   addCustomImages(): void {
-    const imgUrl = 'assets/img/marker_point.png';
+    const imgUrl = 'assets/img/location.svg'; // Replace with your image URL
     const img = new Image(30, 30);
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
