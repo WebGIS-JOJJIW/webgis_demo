@@ -61,12 +61,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
-      if (this.layersDisplay.length > 0 && res.length == 0) {
         this.removeLayersFromMap();
-      } else {
         this.layersDisplay = res;
         this.showLayerDataOnMap(this.layersDisplay);
-      }
     });
     this.initailSensorData();
     this.sensorDataService.subscribeToMainChannel().subscribe(data => {
@@ -111,6 +108,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   showLayerDataOnMap(layers: LayerDisplay[]): void {
     if (layers.length > 0) {
       const filterGroup = document.getElementById('filter-group');
+      
       if (!filterGroup) {
         console.error('Filter group element not found');
         return;
@@ -159,7 +157,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
                   this.addFilterCheckbox(filterGroup, layerId, ele.name);
                 }
               } else {
-                this.addFilterCheckbox(filterGroup, '', ele.name);
+                this.addFilterCheckbox(filterGroup, layerId, ele.name);
               }
 
             },
@@ -328,6 +326,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   }
 
   addFilterCheckbox(filterGroup: HTMLElement, layerId: string, name: string): void {
+    
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = layerId;
@@ -405,13 +404,18 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
 
   removeLayersFromMap(): void {
+    // console.log('removeLayersFromMap');
+    
     const filterGroup = document.getElementById('filter-group');
     if (!filterGroup) {
       console.error('Filter group element not found');
       return;
     }
-
-    this.layersId.forEach(layerId => {
+    
+    this.layersDisplay.forEach(ele => {
+      const layerId = `id-${ele.name}`;
+      // console.log(this.map.getLayer(layerId));
+      
       if (this.map.getLayer(layerId)) {
         this.map.removeLayer(layerId);
       }
@@ -430,8 +434,8 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Clear the layersId array
-    this.layersId = [];
+    // Clear the layersDisplay array
+    this.layersDisplay = [];
   }
 
 }

@@ -5,7 +5,13 @@
 >
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
-      <a class="nav-link text-white" *ngIf="checkMenuShow(1)">
+      <a
+        class="nav-link text-white"
+        (click)="pathDirect()"
+        [class.highlight-button]="isActiveLive"
+        (keydown.enter)="pathDirect()"
+        *ngIf="checkMenuShow(1)"
+      >
         <img
           class="icon-side"
           src="assets/menuIcons/map-marker.png"

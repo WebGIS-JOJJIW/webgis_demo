@@ -18,11 +18,13 @@ export class SideNavbarComponent implements OnInit{
   appConst = AppConst;
   isActiveListLayer = false;
   activeEventFull = false;
+  isActiveLive = false;
   constructor(
     private sharedService: SharedService,
     private router : Router
   ) { }
   ngOnInit(): void {
+    this.isActiveLive = true;
     this.sharedService.currentPageLive.subscribe(x=> {
       this.PageLive = x;
     }
@@ -39,22 +41,41 @@ export class SideNavbarComponent implements OnInit{
       })
       if(flagLayer){
         this.sharedService.ChangeShowLayerComp(false);
+        this.isActiveLive = true;
       }else{
         this.sharedService.ChangeShowLayerComp(true);
+        this.sharedService.setEventActiveFull(false);
+        this.isActiveLive = false;
+        this.activeEventFull = false;
       } 
+    }
+  }
+
+  pathDirect(){
+    this.isActiveLive = true;
+    const url = this.router.url;
+    if(url === '/live-monitoring'){
+      this.isActiveLive = true;
+      this.isActiveListLayer = false;
+      this.activeEventFull = false;
+      this.sharedService.setEventActiveFull(false);
+      this.sharedService.ChangeShowLayerComp(this.isActiveListLayer);
     }
   }
 
   openLastEvent(){
     this.activeEventFull = !this.activeEventFull;
     this.sharedService.setEventActiveFull(this.activeEventFull);
-    // this.router.navigate(['/lastest-events', true]);
+    if(this.activeEventFull){
+      this.isActiveLive = false;
+      this.isActiveListLayer = false;
+      this.sharedService.ChangeShowLayerComp(false);
+    }else{
+      this.isActiveLive = true;
+    }
   }
 
   checkMenuShow(no:number):boolean{
-    // console.log(this.PageLive);
-    
-    // console.log(this.appConst.PageShowSideAll[this.PageLive]);
     return this.appConst.PageShowSideAll[this.PageLive].includes(no)
   }
 

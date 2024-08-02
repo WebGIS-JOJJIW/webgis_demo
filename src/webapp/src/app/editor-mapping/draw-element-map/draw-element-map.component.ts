@@ -23,12 +23,20 @@ export class DrawElementMapComponent implements OnInit {
 
   setupSubscriptions() {
     let flagActive = false;
-    this.sharedService.currentActiveLayerEditor.subscribe(x => { flagActive = x });
+    this.sharedService.currentActiveLayerEditor.subscribe(x => { 
+      flagActive = x 
+    });
     this.layersData = [];
     if (flagActive) {
       this.resetData();
     }
-
+    this.sharedService.currentActiveEdit.subscribe(x=>{
+      // console.log(x);
+      
+      if(!x){
+        this.activeBt = false;
+      }
+    })
     this.sharedService.currentLayer.subscribe(x => this.layerOld = x);
     this.sharedService.currentLayerAfterSave.subscribe(x => {
       if (x != '') {
@@ -174,11 +182,7 @@ export class DrawElementMapComponent implements OnInit {
   }
 
   selectLayer(layer: Layer_List,canEdit :boolean=false): void {
-    // console.log(layer);
     this.setEditorMap(layer,canEdit);
-    // this.selectedLayer = layer;
-    // this.sharedService.setLayer(layer);
-    // this.sharedService.setActiveEdit(true)
   }
 
   deselectLayer(event: MouseEvent): void {

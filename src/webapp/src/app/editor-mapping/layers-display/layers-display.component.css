@@ -48,16 +48,16 @@
 .section {
   margin: 10px 0;
   border-bottom: 1px solid #ffffff;
-  height: 450px;
-  overflow-x: scroll;
+  /* height: 450px; */
+  /* overflow-x: scroll; */
   /* Add bottom border here */
 }
 
 .section2 {
   margin: 10px 0;
   border-bottom: 1px solid #ffffff;
-  height: 200px;
-  overflow-x: scroll;
+  /* height: 200px; */
+  /* overflow-x: scroll; */
   /* Add bottom border here */
 }
 
@@ -190,4 +190,21 @@
   /* Break words that are too long */
   word-wrap: break-word;
   /* Ensure compatibility with older browsers */
+}
+
+.scroll-height{
+  max-height: 710px;
+  /* height: 690px; */
+  padding-bottom: 5px;
+  overflow-x: scroll;
+}
+
+.btn-secondary {
+  background-color: #ad8dab;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #4ea0da;
+  border: none;
 }

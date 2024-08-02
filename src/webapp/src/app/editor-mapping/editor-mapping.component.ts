@@ -24,6 +24,7 @@ export class EditorMappingComponent implements OnInit {
   private layer!: Layer_List;
   private proxy = '';
   private unsavedFeatures: any[] = [];
+  activeDialog = false;
   constructor(
     public dialog: MatDialog,
     private sharedService: SharedService,
@@ -125,13 +126,14 @@ export class EditorMappingComponent implements OnInit {
         }
       }
     })
+
     this.sharedService.currentActiveSave.subscribe(x => {
-      if (x) {
+      if (x && !this.activeDialog) {
         // write save to api with option 
+        this.activeDialog = true;
         const dialogRef = this.dialog.open(DialogWarningComponent);
         dialogRef.afterClosed().subscribe(result => {
-          console.log(result);
-
+          this.activeDialog = false;
           if (result) {
             console.log('save');
             this.saveFeatures();
@@ -304,11 +306,19 @@ export class EditorMappingComponent implements OnInit {
             panelClass: ['custom-snackbar', 'snackbar-success']
           });
           this.initializeMap();
+          this.sharedService.setActiveLayerEditor(false);
           // this.initializeDraw();
         })
         .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
       // Handle saving `data` to your API or GeoServer
+      
+    }else{
+      console.log('no data  save change');
+      this.sharedService.setActiveEdit(false);
+      this.sharedService.setActiveSave(false);
+      
     }
+    // this.sharedService.setActiveEdit(false);
   }
   //#endregion
 
