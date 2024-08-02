@@ -70,11 +70,23 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       this.refreshSensorPoints();
     });
 
+    
+
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
         this.activeFlag = flag;
       }
+
+      if(flag){
+        this.dialog.closeAll()
+      }
     });
+
+    this.sharedService.currentActiveEventFull.subscribe(x=>{
+      if(x){
+        this.dialog.closeAll()
+      }
+    })
   }
 
   initailSensorData() {
@@ -376,9 +388,16 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         this.map.on('click', layerId, (e) => {
           // Open the dialog with the marker details data
           this.sharedService.openDialog(sensorMarker, this.dialog);
+          this.setCloseAllPanel();
+          
         });
       });
     }
+  }
+
+  setCloseAllPanel(){
+    this.sharedService.setEventActiveFull(false);
+    this.sharedService.ChangeShowLayerComp(false);
   }
 
 
@@ -392,7 +411,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   addCustomImages(): void {
     // Add your custom marker image
-    const imgUrl = 'assets/img/marker_point.png'; // Replace with your image URL
+    const imgUrl = 'assets/img/location.svg'; // Replace with your image URL
     const img = new Image(25, 25); // Adjust the size as needed
     img.onload = () => {
       if (!this.map.hasImage('custom-marker')) {
