@@ -30,6 +30,11 @@ body, h1, h2, h3, h4, h5, h6, p, a, span, div {
   color: white;
 }
 
+.mat-mdc-dialog-surface {
+  height: auto !important; 
+  
+}
+
 
 .mdc-dialog--open .mat-mdc-dialog-inner-container {
   opacity: 1;
