@@ -47,6 +47,13 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       zoom: 14, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
+
+    this.map.on('load', ()=>{
+      this.initailSensorData();
+      this.sensorDataService.subscribeToMainChannel().subscribe(data => {
+        this.refreshSensorPoints();
+      });
+    })
   }
 
   setupSubscriptions(): void {
@@ -65,13 +72,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       this.layersDisplay = res;
       this.showLayerDataOnMap(this.layersDisplay);
     });
-
-    this.initailSensorData();
-    this.sensorDataService.subscribeToMainChannel().subscribe(data => {
-      this.refreshSensorPoints();
-    });
-
-
 
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
@@ -190,35 +190,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     }
   }
 
-  // addPoint(layerId: string): Promise<void> {
-  //   return new Promise((resolve) => {
-  //     if (!this.map.getLayer(layerId)) {
-  //       this.map.addLayer({
-  //         id: layerId,
-  //         type: 'symbol',
-  //         source: layerId,
-  // filter: ['has', 'point_count'],
-  //         layout: {
-  //           'icon-image': 'custom-marker',
-  //           'icon-size': 1.5,
-  //           'text-field': '{title}',
-  //           'text-offset': [0, 1.25],
-  //           'text-anchor': 'top'
-  //         },
-  //         minzoom: 0, // Add minzoom
-  //         maxzoom: 24 // Add maxzoom
-  //       });
-
-  //       this.map.once('idle', () => {
-  //         resolve();
-  //       });
-  //     } else {
-  //       console.warn(`Point layer with ID ${layerId} already exists.`);
-  //       resolve();
-  //     }
-  //   });
-  // }
-
   addPoint(layerId: string): Promise<void> {
     return new Promise((resolve) => {
       if (!this.map.getLayer(layerId)) {
@@ -248,17 +219,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
             'text-anchor': 'top'
           }
         });
-
-        // this.map.addLayer({
-        //   id: `${layerId}-unclustered`,
-        //   type: 'circle',
-        //   source: layerId,
-        //   filter: ['!', ['has', 'point_count']],// Filter for clustered points
-        //   paint: {
-        //     'circle-color': '#ffff',
-        //     'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
-        //   }
-        // });
 
         this.map.once('idle', () => {
           resolve();
@@ -421,39 +381,63 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
     // Remove existing source and layer if they exist
     if (this.map.getSource(layerId)) {
-      if (this.map.getLayer(layerId)) {
-        this.map.removeLayer(layerId);
+      if (this.map.getLayer(`${layerId}-clusters`)) {
+          this.map.removeLayer(`${layerId}-clusters`);
+      }
+      if (this.map.getLayer(`${layerId}-unclustered`)) {
+          this.map.removeLayer(`${layerId}-unclustered`);
+      }
+      if (this.map.getLayer(`${layerId}-cluster-count`)) {
+          this.map.removeLayer(`${layerId}-cluster-count`);
       }
       this.map.removeSource(layerId);
-    }
-  
-    // Add the new source with larger cluster radius and lower clusterMaxZoom
-    this.map.addSource(layerId, {
+  }
+
+  // Add a new GeoJSON source with clustering enabled
+  this.map.addSource(layerId, {
       type: 'geojson',
       data: {
-        type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: sensorMarker.coordinates
-          },
-          properties: {
-            title: sensorMarker.title
-          }
-        }]
+          type: 'FeatureCollection',
+          features: [
+              {
+                  type: 'Feature',
+                  geometry: {
+                      type: 'Point',
+                      coordinates: sensorMarker.coordinates
+                  },
+                  properties: {
+                      title: sensorMarker.title
+                  }
+              }
+          ]
       },
       cluster: true,               // Enable clustering
-      clusterMaxZoom: 6,           // Allow clustering at lower zoom levels (zoomed out)
-      clusterRadius: 500           // Larger cluster radius in pixels for zoomed-out view
+      clusterMaxZoom: 14,           // Stop clustering at zoom level 14
+      clusterRadius: 50             // Cluster radius in pixels
+  });
+
+    // Force update the data (optional)
+    const source = this.map.getSource(layerId) as GeoJSONSource;
+    source.setData({
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: sensorMarker.coordinates
+        },
+        properties: {
+          title: sensorMarker.title
+        }
+      }]
     });
-  
+
     // Add clustered points layer
     this.map.addLayer({
       id: `${layerId}-clusters`,
       type: 'circle',
       source: layerId,
-      filter: ['has', 'point_count'],
+      filter: ['has', 'point_count'],  // Only show clusters with this filter
       paint: {
         'circle-color': [
           'step',
@@ -467,7 +451,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         ]
       }
     });
-  
+
     // Add unclustered points layer
     this.map.addLayer({
       id: `${layerId}-unclustered`,
@@ -476,13 +460,13 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       filter: ['!', ['has', 'point_count']], // Filter for unclustered points
       layout: {
         'icon-image': 'custom-marker',
-        'icon-size': 1.5,
+        'icon-size': 1.2,
         'text-field': '{title}',
-        'text-offset': [0, 1.25],
+        'text-offset': [0, 1.15],
         'text-anchor': 'top'
       }
     });
-  
+
     // Add a layer for the cluster count labels
     this.map.addLayer({
       id: `${layerId}-cluster-count`,
@@ -495,17 +479,17 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         'text-size': 12
       }
     });
-  
+
     // Click event for clusters to zoom in
     this.map.on('click', `${layerId}-clusters`, (e) => {
       const features = this.map.queryRenderedFeatures(e.point, {
         layers: [`${layerId}-clusters`]
       });
       const clusterId = features[0].properties['cluster_id'];
-  
+
       // Cast the source to GeoJSONSource
       const source = this.map.getSource(layerId) as GeoJSONSource;
-  
+
       // Call getClusterExpansionZoom
       source.getClusterExpansionZoom(clusterId).then((zoom: number) => {
         this.map.easeTo({
@@ -516,15 +500,15 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         console.error('Error getting cluster expansion zoom:', err);
       });
     });
-  
+
     // Click event for unclustered points to open the dialog
     this.map.on('click', `${layerId}-unclustered`, (e) => {
       this.sharedService.openDialog(sensorMarker, this.dialog);
       console.log(sensorMarker);
-      
+
       this.setCloseAllPanel();
     });
-  
+
     // Change the cursor to a pointer when over clusters or unclustered points
     this.map.on('mouseenter', `${layerId}-clusters`, () => {
       this.map.getCanvas().style.cursor = 'pointer';
@@ -532,7 +516,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
     this.map.on('mouseenter', `${layerId}-unclustered`, () => {
       this.map.getCanvas().style.cursor = 'pointer';
     });
-  
+
     this.map.on('mouseleave', `${layerId}-clusters`, () => {
       this.map.getCanvas().style.cursor = '';
     });
@@ -540,7 +524,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       this.map.getCanvas().style.cursor = '';
     });
   }
-  
+
 
   setCloseAllPanel() {
     this.sharedService.setEventActiveFull(false);
