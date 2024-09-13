@@ -82,19 +82,33 @@ app-lastest-events {
   /* right: 10px; */
   /* background: #333; */
   /* padding: 20px; */
-  border-radius: 8px;
-  width: 97%;
+  /* border-radius: 8px; */
+  /* width: 97%; */
   /* height: 80%; */
   z-index: 777;
   /* Ensure it's above other map elements */
 }
 
-app-layers-display{
+/* app-layers-display{
   z-index: 888;
   max-height: calc(100vh - 240px) ;
   background-color: #4ea0da;
-}
+} */
 
+
+app-layers-display {
+  position: absolute;
+  /* top: 0px; */
+  left: 40px;
+  /* background: #333; */
+  top: 56px;
+  height: 1000px;
+  padding: 20px;
+  border-radius: 8px;
+  /* width: 400px; */
+  z-index: 888;
+  /* Ensure it's above other map elements */  
+}
 
 .ontop{
   position: absolute;
