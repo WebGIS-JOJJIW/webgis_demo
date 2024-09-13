@@ -107,43 +107,54 @@ export class GeoServerService {
     return transactionXml;
   }
 
-  convertUpdatedGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
-    let transactionXml = `
-       <wfs:Transaction service="WFS" version="1.1.0"
-       xmlns:wfs="http://www.opengis.net/wfs"
-       xmlns:ogc="http://www.opengis.net/ogc"
-       xmlns:gml="http://www.opengis.net/gml"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.opengis.net/wfs
-                           http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
-  
-          <wfs:Patch>
-           
-      `;
+  generateWFSUpdatePayload(features: FeatureCollection<any, any>['features'], dict: string[]): string {
+    const [workspace, layerName, geomField, srsName] = dict;
 
-    features.forEach((feature) => {
-      transactionXml += `<${dict[0] + ':' + dict[1]} xmlns:${dict[0]}="${dict[0]}">` //open tag one element 
+    if (!workspace || !layerName || !geomField || !srsName) {
+      throw new Error('Dictionary array does not have the required values.');
+    }
+
+    const featureUpdates = features.map(feature => {
+      const coordinates = feature.geometry.coordinates[0].map((coord: any[]) => coord.reverse().join(',')).join(' ');
+
+      let geometryXML: string;
+
       if (feature.geometry.type === 'Polygon') {
-        transactionXml += `
-          <${dict[0] + ':' + dict[2]}>
-                  ${this.geometryToGml(feature.geometry, dict[3])}
-          </${dict[0] + ':' + dict[2]}>
-        `;
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <wfs:Property>
+             <wfs:Name>the_geom</wfs:Name>
+              <wfs:Value>
+                <gml:Polygon srsName="${srsName}">
+                    <gml:exterior>
+                        <gml:LinearRing>
+                            <gml:coordinates>${coordinates}</gml:coordinates>
+                        </gml:LinearRing>
+                    </gml:exterior>
+                </gml:Polygon>
+              </wfs:Value>
+            </wfs:Property> 
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
       } else {
-        transactionXml += `<${dict[0] + ':' + dict[2]}>
-          ${this.geometryToGml(feature.geometry, dict[3])}
-          </${dict[0] + ':' + dict[2]}>`;
+        // Handle other geometry types if needed
+        throw new Error(`Geometry type ${feature.geometry.type} not supported.`);
       }
-      transactionXml += `</${dict[0] + ':' + dict[1]}>` // end tag element 
-    });
-    // <gis:name>Sensor002</gis:name>
-    // <gis:vector_type>STANDARD_POI</gis:vector_type>
-    transactionXml += `
-          </wfs:Patch>
-        </wfs:Transaction>
-      `;
 
-    return transactionXml;
+      return `${geometryXML}`;
+    }).join('');
+
+    return `<wfs:Transaction service="WFS" version="1.1.0"
+        xmlns:wfs="http://www.opengis.net/wfs"
+        xmlns:ogc="http://www.opengis.net/ogc"
+        xmlns:gml="http://www.opengis.net/gml"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.opengis.net/wfs
+                            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+            ${featureUpdates}
+    </wfs:Transaction>`;
   }
 
   geometryToGml(geometry: Geometry, srsName: string): string {

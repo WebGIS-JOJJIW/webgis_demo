@@ -120,9 +120,6 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   showLayerDataOnMap(layers: LayerDisplay[]): void {
     if (layers.length > 0) {
-
-      console.log('showLayerDataOnMap');
-
       const filterGroup = document.getElementById('filter-group');
 
       if (!filterGroup) {

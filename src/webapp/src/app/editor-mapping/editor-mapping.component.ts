@@ -269,15 +269,13 @@ export class EditorMappingComponent implements OnInit {
     const type = 'the_geom';
     const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
     // Convert previous features to WFS Transaction XML for update
-    const wfsTransactionXmlUpdate = this.geoServerService.convertUpdatedGeoJSONToWFST(this.previousFeatures, dict);
+    const wfsTransactionXmlUpdate = this.geoServerService.generateWFSUpdatePayload(this.previousFeatures, dict);
     const wfsUrl = `${this.proxy}/wfs`;
-
-
     if (this.unsavedFeatures.length > 0) {
       const featuresToInsert = this.unsavedFeatures; // Assuming these are all new features for insertion
       this.unsavedFeatures = []; // Clear unsaved features after processing
       // Convert features to WFS Transaction XML for insert
-      const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(featuresToInsert, dict);  
+      const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(featuresToInsert, dict);
 
       // Prepare fetch requests
       const insertPromise = fetch(wfsUrl, {
@@ -296,7 +294,7 @@ export class EditorMappingComponent implements OnInit {
         })
         .catch(error => console.error(`Error saving new data to GeoServer:`, error));
 
-      
+
       const updatePromise = fetch(wfsUrl, {
         method: 'POST',
         headers: {
