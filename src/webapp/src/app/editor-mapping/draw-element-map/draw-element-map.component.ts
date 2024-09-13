@@ -18,7 +18,6 @@ export class DrawElementMapComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupSubscriptions();
-
   }
 
   setupSubscriptions() {
@@ -48,8 +47,12 @@ export class DrawElementMapComponent implements OnInit {
 
 
   resetData(name:string= '') {
+    // console.log('resetData');
+    
     this.layersData = []
     this.geoService.getLayerListApi().subscribe(async res => {
+      // console.log(res);
+      
       this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:') && (!layer.name.includes('drone_images') && !layer.name.includes('sensors'))).map((layer => ({
         ...layer,
         name: layer.name.replace('gis:', ''),  // Remove 'gis:' from layer.name
@@ -70,6 +73,8 @@ export class DrawElementMapComponent implements OnInit {
       // Second loop get Vector_type to list 
       const secondLoopPromises = this.layersList.map((element, index) =>
         this.geoService.getLayerDetails(element.href).toPromise().then(details2 => {
+          // console.log(details2);
+          
           if (element.type === 'VECTOR') {
             let description = '';
             try {

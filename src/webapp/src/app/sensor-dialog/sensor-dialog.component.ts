@@ -25,7 +25,9 @@ export class SensorDialogComponent implements OnInit, OnDestroy {
   ) {
     this.dialog.closeAll();
     // this.sharedService.TurnOnOrOff(false);
-    this.sensorData =data;
+    this.sensorData = data;
+    console.log(data);
+    
     this.sharedService.updateSensorData(data);
     
     

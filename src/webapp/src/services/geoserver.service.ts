@@ -12,8 +12,7 @@ export class GeoServerService {
 
 
   private proxy = `http://${window.location.hostname}:8000/geoserver`;
-  // private proxy = `http://167.172.94.39:8000/geoserver`;
-  // private proxy = `http://138.197.138.95:8080/geoserver`;
+  // private proxy = `http://139.59.221.224:8000/geoserver`;
   private httpOptions = {}
   constructor(private http: HttpClient) {
     this.httpOptions = {
@@ -42,7 +41,6 @@ export class GeoServerService {
 
   getLayerListApi(): Observable<LayerResponse> {
     // console.log(this.httpOptions);
-
     const url = `${this.proxy}/rest/layers?Accept=application/json`
     return this.http.get<LayerResponse>(url, this.httpOptions);
   }
@@ -51,8 +49,7 @@ export class GeoServerService {
     // const url = `${this.proxy}/rest/layers?Accept=application/json`
     const re = /http.*8080/gi;
     const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
-    // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
-    //const corrected_url = `http://138.197.138.95:8080`;
+    // const corrected_url = url.replace(re, `http://139.59.221.224:8000`);
     return this.http.get<any>(corrected_url, this.httpOptions);
   }
 
@@ -104,6 +101,45 @@ export class GeoServerService {
     // <gis:vector_type>STANDARD_POI</gis:vector_type>
     transactionXml += `
           </wfs:Insert>
+        </wfs:Transaction>
+      `;
+
+    return transactionXml;
+  }
+
+  convertUpdatedGeoJSONToWFST(features: FeatureCollection<Geometry, GeoJsonProperties>['features'], dict: string[]): string {
+    let transactionXml = `
+       <wfs:Transaction service="WFS" version="1.1.0"
+       xmlns:wfs="http://www.opengis.net/wfs"
+       xmlns:ogc="http://www.opengis.net/ogc"
+       xmlns:gml="http://www.opengis.net/gml"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.opengis.net/wfs
+                           http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+  
+          <wfs:Patch>
+           
+      `;
+
+    features.forEach((feature) => {
+      transactionXml += `<${dict[0] + ':' + dict[1]} xmlns:${dict[0]}="${dict[0]}">` //open tag one element 
+      if (feature.geometry.type === 'Polygon') {
+        transactionXml += `
+          <${dict[0] + ':' + dict[2]}>
+                  ${this.geometryToGml(feature.geometry, dict[3])}
+          </${dict[0] + ':' + dict[2]}>
+        `;
+      } else {
+        transactionXml += `<${dict[0] + ':' + dict[2]}>
+          ${this.geometryToGml(feature.geometry, dict[3])}
+          </${dict[0] + ':' + dict[2]}>`;
+      }
+      transactionXml += `</${dict[0] + ':' + dict[1]}>` // end tag element 
+    });
+    // <gis:name>Sensor002</gis:name>
+    // <gis:vector_type>STANDARD_POI</gis:vector_type>
+    transactionXml += `
+          </wfs:Patch>
         </wfs:Transaction>
       `;
 
