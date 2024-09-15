@@ -27,6 +27,11 @@ export class SideNavbarComponent implements OnInit{
     this.isActiveLive = true;
     this.sharedService.currentPageLive.subscribe(x=> {
       this.PageLive = x;
+      if(this.PageLive === this.appConst.LivePage){
+        this.isActiveLive = true;
+        this.activeEventFull = false;
+        this.isActiveListLayer = false;
+      }
     }
     );
   }

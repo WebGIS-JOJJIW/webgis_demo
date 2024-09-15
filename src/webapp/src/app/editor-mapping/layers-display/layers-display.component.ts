@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { GeoServerService } from '../../../services/geoserver.service';
 import { Layer, LayerDisplay } from '../../../models/layer.model';
 import { SharedService } from '../../../services/shared.service';
+import { AppConst } from '../../../models/AppConst';
 
 @Component({
   selector: 'app-layers-display',
@@ -134,6 +135,7 @@ export class LayersDisplayComponent {
     this.sharedService.setLayersDisplay(this.selectedLayers);
     this.sharedService.ChangeShowLayerComp(false);
     this.sharedService.onSaveChangeLayer(true);
+    this.sharedService.changePage(AppConst.LivePage)
   }
 
   onCancel(){

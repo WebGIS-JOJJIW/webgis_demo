@@ -42,19 +42,45 @@ export class EditorMappingComponent implements OnInit {
 
   //#region Initialization
   private initializeMap(): void {
+    const savedZoom = localStorage.getItem('mapZoom');
+    const savedCenter = localStorage.getItem('mapCenter');
     this.map = new maplibregl.Map({
       container: 'map',
       style: 'https://api.maptiler.com/maps/b9ce2a02-280d-4a34-a002-37f946992dfa/style.json?key=NRZzdXmGDnNvgNaaF4Ic',
-      center: [-74.3100039, 40.697538],
-      zoom: 2,
+      center: savedCenter ? JSON.parse(savedCenter) : [100.5018, 13.7563],
+      zoom: savedZoom ? parseFloat(savedZoom) : 8,
     });
 
     this.map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+    this.map.on('zoomend', () => {
+      const zoomLevel = this.map.getZoom();
+      localStorage.setItem('mapZoom', zoomLevel.toString());
+    });
+
+    this.map.on('moveend', () => {
+      const center = this.map.getCenter();
+      localStorage.setItem('mapCenter', JSON.stringify([center.lng, center.lat]));
+    });
 
     this.map.on('load', () => {
       this.setMultiLayersOnMap();
       this.addCustomImages();
       this.initializeDraw();
+      this.sharedService.currentActiveEdit.subscribe(x => {
+        this.activeEdit = x
+        if (x) {
+          this.sharedService.setActiveAllowDraw(true);
+          // Subscribe to drawing mode changes
+          this.sharedService.currentMode.subscribe(mode => {
+            if (mode && mode != 'draw_point') {
+              this.draw.changeMode(mode);
+            }
+          });
+        } else {
+          this.sharedService.setActiveAllowDraw(false);
+        }
+      });  // get active add element
 
     });
 
@@ -62,42 +88,33 @@ export class EditorMappingComponent implements OnInit {
       if (this.mode === 'draw_point' && this.activeEdit) {
         this.addPointAtClick(event);
       }
-
     });
   }
 
   private initializeDraw(): void {
-
-
     this.draw = new MapboxDraw({
       displayControlsDefault: false
     });
     this.map.addControl(this.draw as any);
 
-    // Subscribe to drawing mode changes
-    this.sharedService.currentMode.subscribe(mode => {
-      if (mode && mode != 'draw_point') {
-        this.draw.changeMode(mode);
-      }
-    });
-
+    // Bind create, update, delete event listeners
     this.map.on('draw.create', this.updateDrawnPolyFeatures.bind(this));
     this.map.on('draw.update', this.updateDrawnPolyFeatures.bind(this));
     this.map.on('draw.delete', this.updateDrawnPolyFeatures.bind(this));
 
-    if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
-      this.map.once('sourcedata', () => {
-        const layers = this.map.getStyle().layers;
-
-        // Add click handler for each Mapbox Draw layer
-        if (layers) {
-          layers.forEach(layer => {
-            this.map.on('click', layer.id, (event: MapMouseEvent) => this.handleFeatureClick(event, layer.id));
-            // }
-          });
-        }
-      });
-    }
+    // Only attach feature click listeners once the map has loaded
+    this.map.on('load', () => {
+      if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
+        // Listen for clicks on drawn features only
+        this.map.on('click', (event) => {
+          const features = this.map.queryRenderedFeatures(event.point, { layers: ['gl-draw-polygon-fill', 'gl-draw-line'] });
+          if (features.length) {
+            const feature = features[0];
+            this.handleFeatureClick(event, feature.layer.id);
+          }
+        });
+      }
+    });
   }
 
   private subscribeToModeChanges(): void {
@@ -107,17 +124,8 @@ export class EditorMappingComponent implements OnInit {
       // }
     });
 
-    this.sharedService.currentActiveEdit.subscribe(x => {
-      this.activeEdit = x
-      if(x){
-        this.sharedService.setActiveAllowDraw(true);
-      }else{
-        this.sharedService.setActiveAllowDraw(false);
-      }
-    });  // get active add element
-
-    this.sharedService.currentActiveAllowDraw.subscribe(x=>{
-      const mapContainer = document.getElementById('map');      
+    this.sharedService.currentActiveAllowDraw.subscribe(x => {
+      const mapContainer = document.getElementById('map');
       if (mapContainer) {
         if (x && this.activeEdit) {
           mapContainer.classList.add('pencil-cursor');
@@ -135,7 +143,7 @@ export class EditorMappingComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
           this.activeDialog = false;
           if (result) {
-            console.log('save');
+            // console.log('save');
             this.saveFeatures();
           } else {
             console.log('User chose not to save.');
@@ -145,30 +153,24 @@ export class EditorMappingComponent implements OnInit {
       }
     });
 
+    this.sharedService.currentActiveEdit.subscribe(x => {
+      this.activeEdit = x
+      if (x) {
+        this.sharedService.setActiveAllowDraw(true);
+        // Subscribe to drawing mode changes
+        if (this.mode && this.mode != 'draw_point') {
+          this.draw.changeMode(this.mode);
+        }
+      } else {
+        this.sharedService.setActiveAllowDraw(false);
+      }
+    });  // get active add element
+
     this.sharedService.currentLayer.subscribe(x => {
       this.layer = x;
       this.initializeMap();
     });
   }
-  //#endregion
-
-
-  //#region Draw Events
-  // private onDrawCreate(event: any): void {
-  //   this.unsavedFeatures.push(event.features[0]);
-  // }
-
-  // private onDrawUpdate(event: any): void {
-  //   if (!event || !event.features) {
-  //     console.error('Draw update event is invalid');
-  //     return;
-  //   }
-  //   console.log('Draw update:', event);
-  // }
-
-  // private onDrawDelete(event: any): void {
-  //   this.unsavedFeatures = this.unsavedFeatures.filter(f => !event.features.some((ef: any) => ef.id === f.id));
-  // }
   //#endregion
 
   //#region Map Layers
@@ -183,8 +185,11 @@ export class EditorMappingComponent implements OnInit {
       fetch(wfsUrl)
         .then(response => response.json())
         .then(data => {
+          // console.log(data.features);
+          this.previousFeatures = data.features
           data.features.forEach((feature: any) => {
             feature.properties.color = this.sharedService.getRandomColor();
+            this.draw.add(feature);
           });
 
           this.map.addSource(`wfs-layer-${index}`, {
@@ -193,7 +198,7 @@ export class EditorMappingComponent implements OnInit {
           });
 
           if (this.mode == 'draw_polygon') {
-            this.addLayerToMap(index, 'fill', 'fill-color', 0.5);
+            this.addLayerToMap(index, 'fill', 'fill-color', 0.2);
           }
 
           if (this.mode == 'draw_point') {
@@ -273,52 +278,85 @@ export class EditorMappingComponent implements OnInit {
 
   //#region Save Features
   saveFeatures(): void {
-    // console.log('save feature',this.unsavedFeatures);
-
+    const type = 'the_geom';
+    const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
+    // Convert previous features to WFS Transaction XML for update
+    const wfsTransactionXmlUpdate = this.geoServerService.generateWFSUpdatePayload(this.previousFeatures, dict);
+    const wfsUrl = `${this.proxy}/wfs`;
     if (this.unsavedFeatures.length > 0) {
-      const features = this.unsavedFeatures;
-      this.unsavedFeatures = [];
-      // console.log(features);
+      const featuresToInsert = this.unsavedFeatures; // Assuming these are all new features for insertion
+      this.unsavedFeatures = []; // Clear unsaved features after processing
+      // Convert features to WFS Transaction XML for insert
+      const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(featuresToInsert, dict);
 
-      // const data = {
-      //   type: 'FeatureCollection',
-      //   features: features
-      // };
-      var type = 'the_geom'
-      const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
-      const wfsTransactionXml = this.geoServerService.convertGeoJSONToWFST(features, dict);
-      const wfsUrl = `${this.proxy}/wfs`;
-      // console.log(wfsTransactionXml);
-      // console.log(wfsUrl);
+      // Prepare fetch requests
+      const insertPromise = fetch(wfsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
+          'Authorization': 'Basic ' + btoa('admin:geoserver')
+        },
+        body: wfsTransactionXmlInsert
+      }).then(response => response.text())
+        .then(() => {
+          // this.snackBar.open('Insert Layer success', 'Close', {
+          //   duration: 3000,
+          //   panelClass: ['custom-snackbar', 'snackbar-success']
+          // });
+        })
+        .catch(error => console.error(`Error saving new data to GeoServer:`, error));
 
+
+      const updatePromise = fetch(wfsUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
+          'Authorization': 'Basic ' + btoa('admin:geoserver')
+        },
+        body: wfsTransactionXmlUpdate
+      }).then(response => response.text())
+        .then(() => {
+          // this.snackBar.open('Update Layer success', 'Close', {
+          //   duration: 3000,
+          //   panelClass: ['custom-snackbar', 'snackbar-success']
+          // });
+        })
+        .catch(error => console.error(`Error saving updated data to GeoServer:`, error));
+
+      // Wait for both promises to complete
+      Promise.all([insertPromise, updatePromise])
+        .then(() => {
+          this.initializeMap();
+          this.sharedService.setActiveLayerEditor(false);
+          this.snackBar.open('Insert or Update Layer success', 'Close', {
+            duration: 3000,
+            panelClass: ['custom-snackbar', 'snackbar-success']
+          });
+        })
+        .catch(error => console.error('Error with one of the fetch requests:', error));
+
+    } else {
+      // console.log('No data to save');
       fetch(wfsUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
           'Authorization': 'Basic ' + btoa('admin:geoserver')
         },
-        body: wfsTransactionXml
-      })
-        .then(response => response.text())
+        body: wfsTransactionXmlUpdate
+      }).then(response => response.text())
         .then(() => {
-          this.snackBar.open('Insert Layer success', 'Close', {
+          this.snackBar.open('Update Layer success', 'Close', {
             duration: 3000,
             panelClass: ['custom-snackbar', 'snackbar-success']
           });
           this.initializeMap();
           this.sharedService.setActiveLayerEditor(false);
-          // this.initializeDraw();
         })
-        .catch(error => console.error(`Error saving ${type} data to GeoServer:`, error));
-      // Handle saving `data` to your API or GeoServer
-      
-    }else{
-      console.log('no data  save change');
+        .catch(error => console.error(`Error saving updated data to GeoServer:`, error));
       this.sharedService.setActiveEdit(false);
       this.sharedService.setActiveSave(false);
-      
     }
-    // this.sharedService.setActiveEdit(false);
   }
   //#endregion
 
@@ -380,7 +418,6 @@ export class EditorMappingComponent implements OnInit {
     };
     img2.src = imgUrl2;
   }
-
 
   /////////////////////////////////////////////////////////// new add element //////////////////////////////////////////////////////////////////////////////////////
   //#region  add point
@@ -513,11 +550,7 @@ export class EditorMappingComponent implements OnInit {
     console.log(features);
     if (features.length > 0) {
       const feature = features[0];
-      // Ensure feature.id is a string or null
-      // console.log(feature.properties['id']);
       this.selectedFeatureId = feature.properties['id'] != undefined ? feature.properties['id'] : null;
-      // console.log('Selected feature:', feature);
-      // console.log('selectedFeatureId', this.selectedFeatureId);
     } else {
       this.selectedFeatureId = null;
     }
@@ -539,23 +572,41 @@ export class EditorMappingComponent implements OnInit {
   }
   //#endregion
 
-
   //#region  polyline 
   selectPolyFeature(featureId: string) {
     this.selectedFeatureId = featureId;
   }
 
-  updateDrawnPolyFeatures() {
-    const data = this.draw.getAll();
-    this.unsavedFeatures = []
-    this.unsavedFeatures = data.features;
+  private previousFeatures: any[] = []; // Store the previous state of features
+  updateDrawnPolyFeatures(event: any) {
+    // Get the changed features from the event object
+    const changedFeatures = event.features;
+    // console.log(changedFeatures);
     
-    if (this.mode && this.mode != 'draw_point'){
+    // Create a map of changed features by their id for quick lookup
+    const changedFeaturesMap = new Map(changedFeatures.map((f: { id: any; }) => [f.id, f]));
+
+    // Replace existing features in unsavedFeatures and previousFeatures with the changed features
+    this.unsavedFeatures = this.unsavedFeatures.map(existingFeature =>
+      changedFeaturesMap.has(existingFeature.id) ? changedFeaturesMap.get(existingFeature.id) : existingFeature
+    );
+
+    this.previousFeatures = this.previousFeatures.map(existingFeature =>
+      changedFeaturesMap.has(existingFeature.id) ? changedFeaturesMap.get(existingFeature.id) : existingFeature
+    );
+
+    // Filter out features from changedFeatures that are already in previousFeatures
+    const newFeatures = changedFeatures.filter((f: { id: any; }) =>
+      !this.previousFeatures.some(existingFeature => existingFeature.id === f.id) &&
+      !this.unsavedFeatures.some(existingFeature => existingFeature.id === f.id)
+    );
+
+    // Add new features that are not already in unsavedFeatures
+    this.unsavedFeatures = [...this.unsavedFeatures, ...newFeatures];
+
+    if (this.mode && this.mode != 'draw_point') {
       this.sharedService.setActiveAllowDraw(false);
-      
     }
-    // console.log('unsavedFeatures',this.unsavedFeatures); // Handle the drawn data as needed
-    // console.log(data.features);
 
   }
 
@@ -565,6 +616,7 @@ export class EditorMappingComponent implements OnInit {
     const features = this.map.queryRenderedFeatures(event.point, {
       layers: [layerId]
     });
+    // console.log('Feature clicked for editing:', features[0]);
 
     if (features.length > 0) {
 

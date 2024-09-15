@@ -1,6 +1,7 @@
 .layers-display {
   display: flex;
-  /* height: 76%; */
+  /* flex-direction: column; */
+  height: auto; /* Allow height to adjust based on content */
   color: white;
   /* font-family: 'Arial, sans-serif'; */
 }
@@ -25,15 +26,15 @@
   align-items: flex-start;
 }
 
-.sidebar {
+/* .sidebar {
   background-color: #2c3e50;
   width: 300px;
   padding: 10px;
-  /* display: flex; */
+  display: flex;
   flex-direction: column;
   overflow-y: auto;
   justify-content: space-between;
-}
+} */
 
  .header {
   font-size: 1.2em;
@@ -48,16 +49,18 @@
 .section {
   margin: 10px 0;
   border-bottom: 1px solid #ffffff;
-  /* height: 450px; */
-  /* overflow-x: scroll; */
+  height: 550px;
+  overflow-x: scroll;
+  justify-content: space-between;
   /* Add bottom border here */
 }
 
 .section2 {
   margin: 10px 0;
   border-bottom: 1px solid #ffffff;
-  /* height: 200px; */
-  /* overflow-x: scroll; */
+  height: 550px;
+  overflow-x: scroll;
+  justify-content: space-between;
   /* Add bottom border here */
 }
 
@@ -87,14 +90,16 @@
 }
 
 
-.footer {
+/* .footer {
   display: flex;
   justify-content: space-between;
-}
+} */
 
 .selected-layers {
   background-color: #34495e;
   width: 300px;
+  overflow-x: scroll;
+  height: 784px;
   /* padding: 10px; */
 }
 
@@ -192,19 +197,44 @@
   /* Ensure compatibility with older browsers */
 }
 
-.scroll-height{
+.sidebar {
+  background-color: #2c3e50;
+  width: 300px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  justify-content: space-between;
+  /* Ensure the sidebar takes full height */
+  height: 100%;
+}
+
+.scroll-height {
   max-height: 710px;
-  /* height: 690px; */
   padding-bottom: 5px;
-  overflow-x: scroll;
+  overflow-y: auto;
+  /* Allows the scroll-height container to take available space above footer */
+  flex-grow: 1;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  position: sticky;
+  bottom: 0;
+  background-color: #2c3e50;
+  /* Ensure the footer remains at the bottom */
 }
 
 .btn-secondary {
   background-color: #ad8dab;
   border: none;
+  padding: 5px 10px;
 }
 
 .btn-primary {
   background-color: #4ea0da;
   border: none;
+  padding: 5px 10px;
 }

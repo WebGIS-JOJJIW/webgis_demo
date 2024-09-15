@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import maplibregl, { Marker, NavigationControl } from 'maplibre-gl';
+import maplibregl, { GeoJSONSource, Marker, NavigationControl } from 'maplibre-gl';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedService } from '../../services/shared.service';
 import { GeoServerService } from '../../services/geoserver.service';
@@ -47,6 +47,13 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       zoom: 14, // starting zoom
     });
     this.map.addControl(new NavigationControl({}), 'bottom-right');
+
+    this.map.on('load', () => {
+      this.initailSensorData();
+      this.sensorDataService.subscribeToMainChannel().subscribe(data => {
+        this.refreshSensorPoints();
+      });
+    })
   }
 
   setupSubscriptions(): void {
@@ -54,36 +61,31 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       this.dialogOpen = res;
     })
 
-    this.sharedService.currentActiveEventFull.subscribe(x=>this.activeEventFull=x);
+    this.sharedService.currentActiveEventFull.subscribe(x => this.activeEventFull = x);
 
     this.sharedService.currentSensorData.subscribe(res => {
       this.dataSensor = res;
     })
 
     this.sharedService.currentLayersDisplay.subscribe(res => {
-        this.removeLayersFromMap();
-        this.layersDisplay = res;
-        this.showLayerDataOnMap(this.layersDisplay);
+      this.removeLayersFromMap();
+      this.layersDisplay = res;
+      this.showLayerDataOnMap(this.layersDisplay);
+      
     });
-    this.initailSensorData();
-    this.sensorDataService.subscribeToMainChannel().subscribe(data => {
-      this.refreshSensorPoints();
-    });
-
-    
 
     this.sharedService.currentShowLayerComp.subscribe(flag => {
       if (flag != this.activeFlag) {
         this.activeFlag = flag;
       }
 
-      if(flag){
+      if (flag) {
         this.dialog.closeAll()
       }
     });
 
-    this.sharedService.currentActiveEventFull.subscribe(x=>{
-      if(x){
+    this.sharedService.currentActiveEventFull.subscribe(x => {
+      if (x) {
         this.dialog.closeAll()
       }
     })
@@ -120,7 +122,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   showLayerDataOnMap(layers: LayerDisplay[]): void {
     if (layers.length > 0) {
       const filterGroup = document.getElementById('filter-group');
-      
+
       if (!filterGroup) {
         console.error('Filter group element not found');
         return;
@@ -171,7 +173,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
               } else {
                 this.addFilterCheckbox(filterGroup, layerId, ele.name);
               }
-
+              this.refreshSensorPoints();
             },
             error => {
               console.error('Error fetching places data', error);
@@ -188,6 +190,47 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  // addPoint(layerId: string): Promise<void> {
+  //   return new Promise((resolve) => {
+  //     if (!this.map.getLayer(layerId)) {
+  //       // Add a layer for clustered points
+  //       this.map.addLayer({
+  //         id: layerId,
+  //         type: 'circle',
+  //         source: layerId,
+  //         filter: ['has', 'point_count'], // Filter for clustered points
+  //         paint: {
+  //           'circle-color': '#51bbd6',
+  //           'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
+  //         }
+  //       });
+
+  //       // Add a layer for unclustered points
+  //       this.map.addLayer({
+  //         id: `${layerId}-unclustered`,
+  //         type: 'symbol',
+  //         source: layerId,
+  //         filter: ['!', ['has', 'point_count']], // Filter for unclustered points
+  //         layout: {
+  //           'icon-image': 'custom-marker',
+  //           'icon-size': 1.5,
+  //           'text-field': '{title}',
+  //           'text-offset': [0, 1.25],
+  //           'text-anchor': 'top'
+  //         }
+  //       });
+
+  //       this.map.once('idle', () => {
+  //         resolve();
+  //       });
+  //     } else {
+  //       console.warn(`Layer with ID ${layerId} already exists.`);
+  //       resolve();
+  //     }
+  //   });
+  // }
+
 
   addPoint(layerId: string): Promise<void> {
     return new Promise((resolve) => {
@@ -210,17 +253,19 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         this.map.once('idle', () => {
           resolve();
         });
-      } else {
-        console.warn(`Point layer with ID ${layerId} already exists.`);
-        resolve();
+      } else{
+          console.warn(`Point layer with ID ${layerId} already exists.`);
+          resolve();
       }
     });
   }
+
 
   getSensorsPoint(sensorData: SensorData[]) {
     const url = `${this.geoService.GetProxy()}/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`;
     // const url= `http://128.199.168.212:8080/geoserver/gis/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=sensors&outputFormat=application/json`
     this.http.get<FeatureCollection>(url).subscribe(res => {
+      // console.log(res);
       let sensors = ['sensor1', 'sensor2']
       sensors.forEach((ele, inx) => {
         if (res.features.filter(x => x.properties.name === ele).length > 0) {
@@ -338,7 +383,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
   }
 
   addFilterCheckbox(filterGroup: HTMLElement, layerId: string, name: string): void {
-    
+
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.id = layerId;
@@ -366,7 +411,9 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
     // console.log(sensorMarker);
-    if (!this.map.getLayer(`${layerId}`)) {
+    if (!this.map.getLayer(layerId)) {
+      console.log('addsource');
+      
       this.map.addSource(layerId, {
         type: 'geojson',
         data: {
@@ -394,8 +441,154 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
       });
     }
   }
+  // addSensorMarkerToMap(layerId: string, sensorMarker: Sensor) {
+  //   // Remove existing source and layer if they exist
+  //   if (this.map.getSource(layerId)) {
+  //     if (this.map.getLayer(`${layerId}-clusters`)) {
+  //       this.map.removeLayer(`${layerId}-clusters`);
+  //     }
+  //     if (this.map.getLayer(`${layerId}-unclustered`)) {
+  //       this.map.removeLayer(`${layerId}-unclustered`);
+  //     }
+  //     if (this.map.getLayer(`${layerId}-cluster-count`)) {
+  //       this.map.removeLayer(`${layerId}-cluster-count`);
+  //     }
+  //     this.map.removeSource(layerId);
+  //   }
 
-  setCloseAllPanel(){
+  //   // Add a new GeoJSON source with clustering enabled
+  //   this.map.addSource(layerId, {
+  //     type: 'geojson',
+  //     data: {
+  //       type: 'FeatureCollection',
+  //       features: [
+  //         {
+  //           type: 'Feature',
+  //           geometry: {
+  //             type: 'Point',
+  //             coordinates: sensorMarker.coordinates
+  //           },
+  //           properties: {
+  //             title: sensorMarker.title
+  //           }
+  //         }
+  //       ]
+  //     },
+  //     cluster: true,               // Enable clustering
+  //     clusterMaxZoom: 14,           // Stop clustering at zoom level 14
+  //     clusterRadius: 50             // Cluster radius in pixels
+  //   });
+
+  //   // Force update the data (optional)
+  //   const source = this.map.getSource(layerId) as GeoJSONSource;
+  //   source.setData({
+  //     type: 'FeatureCollection',
+  //     features: [{
+  //       type: 'Feature',
+  //       geometry: {
+  //         type: 'Point',
+  //         coordinates: sensorMarker.coordinates
+  //       },
+  //       properties: {
+  //         title: sensorMarker.title
+  //       }
+  //     }]
+  //   });
+
+  //   // Add clustered points layer
+  //   this.map.addLayer({
+  //     id: `${layerId}-clusters`,
+  //     type: 'circle',
+  //     source: layerId,
+  //     filter: ['has', 'point_count'],  // Only show clusters with this filter
+  //     paint: {
+  //       'circle-color': [
+  //         'step',
+  //         ['get', 'point_count'],
+  //         '#51bbd6', 100, '#f1f075', 750, '#f28cb1'
+  //       ],
+  //       'circle-radius': [
+  //         'step',
+  //         ['get', 'point_count'],
+  //         20, 100, 30, 750, 40
+  //       ]
+  //     }
+  //   });
+
+  //   // Add unclustered points layer
+  //   this.map.addLayer({
+  //     id: `${layerId}-unclustered`,
+  //     type: 'symbol',
+  //     source: layerId,
+  //     filter: ['!', ['has', 'point_count']], // Filter for unclustered points
+  //     layout: {
+  //       'icon-image': 'custom-marker',
+  //       'icon-size': 1.2,
+  //       'text-field': '{title}',
+  //       'text-offset': [0, 1.15],
+  //       'text-anchor': 'top'
+  //     }
+  //   });
+
+  //   // Add a layer for the cluster count labels
+  //   this.map.addLayer({
+  //     id: `${layerId}-cluster-count`,
+  //     type: 'symbol',
+  //     source: layerId,
+  //     filter: ['has', 'point_count'],
+  //     layout: {
+  //       'text-field': '{point_count_abbreviated}',
+  //       'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+  //       'text-size': 12
+  //     }
+  //   });
+
+  //   // Click event for clusters to zoom in
+  //   this.map.on('click', `${layerId}-clusters`, (e) => {
+  //     const features = this.map.queryRenderedFeatures(e.point, {
+  //       layers: [`${layerId}-clusters`]
+  //     });
+  //     const clusterId = features[0].properties['cluster_id'];
+
+  //     // Cast the source to GeoJSONSource
+  //     const source = this.map.getSource(layerId) as GeoJSONSource;
+
+  //     // Call getClusterExpansionZoom
+  //     source.getClusterExpansionZoom(clusterId).then((zoom: number) => {
+  //       this.map.easeTo({
+  //         center: sensorMarker.coordinates,
+  //         zoom: zoom
+  //       });
+  //     }).catch((err: any) => {
+  //       console.error('Error getting cluster expansion zoom:', err);
+  //     });
+  //   });
+
+  //   // Click event for unclustered points to open the dialog
+  //   this.map.on('click', `${layerId}-unclustered`, (e) => {
+  //     this.sharedService.openDialog(sensorMarker, this.dialog);
+  //     // console.log(sensorMarker);
+  //     this.setCloseAllPanel();
+  //   });
+
+  //   // Change the cursor to a pointer when over clusters or unclustered points
+  //   this.map.on('mouseenter', `${layerId}-clusters`, () => {
+  //     this.map.getCanvas().style.cursor = 'pointer';
+  //   });
+  //   this.map.on('mouseenter', `${layerId}-unclustered`, () => {
+  //     this.map.getCanvas().style.cursor = 'pointer';
+  //   });
+
+  //   this.map.on('mouseleave', `${layerId}-clusters`, () => {
+  //     this.map.getCanvas().style.cursor = '';
+  //   });
+  //   this.map.on('mouseleave', `${layerId}-unclustered`, () => {
+  //     this.map.getCanvas().style.cursor = '';
+  //   });
+  // }
+
+
+  setCloseAllPanel() {
     this.sharedService.setEventActiveFull(false);
     this.sharedService.ChangeShowLayerComp(false);
   }
@@ -424,17 +617,17 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
   removeLayersFromMap(): void {
     // console.log('removeLayersFromMap');
-    
+
     const filterGroup = document.getElementById('filter-group');
     if (!filterGroup) {
       console.error('Filter group element not found');
       return;
     }
-    
+
     this.layersDisplay.forEach(ele => {
       const layerId = `id-${ele.name}`;
       // console.log(this.map.getLayer(layerId));
-      
+
       if (this.map.getLayer(layerId)) {
         this.map.removeLayer(layerId);
       }

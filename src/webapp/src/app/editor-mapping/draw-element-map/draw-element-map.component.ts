@@ -18,22 +18,21 @@ export class DrawElementMapComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupSubscriptions();
-
   }
 
   setupSubscriptions() {
     let flagActive = false;
-    this.sharedService.currentActiveLayerEditor.subscribe(x => { 
-      flagActive = x 
+    this.sharedService.currentActiveLayerEditor.subscribe(x => {
+      flagActive = x
     });
     this.layersData = [];
     if (flagActive) {
       this.resetData();
     }
-    this.sharedService.currentActiveEdit.subscribe(x=>{
+    this.sharedService.currentActiveEdit.subscribe(x => {
       // console.log(x);
-      
-      if(!x){
+
+      if (!x) {
         this.activeBt = false;
       }
     })
@@ -41,15 +40,18 @@ export class DrawElementMapComponent implements OnInit {
     this.sharedService.currentLayerAfterSave.subscribe(x => {
       if (x != '') {
         this.resetData(x);
-        
       }
     })
   }
 
 
-  resetData(name:string= '') {
+  resetData(name: string = '') {
+    // console.log('resetData');
+
     this.layersData = []
     this.geoService.getLayerListApi().subscribe(async res => {
+      // console.log(res);
+
       this.layersList = res.layers.layer.filter((layer: { name: string; }) => layer.name.startsWith('gis:') && (!layer.name.includes('drone_images') && !layer.name.includes('sensors'))).map((layer => ({
         ...layer,
         name: layer.name.replace('gis:', ''),  // Remove 'gis:' from layer.name
@@ -70,6 +72,8 @@ export class DrawElementMapComponent implements OnInit {
       // Second loop get Vector_type to list 
       const secondLoopPromises = this.layersList.map((element, index) =>
         this.geoService.getLayerDetails(element.href).toPromise().then(details2 => {
+          // console.log(details2);
+
           if (element.type === 'VECTOR') {
             let description = '';
             try {
@@ -116,12 +120,13 @@ export class DrawElementMapComponent implements OnInit {
           })
         }
       });
-      if(name != ''){
-        const searchData = this.layersData.find(x=>x.originalName === name)
+
+      if (name != '') {
+        const searchData = this.layersData.find(x => x.originalName === name)
         // console.log(searchData);
-        
-        if(searchData){
-          this.selectLayer(searchData,true);
+
+        if (searchData) {
+          this.selectLayer(searchData, true);
           if (searchData.typeID.endsWith('POI')) {
             this.sharedService.changeMode('draw_point');
             this.sharedService.setIsMode('draw_point');
@@ -133,23 +138,22 @@ export class DrawElementMapComponent implements OnInit {
             this.sharedService.setIsMode('draw_line_string');
           }
           // console.log(canEdit);
-          
-          this.activeBt = true;
-          this.sharedService.setActiveEdit(true);
           // this.sharedService.setLayer(layer);
         }
+        this.activeBt = true;
+        this.sharedService.setActiveEdit(true);
       }
 
     });
   }
 
-  setEditorMap(layer: Layer_List,canEdit :boolean=false) {
+  setEditorMap(layer: Layer_List, canEdit: boolean = false) {
     // console.log(this.layerOld);
     // console.log(layer);
-    
+
     if (layer.name !== this.layerOld.name) {
       // console.log(true);
-      
+
       if (layer.typeID.endsWith('POI')) {
         this.sharedService.changeMode('draw_point');
         this.sharedService.setIsMode('draw_point');
@@ -161,13 +165,13 @@ export class DrawElementMapComponent implements OnInit {
         this.sharedService.setIsMode('draw_line_string');
       }
       // console.log(canEdit);
-      
+
       this.activeBt = canEdit;
       this.selectedLayer = layer;
       this.sharedService.setActiveEdit(canEdit);
       this.sharedService.setLayer(layer);
     }
-    
+
   }
 
   setButton() {
@@ -181,8 +185,8 @@ export class DrawElementMapComponent implements OnInit {
     }
   }
 
-  selectLayer(layer: Layer_List,canEdit :boolean=false): void {
-    this.setEditorMap(layer,canEdit);
+  selectLayer(layer: Layer_List, canEdit: boolean = false): void {
+    this.setEditorMap(layer, canEdit);
   }
 
   deselectLayer(event: MouseEvent): void {

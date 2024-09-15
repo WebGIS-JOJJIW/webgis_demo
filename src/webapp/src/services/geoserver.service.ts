@@ -12,8 +12,7 @@ export class GeoServerService {
 
 
   private proxy = `http://${window.location.hostname}:8000/geoserver`;
-  // private proxy = `http://167.172.94.39:8000/geoserver`;
-  // private proxy = `http://138.197.138.95:8080/geoserver`;
+  // private proxy = `http://139.59.221.224:8000/geoserver`;
   private httpOptions = {}
   constructor(private http: HttpClient) {
     this.httpOptions = {
@@ -42,7 +41,6 @@ export class GeoServerService {
 
   getLayerListApi(): Observable<LayerResponse> {
     // console.log(this.httpOptions);
-
     const url = `${this.proxy}/rest/layers?Accept=application/json`
     return this.http.get<LayerResponse>(url, this.httpOptions);
   }
@@ -51,8 +49,7 @@ export class GeoServerService {
     // const url = `${this.proxy}/rest/layers?Accept=application/json`
     const re = /http.*8080/gi;
     const corrected_url = url.replace(re, `http://${window.location.hostname}:8000`);
-    // const corrected_url = url.replace(re, `http://167.172.94.39:8000`);
-    //const corrected_url = `http://138.197.138.95:8080`;
+    // const corrected_url = url.replace(re, `http://139.59.221.224:8000`);
     return this.http.get<any>(corrected_url, this.httpOptions);
   }
 
@@ -108,6 +105,74 @@ export class GeoServerService {
       `;
 
     return transactionXml;
+  }
+
+  generateWFSUpdatePayload(features: FeatureCollection<any, any>['features'], dict: string[]): string {
+    const [workspace, layerName, geomField, srsName] = dict;
+
+    if (!workspace || !layerName || !geomField || !srsName) {
+      throw new Error('Dictionary array does not have the required values.');
+    }
+    let mode = ''
+    const featureUpdates = features.map(feature => {
+      let geometryXML: string;
+      if (feature.geometry.type === 'Polygon') {
+        let coordinates = feature.geometry.coordinates[0].map((coord: any[]) => coord.reverse().join(',')).join(' ');
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <wfs:Property>
+             <wfs:Name>the_geom</wfs:Name>
+              <wfs:Value>
+                <gml:Polygon srsName="${srsName}">
+                    <gml:exterior>
+                        <gml:LinearRing>
+                            <gml:coordinates>${coordinates}</gml:coordinates>
+                        </gml:LinearRing>
+                    </gml:exterior>
+                </gml:Polygon>
+              </wfs:Value>
+            </wfs:Property> 
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
+      } else if (feature.geometry.type === 'LineString') {
+        let coordinates = feature.geometry.coordinates.map((coord: any[]) => coord.reverse().join(',')).join(' ');
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <wfs:Property>
+             <wfs:Name>the_geom</wfs:Name>
+              <wfs:Value>
+                <gml:LineString srsName="${srsName}">
+                    <gml:exterior>
+                        <gml:LinearRing>
+                            <gml:coordinates>${coordinates}</gml:coordinates>
+                        </gml:LinearRing>
+                    </gml:exterior>
+                </gml:LineString>
+              </wfs:Value>
+            </wfs:Property> 
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
+      } else {
+        // Handle other geometry types if needed
+        throw new Error(`Geometry type ${feature.geometry.type} not supported.`);
+      }
+
+      return `${geometryXML}`;
+    }).join('');
+
+    return `<wfs:Transaction service="WFS" version="1.1.0"
+        xmlns:wfs="http://www.opengis.net/wfs"
+        xmlns:ogc="http://www.opengis.net/ogc"
+        xmlns:gml="http://www.opengis.net/gml"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.opengis.net/wfs
+                            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+            ${featureUpdates}
+    </wfs:Transaction>`;
   }
 
   geometryToGml(geometry: Geometry, srsName: string): string {

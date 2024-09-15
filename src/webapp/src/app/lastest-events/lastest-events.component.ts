@@ -64,6 +64,7 @@ export class LastestEventsComponent {
 
   mapSensorDataToEvent(sensorData: SensorData): events {
     // let date = new Date(sensorData.dt).toLocaleString()
+    // console.log(sensorData);
     return {
       dateTime: this.formatDate(sensorData.dt),
       type: 'Alarm', // Assume 'Alarm' for this example, adjust as necessary
@@ -129,14 +130,13 @@ export class LastestEventsComponent {
 
   formatDate(dateStr: string): string {
     // console.log(dateStr);
-
-    const date = new Date(dateStr);
-    const year = date.getUTCFullYear();
-    const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
-    const day = ('0' + date.getUTCDate()).slice(-2);
-    const hours = ('0' + date.getUTCHours()).slice(-2);
-    const minutes = ('0' + date.getUTCMinutes()).slice(-2);
-    const seconds = ('0' + date.getUTCSeconds()).slice(-2);
+    const dateObj = new Date(dateStr);
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth() + 1; // Months are zero-based
+    const day = dateObj.getDate();
+    const hours = dateObj.getHours();
+    const minutes = dateObj.getMinutes();
+    const seconds = dateObj.getSeconds(); 
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
