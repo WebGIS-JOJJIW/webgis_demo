@@ -67,6 +67,18 @@ export class EditorMappingComponent implements OnInit {
       this.setMultiLayersOnMap();
       this.addCustomImages();
       this.initializeDraw();
+      this.sharedService.currentActiveEdit.subscribe(x => {
+        this.activeEdit = x
+        if (x) {
+          this.sharedService.setActiveAllowDraw(true);
+          // Subscribe to drawing mode changes
+          if (this.mode && this.mode != 'draw_point') {
+            this.draw.changeMode(this.mode);
+          }
+        } else {
+          this.sharedService.setActiveAllowDraw(false);
+        }
+      });  // get active add element
 
     });
 
@@ -110,21 +122,6 @@ export class EditorMappingComponent implements OnInit {
       // }
     });
 
-    this.sharedService.currentActiveEdit.subscribe(x => {
-      this.activeEdit = x
-      if (x) {
-        this.sharedService.setActiveAllowDraw(true);
-        // Subscribe to drawing mode changes
-        this.sharedService.currentMode.subscribe(mode => {
-          if (mode && mode != 'draw_point') {
-            this.draw.changeMode(mode);
-          }
-        });
-      } else {
-        this.sharedService.setActiveAllowDraw(false);
-      }
-    });  // get active add element
-
     this.sharedService.currentActiveAllowDraw.subscribe(x => {
       const mapContainer = document.getElementById('map');
       if (mapContainer) {
@@ -144,7 +141,7 @@ export class EditorMappingComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
           this.activeDialog = false;
           if (result) {
-            console.log('save');
+            // console.log('save');
             this.saveFeatures();
           } else {
             console.log('User chose not to save.');
@@ -173,7 +170,7 @@ export class EditorMappingComponent implements OnInit {
       fetch(wfsUrl)
         .then(response => response.json())
         .then(data => {
-          console.log(data.features);
+          // console.log(data.features);
           this.previousFeatures = data.features
           data.features.forEach((feature: any) => {
             feature.properties.color = this.sharedService.getRandomColor();
@@ -186,7 +183,7 @@ export class EditorMappingComponent implements OnInit {
           });
 
           if (this.mode == 'draw_polygon') {
-            this.addLayerToMap(index, 'fill', 'fill-color', 0.5);
+            this.addLayerToMap(index, 'fill', 'fill-color', 0.2);
           }
 
           if (this.mode == 'draw_point') {
@@ -287,10 +284,10 @@ export class EditorMappingComponent implements OnInit {
         body: wfsTransactionXmlInsert
       }).then(response => response.text())
         .then(() => {
-          this.snackBar.open('Insert Layer success', 'Close', {
-            duration: 3000,
-            panelClass: ['custom-snackbar', 'snackbar-success']
-          });
+          // this.snackBar.open('Insert Layer success', 'Close', {
+          //   duration: 3000,
+          //   panelClass: ['custom-snackbar', 'snackbar-success']
+          // });
         })
         .catch(error => console.error(`Error saving new data to GeoServer:`, error));
 
@@ -304,10 +301,10 @@ export class EditorMappingComponent implements OnInit {
         body: wfsTransactionXmlUpdate
       }).then(response => response.text())
         .then(() => {
-          this.snackBar.open('Update Layer success', 'Close', {
-            duration: 3000,
-            panelClass: ['custom-snackbar', 'snackbar-success']
-          });
+          // this.snackBar.open('Update Layer success', 'Close', {
+          //   duration: 3000,
+          //   panelClass: ['custom-snackbar', 'snackbar-success']
+          // });
         })
         .catch(error => console.error(`Error saving updated data to GeoServer:`, error));
 
@@ -316,11 +313,15 @@ export class EditorMappingComponent implements OnInit {
         .then(() => {
           this.initializeMap();
           this.sharedService.setActiveLayerEditor(false);
+          this.snackBar.open('Insert or Update Layer success', 'Close', {
+            duration: 3000,
+            panelClass: ['custom-snackbar', 'snackbar-success']
+          });
         })
         .catch(error => console.error('Error with one of the fetch requests:', error));
 
     } else {
-      console.log('No data to save');
+      // console.log('No data to save');
       fetch(wfsUrl, {
         method: 'POST',
         headers: {
@@ -565,7 +566,8 @@ export class EditorMappingComponent implements OnInit {
   updateDrawnPolyFeatures(event: any) {
     // Get the changed features from the event object
     const changedFeatures = event.features;
-
+    console.log(changedFeatures);
+    
     // Create a map of changed features by their id for quick lookup
     const changedFeaturesMap = new Map(changedFeatures.map((f: { id: any; }) => [f.id, f]));
 

@@ -113,13 +113,11 @@ export class GeoServerService {
     if (!workspace || !layerName || !geomField || !srsName) {
       throw new Error('Dictionary array does not have the required values.');
     }
-
+    let mode = ''
     const featureUpdates = features.map(feature => {
-      const coordinates = feature.geometry.coordinates[0].map((coord: any[]) => coord.reverse().join(',')).join(' ');
-
       let geometryXML: string;
-
       if (feature.geometry.type === 'Polygon') {
+        let coordinates = feature.geometry.coordinates[0].map((coord: any[]) => coord.reverse().join(',')).join(' ');
         geometryXML = `
             <wfs:Update typeName="${workspace}:${layerName}">
             <wfs:Property>
@@ -132,6 +130,26 @@ export class GeoServerService {
                         </gml:LinearRing>
                     </gml:exterior>
                 </gml:Polygon>
+              </wfs:Value>
+            </wfs:Property> 
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
+      } else if (feature.geometry.type === 'LineString') {
+        let coordinates = feature.geometry.coordinates.map((coord: any[]) => coord.reverse().join(',')).join(' ');
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <wfs:Property>
+             <wfs:Name>the_geom</wfs:Name>
+              <wfs:Value>
+                <gml:LineString srsName="${srsName}">
+                    <gml:exterior>
+                        <gml:LinearRing>
+                            <gml:coordinates>${coordinates}</gml:coordinates>
+                        </gml:LinearRing>
+                    </gml:exterior>
+                </gml:LineString>
               </wfs:Value>
             </wfs:Property> 
             <ogc:Filter>

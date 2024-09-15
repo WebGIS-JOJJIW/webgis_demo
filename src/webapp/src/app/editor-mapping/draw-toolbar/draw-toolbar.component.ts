@@ -32,8 +32,9 @@ export class DrawToolbarComponent implements OnInit {
   }
 
   inputSearch = "";
-
   changeMode(mode: 'draw_polygon' | 'draw_line_string' | 'draw_point' | 'draw_shape_polygon') {
+    // console.log(mode);
+    
     this.sharedService.changeMode(mode);
     this.sharedService.setActiveAllowDraw(true); 
   }
