@@ -40,7 +40,6 @@ export class DrawElementMapComponent implements OnInit {
     this.sharedService.currentLayerAfterSave.subscribe(x => {
       if (x != '') {
         this.resetData(x);
-        
       }
     })
   }
@@ -121,6 +120,7 @@ export class DrawElementMapComponent implements OnInit {
           })
         }
       });
+
       if(name != ''){
         const searchData = this.layersData.find(x=>x.originalName === name)
         // console.log(searchData);
@@ -138,13 +138,11 @@ export class DrawElementMapComponent implements OnInit {
             this.sharedService.setIsMode('draw_line_string');
           }
           // console.log(canEdit);
-          
-          this.activeBt = true;
-          this.sharedService.setActiveEdit(true);
           // this.sharedService.setLayer(layer);
         }
       }
-
+      this.activeBt = true;
+      this.sharedService.setActiveEdit(true);
     });
   }
 

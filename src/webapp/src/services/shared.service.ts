@@ -106,7 +106,7 @@ export class SharedService {
   }
 
   setLayerAfterSaved(name:string){
-    console.log(name);
+    // console.log(name);
     
     this.layerAfterSave.next(name);
   }

@@ -32,9 +32,13 @@ body, h1, h2, h3, h4, h5, h6, p, a, span, div {
 
 .mat-mdc-dialog-surface {
   height: auto !important; 
-  
+  max-height: none !important;
 }
 
+.mat-mdc-dialog-inner-container {
+  height: auto !important;  /* Override the default height */
+  max-height: none !important;
+}
 
 .mdc-dialog--open .mat-mdc-dialog-inner-container {
   opacity: 1;
