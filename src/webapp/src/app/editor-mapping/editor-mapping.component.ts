@@ -72,9 +72,11 @@ export class EditorMappingComponent implements OnInit {
         if (x) {
           this.sharedService.setActiveAllowDraw(true);
           // Subscribe to drawing mode changes
-          if (this.mode && this.mode != 'draw_point') {
-            this.draw.changeMode(this.mode);
-          }
+          this.sharedService.currentMode.subscribe(mode => {
+            if (mode && mode != 'draw_point') {
+              this.draw.changeMode(mode);
+            }
+          });
         } else {
           this.sharedService.setActiveAllowDraw(false);
         }
@@ -150,6 +152,19 @@ export class EditorMappingComponent implements OnInit {
         });
       }
     });
+
+    this.sharedService.currentActiveEdit.subscribe(x => {
+      this.activeEdit = x
+      if (x) {
+        this.sharedService.setActiveAllowDraw(true);
+        // Subscribe to drawing mode changes
+        if (this.mode && this.mode != 'draw_point') {
+          this.draw.changeMode(this.mode);
+        }
+      } else {
+        this.sharedService.setActiveAllowDraw(false);
+      }
+    });  // get active add element
 
     this.sharedService.currentLayer.subscribe(x => {
       this.layer = x;
@@ -566,7 +581,7 @@ export class EditorMappingComponent implements OnInit {
   updateDrawnPolyFeatures(event: any) {
     // Get the changed features from the event object
     const changedFeatures = event.features;
-    console.log(changedFeatures);
+    // console.log(changedFeatures);
     
     // Create a map of changed features by their id for quick lookup
     const changedFeaturesMap = new Map(changedFeatures.map((f: { id: any; }) => [f.id, f]));
@@ -601,7 +616,7 @@ export class EditorMappingComponent implements OnInit {
     const features = this.map.queryRenderedFeatures(event.point, {
       layers: [layerId]
     });
-    console.log('Feature clicked for editing:', features[0]);
+    // console.log('Feature clicked for editing:', features[0]);
 
     if (features.length > 0) {
 
