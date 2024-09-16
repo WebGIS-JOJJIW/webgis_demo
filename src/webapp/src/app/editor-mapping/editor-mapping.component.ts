@@ -21,6 +21,7 @@ export class EditorMappingComponent implements OnInit {
   showAddLayer = false;
   showLayerConf = false;
   activeEdit = false;
+  private checkUpdate = false;
   private layer!: Layer_List;
   private proxy = '';
   private unsavedFeatures: any[] = [];
@@ -88,6 +89,13 @@ export class EditorMappingComponent implements OnInit {
       if (this.mode === 'draw_point' && this.activeEdit) {
         this.addPointAtClick(event);
       }
+      // console.log('click');
+
+      const features = this.map.queryRenderedFeatures(event.point);
+      if (features.length) {
+        const feature = features[0];
+        this.handleFeatureClick(event, feature.layer.id);
+      }
     });
   }
 
@@ -107,11 +115,7 @@ export class EditorMappingComponent implements OnInit {
       if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
         // Listen for clicks on drawn features only
         this.map.on('click', (event) => {
-          const features = this.map.queryRenderedFeatures(event.point, { layers: ['gl-draw-polygon-fill', 'gl-draw-line'] });
-          if (features.length) {
-            const feature = features[0];
-            this.handleFeatureClick(event, feature.layer.id);
-          }
+
         });
       }
     });
@@ -245,119 +249,84 @@ export class EditorMappingComponent implements OnInit {
           'text-anchor': 'top'
         }
       });
-    } else {
-      // Handle other types as before
-      if (type === 'fill') {
-        paint['fill-opacity'] = opacityOrRadius;
-        this.map.addLayer({
-          'id': `wfs-laye-${type}-${index}`,
-          'type': 'fill',
-          'source': `wfs-layer-${index}`,
-          paint: paint
-        });
-      } else if (type === 'circle') {
-        paint['circle-radius'] = opacityOrRadius;
-        this.map.addLayer({
-          'id': `wfs-laye-${type}-${index}`,
-          'type': 'circle',
-          'source': `wfs-layer-${index}`,
-          paint: paint
-        });
-      } else if (type === 'line') {
-        paint['line-width'] = opacityOrRadius;
-        this.map.addLayer({
-          'id': `wfs-laye-${type}-${index}`,
-          'type': 'line',
-          'source': `wfs-layer-${index}`,
-          paint: paint
-        });
-      }
-    }
+    } 
   }
   //#endregion
 
+
   //#region Save Features
   saveFeatures(): void {
-    const type = 'the_geom';
-    const dict = ['gis', this.layer.originalName, type, 'urn:ogc:def:crs:EPSG::4326'];
-    // Convert previous features to WFS Transaction XML for update
-    const wfsTransactionXmlUpdate = this.geoServerService.generateWFSUpdatePayload(this.previousFeatures, dict);
-    const wfsUrl = `${this.proxy}/wfs`;
+    const promises: Promise<void>[] = [];
+  
+    if (this.selectedDeletedId.length > 0) {
+      promises.push(this.deletedFeatures());
+    }
+    if (this.checkUpdate) {
+      promises.push(this.updateFeatures());
+    }
     if (this.unsavedFeatures.length > 0) {
-      const featuresToInsert = this.unsavedFeatures; // Assuming these are all new features for insertion
-      this.unsavedFeatures = []; // Clear unsaved features after processing
-      // Convert features to WFS Transaction XML for insert
-      const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(featuresToInsert, dict);
-
-      // Prepare fetch requests
-      const insertPromise = fetch(wfsUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
-          'Authorization': 'Basic ' + btoa('admin:geoserver')
-        },
-        body: wfsTransactionXmlInsert
-      }).then(response => response.text())
-        .then(() => {
-          // this.snackBar.open('Insert Layer success', 'Close', {
-          //   duration: 3000,
-          //   panelClass: ['custom-snackbar', 'snackbar-success']
-          // });
-        })
-        .catch(error => console.error(`Error saving new data to GeoServer:`, error));
-
-
-      const updatePromise = fetch(wfsUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
-          'Authorization': 'Basic ' + btoa('admin:geoserver')
-        },
-        body: wfsTransactionXmlUpdate
-      }).then(response => response.text())
-        .then(() => {
-          // this.snackBar.open('Update Layer success', 'Close', {
-          //   duration: 3000,
-          //   panelClass: ['custom-snackbar', 'snackbar-success']
-          // });
-        })
-        .catch(error => console.error(`Error saving updated data to GeoServer:`, error));
-
-      // Wait for both promises to complete
-      Promise.all([insertPromise, updatePromise])
-        .then(() => {
-          this.initializeMap();
-          this.sharedService.setActiveLayerEditor(false);
-          this.snackBar.open('Insert or Update Layer success', 'Close', {
-            duration: 3000,
-            panelClass: ['custom-snackbar', 'snackbar-success']
-          });
-        })
-        .catch(error => console.error('Error with one of the fetch requests:', error));
-
-    } else {
-      // console.log('No data to save');
-      fetch(wfsUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml', // WFS Transaction XML should be 'application/xml'
-          'Authorization': 'Basic ' + btoa('admin:geoserver')
-        },
-        body: wfsTransactionXmlUpdate
-      }).then(response => response.text())
-        .then(() => {
-          this.snackBar.open('Update Layer success', 'Close', {
-            duration: 3000,
-            panelClass: ['custom-snackbar', 'snackbar-success']
-          });
-          this.initializeMap();
-          this.sharedService.setActiveLayerEditor(false);
-        })
-        .catch(error => console.error(`Error saving updated data to GeoServer:`, error));
+      promises.push(this.insertFeatures());
+    }
+  
+    Promise.all(promises)
+      .then(() => {
+        this.initializeMap();
+        this.sharedService.setActiveLayerEditor(false);
+        this.snackBar.open('Operation successful', 'Close', {
+          duration: 3000,
+          panelClass: ['custom-snackbar', 'snackbar-success']
+        });
+        this.unsavedFeatures = []; // Clear unsaved features after processing
+        this.checkUpdate = false;
+        this.selectedDeletedId = [];
+      })
+      .catch(error => console.error('Error processing features:', error));
+  
+    if (this.selectedDeletedId.length === 0 && !this.checkUpdate && this.unsavedFeatures.length === 0) {
       this.sharedService.setActiveEdit(false);
       this.sharedService.setActiveSave(false);
     }
   }
+  
+  async insertFeatures(): Promise<void> {
+    const wfsUrl = `${this.proxy}/wfs`;
+    const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
+    
+    const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(this.unsavedFeatures, dict);
+  
+    await this.fetchWFS(wfsUrl, wfsTransactionXmlInsert);
+  }
+  
+  async updateFeatures(): Promise<void> {
+    const wfsUrl = `${this.proxy}/wfs`;
+    const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
+    
+    const wfsTransactionXmlUpdate = this.geoServerService.generateWFSUpdatePayload(this.previousFeatures, dict);
+    
+    await this.fetchWFS(wfsUrl, wfsTransactionXmlUpdate);
+  }
+  
+  async deletedFeatures(): Promise<void> {
+    const wfsUrl = `${this.proxy}/wfs`;
+    const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
+  
+    const wfsTransactionXmlDelete = this.geoServerService.generateWFSDeletePayload(this.previousFeatures, dict);
+    
+    await this.fetchWFS(wfsUrl, wfsTransactionXmlDelete);
+  }
+  
+  async fetchWFS(url: string, body: string): Promise<void> {
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/xml',
+        'Authorization': 'Basic ' + btoa('admin:geoserver')
+      },
+      body
+    }).then(response => response.text())
+      .catch(error => console.error('Error with fetch request:', error));
+  }
+  
   //#endregion
 
   //#region Helpers
@@ -384,14 +353,17 @@ export class EditorMappingComponent implements OnInit {
   //#region Keyboard Events
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent): void {
-    // console.log(event); 
+    // console.log(event.key); 
     if (event.key === 'Backspace') {
       if (this.mode === 'draw_point') {
         this.deleteSelectedFeature();
       }
       if (this.mode === 'draw_polygon' || this.mode === 'draw_line_string') {
+        // console.log(this.selectedFeatureId);
+
         if (this.selectedFeatureId) {
           this.draw.delete(this.selectedFeatureId);
+          this.selectedDeletedId.push(this.selectedFeatureId);
           this.selectedFeatureId = null;
         }
       }
@@ -516,9 +488,11 @@ export class EditorMappingComponent implements OnInit {
     return `feature-${Date.now()}`;
   }
   private selectedFeatureId: string | null = null;
+  private selectedDeletedId = [''];
   private deleteSelectedFeature(): void {
-    if (this.selectedFeatureId) {
+    // console.log(this.selectedFeatureId);
 
+    if (this.selectedFeatureId) {
       const source = this.map.getSource(`wfs-layer-${this.layer.originalName}`) as maplibregl.GeoJSONSource;
 
       if (source) {
@@ -581,8 +555,8 @@ export class EditorMappingComponent implements OnInit {
   updateDrawnPolyFeatures(event: any) {
     // Get the changed features from the event object
     const changedFeatures = event.features;
-    // console.log(changedFeatures);
-    
+    console.log(changedFeatures);
+
     // Create a map of changed features by their id for quick lookup
     const changedFeaturesMap = new Map(changedFeatures.map((f: { id: any; }) => [f.id, f]));
 
@@ -594,6 +568,11 @@ export class EditorMappingComponent implements OnInit {
     this.previousFeatures = this.previousFeatures.map(existingFeature =>
       changedFeaturesMap.has(existingFeature.id) ? changedFeaturesMap.get(existingFeature.id) : existingFeature
     );
+
+    let act = this.previousFeatures.find(x => changedFeaturesMap.has(x.id))
+    if (act) {
+      this.checkUpdate = true;
+    }
 
     // Filter out features from changedFeatures that are already in previousFeatures
     const newFeatures = changedFeatures.filter((f: { id: any; }) =>
@@ -609,7 +588,6 @@ export class EditorMappingComponent implements OnInit {
     }
 
   }
-
 
   handleFeatureClick(event: MapMouseEvent, layerId: string) {
     // Query features at the click location
@@ -627,6 +605,8 @@ export class EditorMappingComponent implements OnInit {
       // Ensure featureId is a string before calling selectFeature
       if (typeof featureId === 'string') {
         this.selectPolyFeature(featureId);
+        // console.log(featureId);
+
       }
     }
   }
