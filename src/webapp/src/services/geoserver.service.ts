@@ -175,6 +175,48 @@ export class GeoServerService {
     </wfs:Transaction>`;
   }
 
+  generateWFSDeletePayload(features: FeatureCollection<any, any>['features'], dict: string[]): string {
+    const [workspace, layerName, geomField, srsName] = dict;
+
+    if (!workspace || !layerName || !geomField || !srsName) {
+      throw new Error('Dictionary array does not have the required values.');
+    }
+    let mode = ''
+    const featureUpdates = features.map(feature => {
+      let geometryXML: string;
+      if (feature.geometry.type === 'Polygon') {
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
+      } else if (feature.geometry.type === 'LineString') {
+        geometryXML = `
+            <wfs:Update typeName="${workspace}:${layerName}">
+            <ogc:Filter>
+                ${`<ogc:FeatureId fid="${feature.id}"/>`}
+            </ogc:Filter>
+            </wfs:Update>`;
+      } else {
+        // Handle other geometry types if needed
+        throw new Error(`Geometry type ${feature.geometry.type} not supported.`);
+      }
+
+      return `${geometryXML}`;
+    }).join('');
+
+    return `<wfs:Transaction service="WFS" version="1.1.0"
+        xmlns:wfs="http://www.opengis.net/wfs"
+        xmlns:ogc="http://www.opengis.net/ogc"
+        xmlns:gml="http://www.opengis.net/gml"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.opengis.net/wfs
+                            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+            ${featureUpdates}
+    </wfs:Transaction>`;
+  }
+
   geometryToGml(geometry: Geometry, srsName: string): string {
     if (geometry.type === 'Point') {
       const [x, y] = geometry.coordinates;
