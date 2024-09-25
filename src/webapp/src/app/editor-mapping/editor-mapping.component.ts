@@ -248,7 +248,7 @@ export class EditorMappingComponent implements OnInit {
           'text-anchor': 'top'
         }
       });
-    } 
+    }
   }
   //#endregion
 
@@ -256,7 +256,7 @@ export class EditorMappingComponent implements OnInit {
   //#region Save Features
   saveFeatures(): void {
     const promises: Promise<void>[] = [];
-  
+
     if (this.selectedDeletedId.length > 0) {
       promises.push(this.deletedFeatures());
     }
@@ -266,7 +266,7 @@ export class EditorMappingComponent implements OnInit {
     if (this.unsavedFeatures.length > 0) {
       promises.push(this.insertFeatures());
     }
-  
+
     Promise.all(promises)
       .then(() => {
         this.initializeMap();
@@ -280,40 +280,40 @@ export class EditorMappingComponent implements OnInit {
         this.selectedDeletedId = [];
       })
       .catch(error => console.error('Error processing features:', error));
-  
+
     if (this.selectedDeletedId.length === 0 && !this.checkUpdate && this.unsavedFeatures.length === 0) {
       this.sharedService.setActiveEdit(false);
       this.sharedService.setActiveSave(false);
     }
   }
-  
+
   async insertFeatures(): Promise<void> {
     const wfsUrl = `${this.proxy}/wfs`;
     const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
-    
+
     const wfsTransactionXmlInsert = this.geoServerService.convertGeoJSONToWFST(this.unsavedFeatures, dict);
-  
+
     await this.fetchWFS(wfsUrl, wfsTransactionXmlInsert);
   }
-  
+
   async updateFeatures(): Promise<void> {
     const wfsUrl = `${this.proxy}/wfs`;
     const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
-    
+
     const wfsTransactionXmlUpdate = this.geoServerService.generateWFSUpdatePayload(this.previousFeatures, dict);
-    
+
     await this.fetchWFS(wfsUrl, wfsTransactionXmlUpdate);
   }
-  
+
   async deletedFeatures(): Promise<void> {
     const wfsUrl = `${this.proxy}/wfs`;
     const dict = ['gis', this.layer.originalName, 'the_geom', 'urn:ogc:def:crs:EPSG::4326'];
-  
+
     const wfsTransactionXmlDelete = this.geoServerService.generateWFSDeletePayload(this.previousFeatures, dict);
-    
+
     await this.fetchWFS(wfsUrl, wfsTransactionXmlDelete);
   }
-  
+
   async fetchWFS(url: string, body: string): Promise<void> {
     await fetch(url, {
       method: 'POST',
@@ -325,7 +325,7 @@ export class EditorMappingComponent implements OnInit {
     }).then(response => response.text())
       .catch(error => console.error('Error with fetch request:', error));
   }
-  
+
   //#endregion
 
   //#region Helpers
@@ -395,25 +395,29 @@ export class EditorMappingComponent implements OnInit {
   private addPointAtClick(event: maplibregl.MapMouseEvent): void {
     const lngLat = event.lngLat;
     const clickPoint: [number, number] = [lngLat.lng, lngLat.lat];
-    const minDistance = 200; // Minimum distance in kilometers to prevent adding points (adjust as needed)
+    const minDistance = 1; // Minimum distance in kilometers to prevent adding points (adjust as needed)
 
     // Retrieve the source
     const source = this.map.getSource(`wfs-layer-${this.layer.originalName}`) as maplibregl.GeoJSONSource;
+    console.log(source);
 
     if (source) {
       const data = source._data as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
       let isTooClose = false;
+      console.log(data);
 
       // Check if the click location is too close to any existing features
       for (const feature of data.features) {
         if (feature.geometry.type === 'Point') {
           const coordinates = feature.geometry.coordinates;
-
+          
           if (coordinates.length === 2) {
             const featurePoint: [number, number] = coordinates as [number, number];
             const distance = this.calculateDistance(clickPoint, featurePoint);
             // console.log(distance);
-
+            console.log(distance);
+            console.log(minDistance);
+            
             if (distance < minDistance) {
               isTooClose = true;
               break;
@@ -423,7 +427,8 @@ export class EditorMappingComponent implements OnInit {
           }
         }
       }
-
+      console.log(isTooClose);
+      
       if (!isTooClose) {
         // Create a new feature with the clicked coordinates
         const feature: GeoJSON.Feature<GeoJSON.Point> = {
@@ -520,7 +525,7 @@ export class EditorMappingComponent implements OnInit {
 
   private selectFeatureAtClick(event: maplibregl.MapMouseEvent): void {
     const features = this.map.queryRenderedFeatures(event.point);
-    console.log(features);
+    // console.log(features);
     if (features.length > 0) {
       const feature = features[0];
       this.selectedFeatureId = feature.properties['id'] != undefined ? feature.properties['id'] : null;
