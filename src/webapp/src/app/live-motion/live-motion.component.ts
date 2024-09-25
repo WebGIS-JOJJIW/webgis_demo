@@ -549,8 +549,14 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
 
     // Click event for unclustered points
     this.map.on('click', `${layerId}-unclustered`, (e) => {
-      const sensor = sensorMarkers.find(s => s.coordinates[0] === e.lngLat.lng && s.coordinates[1] === e.lngLat.lat);
+      
+      const features = this.map.queryRenderedFeatures(e.point, {
+        layers: [`${layerId}-unclustered`]
+      });
+     
+      const sensor = sensorMarkers.find(s => s.title === features[0].properties['title']??'');
       console.log(sensor);
+      console.log(features[0].properties['title']);
       
       if (sensor) {
         this.sharedService.openDialog(sensor, this.dialog);
