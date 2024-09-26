@@ -6,6 +6,7 @@ services:
       - SKIP_DEMO_DATA=true
       - ROOT_WEBAPP_REDIRECT=true
       - CORS_ENABLED=true
+      - JAVA_OPTS=-XX:+UseG1GC -Xms2g -Xmx4g
     volumes:
       - ./data/:/opt/geoserver_data/
     networks:
