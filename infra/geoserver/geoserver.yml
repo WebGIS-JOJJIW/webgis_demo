@@ -7,6 +7,8 @@ services:
       - ROOT_WEBAPP_REDIRECT=true
       - CORS_ENABLED=true
       - JAVA_OPTS=-XX:+UseG1GC -Xms2g -Xmx4g
+      - INSTALL_EXTENSIONS=true
+      - STABLE_EXTENSIONS=importer
     volumes:
       - ./data/:/opt/geoserver_data/
     networks:
