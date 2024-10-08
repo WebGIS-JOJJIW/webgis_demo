@@ -16,18 +16,9 @@ def get_datetime_from_timestamp(timestamp: int) -> str:
 @click.command
 @click.option("--broker", "-b", help="The AMQP broker to which the image is sent", default="rabbitmq")
 @click.option("--event", "-e", help="ID of the event", required=True)
-@click.option("--image", "-i", help="File name of the image to send", required=True)
 @click.option("--sensor", "-s", help="ID of the sensor", required=True)
-def main(broker: str, event: str, image: str, sensor: str):
-    image_file = Path(image)
-    file_size = image_file.stat().st_size
-    if not image_file.is_file():
-        raise Exception("Cannot find specified image file")
-
-    # Load the image to be sent
-    with open(str(image_file), "rb") as f:
-        bin_content = f.read()
-
+@click.option("--text", "-t", help="Summary of the event", required=True)
+def main(broker: str, event: str, sensor: str, text: str):
     # Create publish channel
     channel = Channel(broker, "image")
 
@@ -49,15 +40,14 @@ def main(broker: str, event: str, image: str, sensor: str):
     response.timestamp = int(dt.timestamp())
 
     # Set the content of the image to the message
-    response.eventImages.label = "people"
-    response.eventImages.imageData.append(bin_content)
+    response.eventSummary.summary = text
 
     # Publish the reponse
     channel.send_response(response)
 
     print(
         f"""
-Successfully sent message
+Successfully sent text summary
     uuid:     {response.messageUuid}
     sensor:   {response.sourceInfo.id}
     datetime: {dt.strftime('%Y-%m-%d %H:%M:%S')}

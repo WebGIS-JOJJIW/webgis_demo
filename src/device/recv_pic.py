@@ -22,16 +22,21 @@ class ImageChannel(Channel):
     def handle_response(self, response: Response):
         filename = get_filename_from_timestamp(response.timestamp)
         dt = get_datetime_from_timestamp(response.timestamp)
-        # Write the collected binary parts when we receive all the expected parts
-        with open(filename, "wb") as f:
-            f.write(response.imageData)
-        print(
-            f"""
-Successfully received image
-    uuid:     {response.messageUuid}
-    datetime: {dt}
-    Saved at: {filename}
-""")
+
+        event_info_type = response.WhichOneof('eventInfo')
+        if event_info_type == 'eventImages':
+            # Write the collected binary parts when we receive all the expected parts
+            with open(filename, "wb") as f:
+                f.write(response.eventImages.imageData[0])
+            print(
+                f"""
+    Successfully received image
+        uuid:     {response.messageUuid}
+        datetime: {dt}
+        Saved at: {filename}
+    """)
+        elif event_info_type == "eventSummary":
+            print(f"Receiving text: {response.eventSummary.summary}")
 
 
 def main():
