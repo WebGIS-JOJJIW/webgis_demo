@@ -554,7 +554,7 @@ export class LiveMotionComponent implements OnInit, OnDestroy {
         layers: [`${layerId}-unclustered`]
       });
      
-      const sensor = sensorMarkers.find(s => s.title === features[0].properties['title']??'');
+      const sensor = sensorMarkers.find(s => s.title === features[0].properties['title']);
       console.log(sensor);
       console.log(features[0].properties['title']);
       
