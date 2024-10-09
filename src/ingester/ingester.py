@@ -4,6 +4,8 @@ from pathlib import Path
 
 import requests
 
+from pb.response_pb2 import Response
+
 # ARTIFACT_SERVE
 SCRIPT_PATH = Path(__file__).absolute()
 ARTIFACTORY_ROOT_PATH = SCRIPT_PATH.parent / ".." / \
@@ -15,10 +17,11 @@ STREAMER_ENDPOINT = "http://{}:3001/sensor_data"
 
 
 class Ingester:
-    def __init__(self, image_bin: bytes, sensor: str, timestamp: int):
-        self._image_bin = image_bin
-        self._sensor = sensor
-        self._timestamp = timestamp
+    def __init__(self, response: Response):
+        self._response = response
+        self._event_id = response.eventUuid
+        self._sensor = response.sourceInfo.id
+        self._timestamp = response.timestamp
         self._streamer_host = "api"
 
     def _save_image_to_artifactory(self, image_bin: bytes, sensor: str, timestamp: int) -> Path:
@@ -29,17 +32,18 @@ class Ingester:
             f.write(image_bin)
         return artifact_path.relative_to(ARTIFACTORY_ROOT_PATH)
 
-    def _notify_streamer(self, sensor: str, image_url: str, timestamp: int) -> int:
+    def _notify_streamer(self, event_id: str, sensor: str, pub_value: str, timestamp: int, is_summary=True) -> int:
         captured_ts = datetime.fromtimestamp(
             timestamp).strftime("%Y-%m-%d %H:%M:%S")
         data = {
             "sensor_data": {
+                "event_id": event_id,
                 "sensor_name": sensor,
                 "sensor_poi_id": sensor,
                 "sensor_type_name": "camara sensor",
                 "region_name": "region1",
-                "data_type_name": "image",
-                "value": image_url,
+                "data_type_name": "summary" if is_summary else "image",
+                "value": pub_value,
                 "dt": captured_ts
             }
         }
@@ -53,9 +57,19 @@ class Ingester:
         print(response.json())
 
     def publish(self):
-        artifact_relpath = self._save_image_to_artifactory(
-            self._image_bin, self._sensor, self._timestamp
-        )
-        self._notify_streamer(
-            self._sensor, str(artifact_relpath), self._timestamp
-        )
+        event_info_type = self._response.WhichOneof('eventInfo')
+        if event_info_type == 'eventImages':
+            relpath = self._save_image_to_artifactory(
+                self._response.eventImages.imageData[0], self._sensor, self._timestamp
+            )
+            self._notify_streamer(
+                self._event_id, self._sensor, str(relpath), self._timestamp, is_summary=False
+            )
+        elif event_info_type == "eventSummary":
+            summary_text = self._response.eventSummary.summary
+            self._notify_streamer(
+                self._event_id, self._sensor, summary_text, self._timestamp
+            )
+        else:
+            print("Not publishing anything")
+            return

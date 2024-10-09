@@ -9,8 +9,7 @@ class ImageChannel(Channel):
 
     def handle_response(self, response: Response):
         print("Received image")
-        Ingester(response.imageData, response.sourceInfo.id,
-                 response.timestamp).publish()
+        Ingester(response).publish()
         print("Successfully notify Streamer")
 
 
