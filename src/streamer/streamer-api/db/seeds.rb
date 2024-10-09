@@ -26,6 +26,9 @@ end
   Region.find_or_create_by!(name: region_name)
 end
 
-["data_type1","data_type2","data_type3","data_type4","data_type5"].each do |data_type_name|
+["data_type1","data_type2"].each do |data_type_name|
   DataType.find_or_create_by!(name: data_type_name)
 end
+
+DataType.find(1).update(name:"summary")
+DataType.find(2).update(name:"image")

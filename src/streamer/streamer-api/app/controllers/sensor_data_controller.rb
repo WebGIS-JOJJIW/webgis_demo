@@ -46,6 +46,6 @@ class SensorDataController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def sensor_data_params
-      params.require(:sensor_data).permit(:sensor_id, :sensor_name, :sensor_poi_id, :lat, :lon, :sensor_type_id, :sensor_type_name, :region_id, :region_name, :data_type_id, :data_type_name, :value, :dt, :dt_year, :dt_yearmon, :dt_epoch, :partition_yearmon)
+      params.require(:sensor_data).permit(:sensor_id, :sensor_name, :sensor_poi_id, :lat, :lon, :sensor_type_id, :sensor_type_name, :region_id, :region_name, :data_type_id, :data_type_name, :value, :dt, :dt_year, :dt_yearmon, :dt_epoch, :partition_yearmon, :event_id)
     end
 end

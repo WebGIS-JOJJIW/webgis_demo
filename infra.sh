@@ -33,6 +33,23 @@ function setup {
     set +x
 }
 
+function update {
+    set -x
+    docker rmi streamer_api:0.1
+    set +x
+
+    up
+    set -x
+
+    # Wait for the services to finish initialization
+    echo Wait 30 seconds to wait for services to finish initialization
+    sleep 30
+
+    # Setup PostgreSQL
+    infra/streamer/init/update.sh
+    set +x
+}
+
 function reset {
     down
     set -x
@@ -62,6 +79,9 @@ case $1 in
         ;;
     setup)
         setup
+        ;;
+    update)
+        update
         ;;
     reset)
         reset

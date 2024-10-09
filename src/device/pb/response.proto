@@ -12,16 +12,31 @@ message SourceInfo {
     string id = 2;
 }
 
+message EventSummary {
+    string summary = 1;
+}
+
+message EventImages {
+    string label = 1;
+    repeated bytes imageData = 2;
+}
+
 message Response {
     // Unique identifier of the message
     string messageUuid = 1;
 
+    // Unique identifier of the triggering event
+    string eventUuid = 2;
+
     // Information of the sender
-    SourceInfo sourceInfo = 2;
+    SourceInfo sourceInfo = 3;
 
     // Timestamp in epoch at which the message is created
-    int32 timestamp = 3;
+    int32 timestamp = 4;
 
-    // ImageData
-    bytes imageData = 4;
+    // Text or Image data associate to the event
+    oneof eventInfo {
+        EventSummary eventSummary = 5;
+        EventImages eventImages = 6;
+    }
 }
