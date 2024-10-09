@@ -1,7 +1,8 @@
 {
     "mode": "development",
     "debug": true,
-    "mqhost": "163.47.10.22",
+    "mqhost": "showcase.jeypon.com",
     "mon_extension": ".jpg",
-    "mon_dir": "/opt/imgin/"
+    "mon_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "sensor_name": "sensor1"
 }

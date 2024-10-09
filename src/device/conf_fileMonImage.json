@@ -1,0 +1,8 @@
+{
+    "mode": "development",
+    "debug": true,
+    "mon_extension": ".jpg",
+    "mon_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/mon_input/",
+    "output_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "sensor_name": "sensor1"
+}

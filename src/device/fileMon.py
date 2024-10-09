@@ -5,7 +5,7 @@
 #   over message broker to the webgis server.
 #
 # Dev by : Sutee C.
-# Version : 1.0
+# Version : 1.1
 # ==========================================================================================
 import os
 import time
@@ -18,7 +18,21 @@ from pathlib import Path
 from channel import Channel
 
 from pb.response_pb2 import Response, SourceType
-from util_fileMon import CodeBlockTimer, Config
+from util_fileMon import *
+
+# Predefined dictionary for obj_classID and obj_className mapping
+object_mapping = {
+    0: "person",
+    1: "bicycle",
+    2: "car",
+    3: "motorcycle",
+    5: "bus",
+    7: "truck"
+}
+
+# Function to get the text from a given number
+def get_object_text(number):
+    return object_mapping.get(number, "Unknown_object")  # Return "Unknown object" if the number is not found
 
 def get_datetime_from_timestamp(timestamp: int) -> str:
     return datetime.fromtimestamp(timestamp).strftime("%Y/%m/%d %H-%M-%S")
@@ -26,7 +40,6 @@ def get_datetime_from_timestamp(timestamp: int) -> str:
 def send_file_over_mbroker(image: str, sensor: str):
     if 'mqhost' not in appConf.config:
         raise Exception("'hostip' not found in config")
-
     hostip = appConf.config['mqhost']
 
     # debug
@@ -44,6 +57,20 @@ def send_file_over_mbroker(image: str, sensor: str):
     with open(str(image_file), "rb") as f:
         bin_content = f.read()
 
+    # Extracting image data from image file name
+    image_directory, image_filename_ext = os.path.split(image_file)
+    img_info = extract_img_info(image_filename_ext)
+
+    # Checking if the return result is valid and using the elements
+    if img_info:
+        img_info_eventID = img_info['eventID']
+        img_info_obj_class_id = img_info['obj_class_id']
+        img_info_image_counter = img_info['image_counter']
+        img_info_obj_class_name = get_object_text(img_info_obj_class_id)
+    else:
+        img_info_eventID = (f"sensor_{int(time.time())}")
+        img_info_obj_class_name = "Unknown_object"
+
     # Create publish channel
     channel = Channel(hostip, "image")
 
@@ -52,6 +79,9 @@ def send_file_over_mbroker(image: str, sensor: str):
 
     # Add UUID for the message
     response.messageUuid = str(uuid.uuid4())
+
+    # Add UUID for the event
+    response.eventUuid = img_info_eventID
 
     # Set sensor information
     response.sourceInfo.id = sensor
@@ -62,7 +92,8 @@ def send_file_over_mbroker(image: str, sensor: str):
     response.timestamp = int(dt.timestamp())
 
     # Set the content of the image to the message
-    response.imageData = bin_content
+    response.eventImages.label = img_info_obj_class_name
+    response.eventImages.imageData.append(bin_content)
 
     # Publish the reponse
     channel.send_response(response)
@@ -72,30 +103,14 @@ def send_file_over_mbroker(image: str, sensor: str):
 
     print(
         f"""
-Successfully sent message
+Successfully sent data
+    eventUuid {response.eventUuid}
     uuid:     {response.messageUuid}
     sensor:   {response.sourceInfo.id}
     datetime: {dt.strftime('%Y-%m-%d %H:%M:%S')}
 """)
     # Archive sent image file
     archive_img(image_file)
-
-def archive_img(filepath):
-    # building new file name after process
-    timestamp = int(time.time())
-
-    directory, filename = os.path.split(filepath)
-    new_filename = str(timestamp) + "_" + str(filename)
-
-    if appConf.config['debug']: print("\tnew filename: ", new_filename)
-
-    # Construct the new filepath
-    new_filepath = os.path.join(directory, new_filename)
-    new_filepath = new_filepath.replace(appConf.config['mon_extension'], str(appConf.config['mon_extension']) + "Process")
-    os.rename(filepath, new_filepath)
-
-    if appConf.config['debug']: print("\tProcessed and renamed: ", filepath)
-
 
 # Simulate sending the file over WebSocket
 def mock_send_file_over_websocket(filepath):
@@ -126,7 +141,7 @@ def monitor_directory(directory):
                 if flag == flags.CLOSE_WRITE:
                     if monitored_file == event.name:
                         # Start a new thread to handle the file processing
-                        threading.Thread(target=send_file_over_mbroker, args=(filepath,"sensor1",)).start()
+                        threading.Thread(target=send_file_over_mbroker, args=(filepath,appConf.config['sensor_name'],)).start()
 
 # load config and set the default config parameter
 print(f"Loading configuration file..")
