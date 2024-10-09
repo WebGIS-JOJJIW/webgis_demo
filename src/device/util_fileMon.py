@@ -4,7 +4,7 @@
 # Script Desc: POC - library utility for fileMon
 #
 # Dev by : Sutee C.
-# Version : 1.2
+# Version : 2.0
 # ==========================================================================================
 import os
 import json
@@ -53,11 +53,11 @@ def archive_img(filepath):
 
     directory, filename = os.path.split(filepath)
     _file_name, file_extension = os.path.splitext(filename)
-    new_filename = str(timestamp) + "_" + str(filename)
+    new_filename = f"{_file_name}_{str(timestamp)}{file_extension}"
 
     # Construct the new filepath
     new_filepath = os.path.join(directory, new_filename)
-    new_filepath = new_filepath.replace(file_extension, str(file_extension) + "Process")
+    new_filepath = new_filepath.replace(file_extension, str(file_extension) + "X")
     os.rename(filepath, new_filepath)
 
 # Commonly usedfor image file name data extraction on fileMon send over mBroker
@@ -90,10 +90,10 @@ def add_metadata(image_path, metadata_dict):
     for key, value in metadata_dict.items():
         img.info[key] = value
     # Save the image with the metadata
-    img.save('image_with_metadata.jpg', exif=img.info.get('exif'))
+    img.save(image_path, exif=img.info.get('exif'))
 
 def extract_metadata(image_path):
-    img = Image.open(image_path)
-    # Retrieve metadata
-    metadata = img.info
+    with Image.open(image_path) as img:
+        # Retrieve metadata
+        metadata = img.info
     return metadata
