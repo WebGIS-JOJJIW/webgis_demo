@@ -1,4 +1,6 @@
 import json
+import random
+import string
 from datetime import datetime
 from pathlib import Path
 
@@ -15,6 +17,12 @@ ARTIFACTORY_PATH = ARTIFACTORY_ROOT_PATH / "sensor_images"
 # STREAMER
 STREAMER_ENDPOINT = "http://{}:3001/sensor_data"
 
+def generate_random_string(length=10):
+    # Combine uppercase, lowercase letters, and digits
+    characters = string.ascii_letters + string.digits
+    # Randomly select characters to form a string of the specified length
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
 
 class Ingester:
     def __init__(self, response: Response):
@@ -25,7 +33,8 @@ class Ingester:
         self._streamer_host = "api"
 
     def _save_image_to_artifactory(self, image_bin: bytes, sensor: str, timestamp: int) -> Path:
-        artifact_name = f"{sensor}_{str(timestamp)}.jpg"
+        random_chars = generate_random_string()
+        artifact_name = f"{sensor}_{str(timestamp)}_{random_chars}.jpg"
         artifact_path = ARTIFACTORY_PATH / artifact_name
         print(f"Saving image binary to '{str(artifact_path)}'")
         with open(artifact_path, "wb") as f:
