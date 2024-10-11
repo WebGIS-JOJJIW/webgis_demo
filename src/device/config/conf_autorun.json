@@ -1,0 +1,31 @@
+{
+    "selectedMode": "X",
+    "modeToScripts": {
+        "A": [
+            "script1.py",
+            "imageOP.py",
+            "xBeeTx.py"
+        ],
+        "B": [
+            "xBeeRx.py",
+            "xBeeTx.py"
+        ],
+        "C": [
+            "xBeeRx.py",
+            "fileMon.py"
+        ],
+        "Q": [
+            "script1.py",
+            "imageOP.py",
+            "fileMon.py"
+        ],
+        "X": [
+            "imageOP.py",
+            "fileMon.py"
+        ],
+        "Z": [
+            "imageOP.py",
+            "xBeeTx.py"
+        ]
+    }
+}

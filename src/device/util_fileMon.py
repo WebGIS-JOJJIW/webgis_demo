@@ -37,17 +37,33 @@ class Config:
     def __init__(self):
         self.config = None
 
-    # load config file
+    # Load config file
     def load(self, config_file):
         try:
             with open(config_file, 'r') as f:
                 self.config = json.load(f)
         except FileNotFoundError:
-            self.config = None
-
+            print(f"Error: Config file '{config_file}' not found.")
+            return None
+        except json.JSONDecodeError:
+            print(f"Error: Config file '{config_file}' contains invalid JSON.")
+            return None
         return self.config
-    
+
 def archive_img(filepath):
+    # Build new file name with timestamp
+    directory, filename = os.path.split(filepath)
+    file_name, file_extension = os.path.splitext(filename)
+    timestamp = str(int(time.time()))
+    
+    # Construct new filename and path
+    new_filename = f"{file_name}_{timestamp}{file_extension}X"
+    new_filepath = os.path.join(directory, new_filename)
+
+    # Rename the original file
+    os.rename(filepath, new_filepath)
+
+def _archive_img(filepath):
     # building new file name after process
     timestamp = int(time.time())
 

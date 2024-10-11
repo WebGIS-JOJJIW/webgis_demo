@@ -1,0 +1,13 @@
+{
+    "mode": "development",
+    "debug": true,
+    "txAddr": "0013A200423EC8C9",
+    "rxAddr": "9999999999999999",
+    "txPort": "/dev/ttyUSB0",
+    "rxPort": "/dev/ttyUSB1",
+    "txBaudRate": 9600,
+    "rxBaudRate": 9600,
+    "mon_extension": ".png",
+    "mon_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "sensor_name": "sensor1"
+}

@@ -23,26 +23,24 @@ from PIL import Image, PngImagePlugin
 
 from util_fileMon import *
 
+# Globally Load the YOLOv8 model
+model = YOLO('YOLO/yolov8n.pt')
+
 # Process and crop the detected interested object from input image
 def processImage(filePathAndName):
     try:
-        eventID = str(appConf.config['sensor_name']) + "_" + str(int(time.time()))
-
-        # Load the YOLOv8 model
-        model = YOLO('YOLO/yolov8n.pt')
+        eventID = f"{appConf.config['sensor_name']}_{int(time.time())}"
 
         # Perform inference on the image
         results = model(filePathAndName)
 
         # Load the image with OpenCV
         img = cv2.imread(filePathAndName)
+        if img is None:
+            raise ValueError(f"Failed to load image from {filePathAndName}")
 
         obj_count = 0
-
-        # Dictionary to keep count of each class
-        class_count = {}
-
-        # image_metadata_list = []  # Store metadata temporarily
+        class_count = {}     # Dictionary to keep count of each class
         crop_data_list = []  # Store cropped image data temporarily
 
         # Loop through the detected objects
@@ -50,24 +48,16 @@ def processImage(filePathAndName):
             boxes = result.boxes.cpu().numpy()
 
             for i, box in enumerate(boxes):
-                # Correctly get the class ID from the bounding box
-                classid = int(box.cls[0])  # Get the class ID
+                classid = int(box.cls[0])  # Get the class ID from the bounding box
+                className = model.names[classid] # Get the class name from the model's list of names
 
-                # Get the class name from the model's list of names
-                className = model.names[classid]
-
-                if (classid in {0, 1, 2, 3, 5, 7}):
+                if (classid in {0, 1, 2, 3, 5, 7, 15, 16, 19}): # Allowed classes
                     # Count the detected objects by type
-                    if className in class_count:
-                        class_count[className] += 1
-                    else:
-                        class_count[className] = 1
+                    class_count[className] = class_count.get(className, 0) + 1
                     obj_count += 1
 
-                    # Get the bounding box coordinates
+                    # Get bounding box coordinates and crop the object
                     r = box.xyxy[0].astype(int)
-                    
-                    # Crop the object from the image
                     crop = img[r[1]:r[3], r[0]:r[2]]
 
                     # Store cropped image data and associated metadata
@@ -81,17 +71,17 @@ def processImage(filePathAndName):
                 else:
                     print(f"Skip object: {classid}: {className}")
         
-        # Generate the summary after processing all images
+        # Generate a summary of detected objects
         summary = ', '.join([f"{count}-{className}" for className, count in class_count.items()])
         print(f"Detected objects summary: {summary}")
 
-        # Add metadata to each cropped image and save it
-        for idx, data in enumerate(crop_data_list):
-            crop = data['crop']
+        # Prepare metadata and save cropped images
+        for data in crop_data_list:
             eventID = data['eventID']
             classid = data['classid']
             className = data['className']
             imgSeq = data['imgSeq']
+            crop = data['crop']
 
             # Convert the cropped image to PIL format
             crop_pil = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
@@ -107,200 +97,18 @@ def processImage(filePathAndName):
             metadata.add_text("imgExtension", appConf.config['write_extension'])
             metadata.add_text("eventSummary", summary)
 
-            # Save the cropped image with metadata as a PNG file
-            save_path = os.path.join(f"{appConf.config['output_dir']}", f"{eventID}_{classid}_{imgSeq}{appConf.config['write_extension']}")
-            crop_pil.save(save_path, "PNG", pnginfo=metadata)  # Save as .png with metadata
+            # Save the cropped image with metadata as PNG
+            save_path = os.path.join(appConf.config['output_dir'], f"{eventID}_{classid}_{imgSeq}{appConf.config['write_extension']}")
+            crop_pil.save(save_path, "PNG", pnginfo=metadata)
             print(f"Saved with metadata: {save_path}")
 
         # Archive processed image file
         archive_img(filePathAndName)
 
+    except (FileNotFoundError, ValueError) as e:
+        print(f"File error: {e}")
     except Exception as e:
         print(f"Error in processing image: {e}")
-
-# Process and crop the detected interested object from input image
-def _processImage(filePathAndName):
-    try:
-        eventID = str(appConf.config['sensor_name']) + "_" + str(int(time.time()))
-
-        # Load the YOLOv8 model
-        model = YOLO('YOLO/yolov8n.pt')
-
-        # Perform inference on the image
-        results = model(filePathAndName)
-
-        # Load the image with OpenCV
-        img = cv2.imread(filePathAndName)
-
-        obj_count = 0
-
-        # Dictionary to keep count of each class
-        class_count = {}
-
-        image_metadata_list = []
-
-        # Loop through the detected objects
-        for result in results:
-            boxes = result.boxes.cpu().numpy()
-
-            for i, box in enumerate(boxes):
-                # Correctly get the class ID from the bounding box
-                classid = int(box.cls[0])  # Get the class ID
-
-                # Get the class name from the model's list of names
-                className = model.names[classid]
-
-                # Print the detected object name
-                # print(f"Detected object: {classid}: {className}")
-
-                if (classid in {0, 1, 2, 3, 5, 7}):
-                    """ Allowed Class ID
-                    0: person
-                    1: bicycle
-                    2: car
-                    3: motorcycle
-                    5: bus
-                    7: truck
-                    """
-                    # Count the detected objects by type
-                    if className in class_count:
-                        class_count[className] += 1
-                    else:
-                        class_count[className] = 1
-                    # increment allowed object counter
-                    obj_count += 1
-
-                    # Get the bounding box coordinates
-                    r = box.xyxy[0].astype(int)
-                    
-                    # Crop the object from the image
-                    crop = img[r[1]:r[3], r[0]:r[2]]
-                    
-                    # Save the cropped image with the index
-                    cv2.imwrite(os.path.join(f"{appConf.config['output_dir']}", f"{eventID}_{classid}_{obj_count}{appConf.config['mon_extension']}"), crop)
-                    print(f"Cropped and saved: {eventID}_{classid}_{obj_count}{appConf.config['mon_extension']}")
-                    print("-----")
-
-                    # Generating cropped image metadata
-                    img_metadata = { 
-                        'eventID': {eventID},
-                        'objClassID': {classid},
-                        'objClassName': {className},
-                        'imgExtension': f"{appConf.config['mon_extension']}",
-                        'imgSeq': obj_count,
-                        'imgTotal': '',
-                        'eventSummary': ''
-                    }
-                    # Add the metadata to the list
-                    image_metadata_list.append(img_metadata)
-                else:
-                    print(f"Skip object: {classid}: {className}")
-        # Archive processed image file
-        archive_img(filePathAndName)
-
-        # Create a summary string of detected objects
-        summary = ', '.join([f"{count}-{className}" for className, count in class_count.items()])
-        print(f"Detected objects summary: {summary}")
-
-        time.sleep(2)
-
-        # Update metadata and add each into image
-        for imgMetaLoop in image_metadata_list:
-            # update missing metadata
-            imgMetaLoop['imgTotal'] = obj_count
-            imgMetaLoop['eventSummary'] = summary
-
-            tmpImgPath = os.path.join(f"{appConf.config['output_dir']}", f"{eventID}_{classid}_{obj_count}{appConf.config['mon_extension']}T")
-            add_metadata(tmpImgPath, imgMetaLoop)
-
-            # # remove temporary file extension (T) from the file
-            # tmpImgPath = tmpImgPath.replace(f"{appConf.config['mon_extension']}T", {appConf.config['mon_extension']})
-            time.sleep(2)
-
-    finally:
-        # Memory cleanup
-        img = None   # Release OpenCV image resource
-        results = None # Clear YOLO model results
-        del model   # Explicitly delete any large objects
-        gc.collect()    # Force garbage collection
-
-# Process and crop the detected interested object from input image
-def __processImage(filePathAndName):
-    try:
-        eventID = str(appConf.config['sensor_name']) + "_" + str(int(time.time()))
-
-        # Load the YOLOv8 model
-        model = YOLO('YOLO/yolov8n.pt')
-
-        # Perform inference on the image
-        results = model(filePathAndName)
-
-        # Load the image with OpenCV
-        img = cv2.imread(filePathAndName)
-
-        obj_count = 0
-
-        # Dictionary to keep count of each class
-        class_count = {}
-
-        image_metadata_list = []
-
-        # Loop through the detected objects
-        for result in results:
-            boxes = result.boxes.cpu().numpy()
-
-            for i, box in enumerate(boxes):
-                # Correctly get the class ID from the bounding box
-                classid = int(box.cls[0])  # Get the class ID
-
-                # Get the class name from the model's list of names
-                className = model.names[classid]
-
-                # Print the detected object name
-                # print(f"Detected object: {classid}: {className}")
-
-                if (classid in {0, 1, 2, 3, 5, 7}):
-                    """ Allowed Class ID
-                    0: person
-                    1: bicycle
-                    2: car
-                    3: motorcycle
-                    5: bus
-                    7: truck
-                    """
-                    # Count the detected objects by type
-                    if className in class_count:
-                        class_count[className] += 1
-                    else:
-                        class_count[className] = 1
-                    # increment allowed object counter
-                    obj_count += 1
-
-                    # Get the bounding box coordinates
-                    r = box.xyxy[0].astype(int)
-                    
-                    # Crop the object from the image
-                    crop = img[r[1]:r[3], r[0]:r[2]]
-                    
-                    # Save the cropped image with the index
-                    cv2.imwrite(os.path.join(f"{appConf.config['output_dir']}", f"{eventID}_{classid}_{obj_count}{appConf.config['mon_extension']}"), crop)
-                    print(f"Cropped and saved: {eventID}_{classid}_{obj_count}{appConf.config['mon_extension']}")
-                    print("-----")
-                else:
-                    print(f"Skip object: {classid}: {className}")
-        # Archive processed image file
-        archive_img(filePathAndName)
-
-        # Create a summary string of detected objects
-        summary = ', '.join([f"{count}-{className}" for className, count in class_count.items()])
-        print(f"Detected objects summary: {summary}")
-
-    finally:
-        # Memory cleanup
-        img = None   # Release OpenCV image resource
-        results = None # Clear YOLO model results
-        del model   # Explicitly delete any large objects
-        gc.collect()    # Force garbage collection
 
 # Monitor directory for new .jpg files
 def monitor_directory(directory):
@@ -308,7 +116,12 @@ def monitor_directory(directory):
     watch_flags = flags.CREATE | flags.CLOSE_WRITE
     wd = inotify.add_watch(directory, watch_flags)
 
-    print(f"Begin file monitoring..")
+    
+    print(f"""
+    ========
+    {os.path.basename(__file__)} Begin file monitoring..
+    ========
+    """)
 
     monitored_file = None
     try:
@@ -334,9 +147,8 @@ def monitor_directory(directory):
         gc.collect()    # Force garbage collection
 
 # load config and set the default config parameter
-print(f"Loading configuration file..")
 appConf = Config()
-appConf.load("conf_fileMonImage.json")
+appConf.load("config/conf_fileMonImage.json")
 default_mon_extension = ".jpg"
 
 if __name__ == "__main__":

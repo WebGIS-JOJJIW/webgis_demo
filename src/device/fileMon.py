@@ -28,7 +28,10 @@ object_mapping = {
     2: "car",
     3: "motorcycle",
     5: "bus",
-    7: "truck"
+    7: "truck",
+    15: "cat",
+    16: "dog",
+    19: "cow"
 }
 
 # Function to get the text from a given number
@@ -194,7 +197,11 @@ def monitor_directory(directory):
     watch_flags = flags.CREATE | flags.CLOSE_WRITE
     wd = inotify.add_watch(directory, watch_flags)
 
-    print(f"Begin file monitoring..");
+    print(f"""
+    ========
+    {os.path.basename(__file__)} Begin file monitoring..
+    ========
+    """)
 
     monitored_file = None
     try:
@@ -220,9 +227,8 @@ def monitor_directory(directory):
         gc.collect()    # Force garbage collection
 
 # load config and set the default config parameter
-print(f"Loading configuration file..")
 appConf = Config()
-appConf.load("conf_fileMon.json")
+appConf.load("config/conf_fileMon.json")
 default_mon_extension = ".jpg"
 
 if __name__ == "__main__":
