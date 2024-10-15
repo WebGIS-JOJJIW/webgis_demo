@@ -10,6 +10,7 @@
 import os
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import uuid
 import gc  # Garbage collection module
 
@@ -86,7 +87,7 @@ def send_file_over_mbroker(image: str):
             metadata[key] = default_value
 
     # Load the image to be sent
-    print(f"\tload the image to be sent from: ", image)
+    # print(f"\tload the image to be sent from: ", image)
     with open(str(image_file), "rb") as f:
         bin_content = f.read()
 
@@ -191,11 +192,14 @@ def mock_send_file_over_websocket(filepath):
 
     archive_img(filepath)
 
-# Monitor directory for new .jpg files
+# Monitor directory for new image files
 def monitor_directory(directory):
     inotify = INotify()
     watch_flags = flags.CREATE | flags.CLOSE_WRITE
     wd = inotify.add_watch(directory, watch_flags)
+
+    monitored_extension = appConf.config['mon_extension']
+    monitored_files = set()  # Keep track of monitored files to avoid repeated checks
 
     print(f"""
     ========
@@ -203,33 +207,34 @@ def monitor_directory(directory):
     ========
     """)
 
-    monitored_file = None
-    try:
-        while True:
-            # This call blocks until events are available
-            for event in inotify.read():
-                for flag in flags.from_mask(event.mask):
-                    if flag == flags.CREATE:
-                        filename = event.name
-                        if filename.endswith(appConf.config['mon_extension']):
-                            filepath = os.path.join(directory, filename)
-                            print("Found: ", filename)
-                            monitored_file = filename
-                    if flag == flags.CLOSE_WRITE:
-                        if monitored_file == event.name:
-                            # Start a new thread to handle the file processing
-                            threading.Thread(target=send_file_over_mbroker, args=(filepath,)).start()
-    except KeyboardInterrupt:
-        print(f"\n{os.path.basename(__file__)}: Interrupt file monitoring by user. Exiting...")
-    except Exception as e:
-        print(f"{os.path.basename(__file__)}: Error: {e}")
-    finally:
-        gc.collect()    # Force garbage collection
+    with ThreadPoolExecutor(max_workers = appConf.config['max_workers']) as executor:
+        try:
+            while True:
+                # This call blocks until events are available
+                for event in inotify.read():
+                    for flag in flags.from_mask(event.mask):
+                        if flag == flags.CREATE:
+                            filename = event.name
+                            if filename.endswith(monitored_extension):
+                                filepath = os.path.join(directory, filename)
+                                if filename not in monitored_files:
+                                    print("Found: ", filename)
+                                    monitored_files.add(filename)
+                        if flag == flags.CLOSE_WRITE and filename in monitored_files:
+                            # Use the thread pool to handle the file processing
+                            executor.submit(send_file_over_mbroker, filepath)
+                            monitored_files.remove(filename)
+        except KeyboardInterrupt:
+            print(f"\n{os.path.basename(__file__)}: Interrupt file monitoring by user. Exiting...")
+        except Exception as e:
+            print(f"{os.path.basename(__file__)}: Error: {e}")
+        finally:
+            gc.collect()    # Force garbage collection
 
 # load config and set the default config parameter
 appConf = Config()
 appConf.load("config/conf_fileMon.json")
-default_mon_extension = ".jpg"
+default_mon_extension = ".png"
 
 if __name__ == "__main__":
     if 'mon_dir' not in appConf.config:

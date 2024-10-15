@@ -1,29 +1,35 @@
 {
-    "selectedMode": "X",
+    "selectedMode": "Z",
     "modeToScripts": {
         "A": [
+            "sys_fileManager.py",
             "script1.py",
             "imageOP.py",
             "xBeeTx.py"
         ],
         "B": [
+            "sys_fileManager.py",
             "xBeeRx.py",
             "xBeeTx.py"
         ],
         "C": [
+            "sys_fileManager.py",
             "xBeeRx.py",
             "fileMon.py"
         ],
         "Q": [
+            "sys_fileManager.py",
             "script1.py",
             "imageOP.py",
             "fileMon.py"
         ],
         "X": [
+            "sys_fileManager.py",
             "imageOP.py",
             "fileMon.py"
         ],
         "Z": [
+            "sys_fileManager.py",
             "imageOP.py",
             "xBeeTx.py"
         ]

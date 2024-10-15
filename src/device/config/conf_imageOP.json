@@ -5,5 +5,10 @@
     "write_extension": ".png",
     "mon_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/mon_input/",
     "output_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "mon_file_expire_hour": 0.06,
+    "mon_check_interval_sec": 50,
+    "output_file_expire_hour": 0.05,
+    "output_check_interval_sec": 50,
+    "max_workers": 4,
     "sensor_name": "sensor1"
 }

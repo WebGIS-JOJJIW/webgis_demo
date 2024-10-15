@@ -13,6 +13,7 @@ import cv2
 import os
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import gc  # Garbage collection module
 
 from inotify_simple import INotify, flags
@@ -100,10 +101,10 @@ def processImage(filePathAndName):
             # Save the cropped image with metadata as PNG
             save_path = os.path.join(appConf.config['output_dir'], f"{eventID}_{classid}_{imgSeq}{appConf.config['write_extension']}")
             crop_pil.save(save_path, "PNG", pnginfo=metadata)
-            print(f"Saved with metadata: {save_path}")
-
+            # print(f"Saved with metadata: {save_path}")
+            
         # Archive processed image file
-        archive_img(filePathAndName)
+        archive_img(filePathAndName) 
 
     except (FileNotFoundError, ValueError) as e:
         print(f"File error: {e}")
@@ -114,41 +115,45 @@ def processImage(filePathAndName):
 def monitor_directory(directory):
     inotify = INotify()
     watch_flags = flags.CREATE | flags.CLOSE_WRITE
-    wd = inotify.add_watch(directory, watch_flags)
+    inotify.add_watch(directory, watch_flags)
 
-    
+    monitored_extension = appConf.config['mon_extension']
+    monitored_files = set()  # Keep track of monitored files to avoid repeated checks
+
     print(f"""
     ========
     {os.path.basename(__file__)} Begin file monitoring..
     ========
     """)
 
-    monitored_file = None
-    try:
-        while True:
-            # This call blocks until events are available
-            for event in inotify.read():
-                for flag in flags.from_mask(event.mask):
-                    if flag == flags.CREATE:
-                        filename = event.name
-                        if filename.endswith(appConf.config['mon_extension']):
-                            filepath = os.path.join(directory, filename)
-                            print("Found: ", filename)
-                            monitored_file = filename
-                    if flag == flags.CLOSE_WRITE:
-                        if monitored_file == event.name:
-                            # Start a new thread to handle the file processing
-                            threading.Thread(target=processImage, args=(filepath,)).start()
-    except KeyboardInterrupt:
-        print(f"\n{os.path.basename(__file__)}: Interrupt file monitoring by user. Exiting...")
-    except Exception as e:
-        print(f"{os.path.basename(__file__)}: Error: {e}")
-    finally:
-        gc.collect()    # Force garbage collection
+    with ThreadPoolExecutor(max_workers = appConf.config['max_workers']) as executor:
+        try:
+            while True:
+                # This call blocks until events are available
+                for event in inotify.read():
+                    for flag in flags.from_mask(event.mask):
+                        if flag == flags.CREATE:
+                            filename = event.name
+                            if filename.endswith(monitored_extension):
+                                filepath = os.path.join(directory, filename)
+                                if filename not in monitored_files:
+                                    print("Found: ", filename)
+                                    monitored_files.add(filename)
+                        if flag == flags.CLOSE_WRITE and filename in monitored_files:
+                            # Use the thread pool to handle the file processing
+                            executor.submit(processImage, filepath)
+                            monitored_files.remove(filename)
+
+        except KeyboardInterrupt:
+            print(f"\n{os.path.basename(__file__)}: Interrupt file monitoring by user. Exiting...")
+        except Exception as e:
+            print(f"{os.path.basename(__file__)}: Error: {e}")
+        finally:
+            gc.collect()    # Force garbage collection
 
 # load config and set the default config parameter
 appConf = Config()
-appConf.load("config/conf_fileMonImage.json")
+appConf.load("config/conf_imageOP.json")
 default_mon_extension = ".jpg"
 
 if __name__ == "__main__":

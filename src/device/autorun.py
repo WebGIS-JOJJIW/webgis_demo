@@ -6,9 +6,11 @@ from util_fileMon import Config
 
 processes = []
 
+# Function to terminate all running subprocesses
 def terminate_subprocesses():
     for process in processes:
-        process.terminate()
+        if process.poll() is None:  # Check if the process is still running
+            process.terminate()
 
 # Function to run scripts based on selected mode
 def run_scripts_based_on_mode(mode, mode_to_scripts):
@@ -40,6 +42,9 @@ def run_scripts_based_on_mode(mode, mode_to_scripts):
         # Ensure all subprocesses are terminated
         terminate_subprocesses()
 
+# Declare the config variable
+appConf = None
+
 if __name__ == '__main__':
     # Check if a mode argument is passed from the command line
     selected_mode = sys.argv[1] if len(sys.argv) > 1 else None
@@ -47,22 +52,22 @@ if __name__ == '__main__':
     # If no argument is passed, load from config
     if not selected_mode:
         appConf = Config()
-        config = appConf.load("config/conf_autorun.json")  # Path to configuration file
+        appConf.load("config/conf_autorun.json")  # Path to configuration file
         
-        if not config:
+        if not appConf:
             print("Error: Failed to load configuration.")
             sys.exit(1)
         
-        selected_mode = config.get("selectedMode")
-        mode_to_scripts = config.get("modeToScripts")
+        selected_mode = appConf.config["selectedMode"]
+        mode_to_scripts = appConf.config["modeToScripts"]
 
         if not selected_mode or not mode_to_scripts:
             print("Error: 'selectedMode' or 'modeToScripts' not found in the configuration.")
             sys.exit(1)
     else:
         appConf = Config()
-        config = appConf.load("config/conf_autorun.json")  # Load the config for mode_to_scripts
-        mode_to_scripts = config.get("modeToScripts") if config else {}
+        appConf.load("config/conf_autorun.json")  # Load the config for mode_to_scripts
+        mode_to_scripts = appConf.config["modeToScripts"] if appConf else {}
 
     # Run the scripts based on the selected mode
     if selected_mode:

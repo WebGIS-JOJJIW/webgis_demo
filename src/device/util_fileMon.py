@@ -24,10 +24,9 @@ class CodeBlockTimer:
     def stop(self):
         if self.start_time is None:
             raise ValueError("Timer was not started.")
-        end_time = time.time()
 
         # calculate elapse time as milliseconds
-        elapsed_time_ms = int((end_time - self.start_time) * 1000)
+        elapsed_time_ms = int((time.time() - self.start_time) * 1000)
         self.start_time = None  # Reset the timer
 
         return elapsed_time_ms
