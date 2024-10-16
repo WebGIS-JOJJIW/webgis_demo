@@ -1,7 +1,7 @@
 {
     "mode": "development",
     "debug": true,
-    "tx_to_dest_addr": "0013A200423EC29B",
+    "tx_to_dest_addr": "0013A200423EC8C9",
     "tx_port": "/dev/ttyUSB0",
     "tx_baudrate": 115200,
     "tx_ack_timeout_sec": 5,
@@ -12,6 +12,8 @@
     "rx_from_src_addr": "0013A200423EC8C9",
     "rx_port": "/dev/ttyUSB1",
     "rx_baudrate": 115200,
+    "rx_output_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "rx_write_extension": ".png",
     "chunk_size_byte": 255,
     "sensor_name": "sensor1",
     "max_workers": 1

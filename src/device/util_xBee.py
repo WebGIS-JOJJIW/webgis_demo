@@ -16,6 +16,7 @@ import threading
 import cv2
 import numpy as np
 from digi.xbee.devices import XBeeDevice, XBee64BitAddress, RemoteXBeeDevice, PowerLevel
+from util_fileMon import extract_metadata
 
 class XBeeTransmitter:
     """
@@ -80,7 +81,7 @@ class XBeeTransmitter:
             if self.device.is_open():
                 self.device.close()
 
-    def read_image_to_bytes(self, image_path):
+    def __read_image_to_bytes(self, image_path):
         """
         Reads an image and returns its byte array.
         """
@@ -90,14 +91,62 @@ class XBeeTransmitter:
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         downsampled_image = cv2.pyrDown(gray_image)
         _, buffer = cv2.imencode('.jpg', downsampled_image)
+        return image.tobytes()
+    
+    def _read_image_to_bytes(self, image_path):
+        # Read the PNG image
+        image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Use IMREAD_UNCHANGED to preserve PNG's alpha channel if present
+
+        if image is None:
+            raise ValueError(f"Image at path {image_path} could not be read.")
+
+        # Encode image to bytes
+        _, buffer = cv2.imencode('.png', image)
+        return buffer.tobytes()
+    
+    def read_image_to_bytes(self, image_path):
+        """
+        Reads an image (JPG or PNG) and returns its byte array based on the file extension.
+        """
+        # Determine the file extension
+        file_extension = os.path.splitext(image_path)[1].lower()
+
+        # Read the image based on the file extension
+        if file_extension == ".jpg":
+            image = cv2.imread(image_path)
+            if image is None:
+                raise ValueError(f"Image at path {image_path} could not be read.")
+            # Convert to grayscale for JPG and downsample
+            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            downsampled_image = cv2.pyrDown(gray_image)
+            # Encode to JPG format
+            _, buffer = cv2.imencode('.jpg', downsampled_image)
+        
+        elif file_extension == ".png":
+            image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Preserve alpha channel for PNG
+            if image is None:
+                raise ValueError(f"Image at path {image_path} could not be read.")
+            # Encode to PNG format
+            _, buffer = cv2.imencode('.png', image)
+        
+        else:
+            raise ValueError(f"Unsupported file extension: {file_extension}. Supported: .jpg, .png")
+
         return buffer.tobytes()
 
-    def split_bytes(self, data):
+    def _split_bytes(self, data):
         """
         Splits a byte array into chunks of the specified size minus the overhead.
         """
         overhead = self.calculate_overhead()
         return [data[i : i + self.chunk_size - overhead] for i in range(0, len(data), self.chunk_size - overhead)]
+
+    def split_bytes(self, data):
+        overhead = self.calculate_overhead()
+        chunk_size = self.chunk_size - overhead
+        # print(f"Overhead: {overhead}, Actual chunk size: {chunk_size} / chunk")
+     
+        return [data[i: i + chunk_size] for i in range(0, len(data), chunk_size)]
 
     def calculate_overhead(self):
         """
@@ -162,9 +211,12 @@ class XBeeTransmitter:
             try:
                 chunk = chunks[frame_counter]
                 payload = struct.pack('B', payload_type) + struct.pack('>I', frame_counter) + struct.pack('>I', chunk_count) + chunk
+                # print(f"{chunk[:]}")
+
+                # print(f"Raw payload data (first 9 bytes): {payload[:9]}")
 
                 for attempt in range(self.max_retries):
-                    print(f"Sending {data_type} chunk {frame_counter + 1}/{chunk_count}")
+                    print(f"Sending {data_type} chunk {len(payload)} bytes {frame_counter + 1}/{chunk_count}")
                     self.device.send_data(remote, payload)
 
                     if self.wait_for_ack(frame_counter):
@@ -217,14 +269,54 @@ class XBeeReceiver:
             Processes completed data (text or image) and saves it to the output path.
     """
 
-    def __init__(self, device, output_path, sync_timeout=5, device_sync_ops_timeout=5):
+    def __init__(self, device, output_path, sync_timeout=5, device_sync_ops_timeout=5, save_extension=".png"):
         self.device = device
         self.output_path = output_path
         self.sync_timeout = sync_timeout
         self.device_sync_ops_timeout = device_sync_ops_timeout
+        self.save_extension = save_extension
         self.received_data = {}
+        self.oper_time = None
+        self.output_file = None
+        self.data_ready_event = threading.Event() # event to signal when data is ready to be processed
     
     def save_image(self, data, output_path):
+        """
+        Saves the received byte data as an image. Supports both .jpg and .png formats.
+        """
+        nparr = np.frombuffer(data, np.uint8)
+        
+        self.oper_time = time.time() - self.oper_time
+        print(f"Total data received: {len(nparr)} bytes")
+        print(f"Total data transfer time: {self.oper_time} seconds")
+
+        # Determine how to decode based on file extension
+        if self.save_extension == ".jpg":
+            # Decode as a grayscale image for .jpg
+            image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+        elif self.save_extension == ".png":
+            # Decode keeping the original format for .png (could have transparency)
+            image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+        else:
+            print(f"Unsupported format: {self.save_extension}")
+            return
+
+        if image is not None:
+            print(f"Image dimensions: {image.shape}")
+            if self.save_extension == ".jpg":
+                upsampled_image = cv2.resize(image, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
+                cv2.imwrite(output_path, upsampled_image)
+                print(f"Image saved successfully as JPG: {output_path}")
+            elif self.save_extension == ".png":
+                # For PNG, save directly without upsampling
+                cv2.imwrite(output_path, image)
+                print(f"Image saved successfully as PNG: {output_path}")
+            self.output_file = output_path
+        else:
+            print("Failed to decode image from byte data.")
+
+
+    def _save_image(self, data, output_path):
         """
         Saves the received byte data as an image.
         """
@@ -245,7 +337,10 @@ class XBeeReceiver:
         payload = xbee_message.data
         remote_device = xbee_message.remote_device
 
-        payload_type, frame_counter, frame_counter_end = struct.unpack('BII', payload[:9])
+        # Extract values from the payload
+        payload_type = struct.unpack('B', payload[:1])[0]        # 1 byte for payload type
+        frame_counter = struct.unpack('>I', payload[1:5])[0]     # 4 bytes for frame counter
+        frame_counter_end = struct.unpack('>I', payload[5:9])[0] # 4 bytes for frame counter end
         chunk = payload[9:]
 
         if remote_device not in self.received_data:
@@ -256,11 +351,20 @@ class XBeeReceiver:
                 "timestamp": -1,
                 "payload_type": payload_type
             }
+            self.oper_time = time.time()
+            print(f"init frame_counter_end = {self.received_data[remote_device]['frame_counter_end']}")
 
+        print(f"Payload : {len(payload)} byte -> {frame_counter} / {self.received_data[remote_device]['frame_counter_end']}")
+        
         if self.received_data[remote_device]["frame_counter"] == self.received_data[remote_device]["frame_counter_end"]:
+            print("All chunks received. Discarding new chunk.")
             return
 
         if frame_counter != self.received_data[remote_device]["frame_counter"] + 1:
+            print("Frame counter mismatch. Discarding chunk.")
+            print(
+                f"Expected: {self.received_data[remote_device]['frame_counter'] + 1}, Received: {frame_counter}"
+            )
             del self.received_data[remote_device]
             return
 
@@ -269,6 +373,11 @@ class XBeeReceiver:
         self.received_data[remote_device]["timestamp"] = xbee_message.timestamp
 
         self.send_ack(remote_device, frame_counter)
+
+        # Trigger the event when the last chunk is received
+        if frame_counter == self.received_data[remote_device]["frame_counter_end"]:
+            print("Data reception complete. Signaling DataStoreService.")
+            self.data_ready_event.set()
 
     def send_ack(self, remote_device, frame_counter):
         """
@@ -304,6 +413,35 @@ class XBeeReceiver:
         """
         for remote_device in list(self.received_data.keys()):
             if self.received_data[remote_device]["frame_counter"] == self.received_data[remote_device]["frame_counter_end"]:
+                # directory_name = str(remote_device.get_64bit_addr())
+                # directory_path = os.path.join(self.output_path, directory_name)
+                if not os.path.exists(self.output_path):
+                    os.makedirs(self.output_path)
+
+                payload_type = self.received_data[remote_device]["payload_type"]
+                filename = f"{time.strftime('%Y%m%d%H%M%S')}"
+                
+                if payload_type == 0:  # Text
+                    filename += ".txt"
+                    with open(os.path.join(self.output_path, filename), 'wb') as f:
+                        f.write(self.received_data[remote_device]["data"])
+                    print(f"Text saved successfully as {filename}!")
+                
+                elif payload_type == 1:  # Image
+                    filename += self.save_extension
+                    self.save_image(self.received_data[remote_device]["data"], os.path.join(self.output_path, filename))
+                
+                del self.received_data[remote_device]
+            
+            # Reset the event after processing
+            self.data_ready_event.clear()
+
+    def _process_received_data(self):
+        """
+        Processes the received data and saves the file based on the payload type.
+        """
+        for remote_device in list(self.received_data.keys()):
+            if self.received_data[remote_device]["frame_counter"] == self.received_data[remote_device]["frame_counter_end"]:
                 directory_name = str(remote_device.get_64bit_addr())
                 directory_path = os.path.join(self.output_path, directory_name)
                 if not os.path.exists(directory_path):
@@ -320,10 +458,32 @@ class XBeeReceiver:
                     print(f"Text saved successfully as {filename}!")
                 
                 elif payload_type == 1:  # Image
-                    filename += ".jpg"
+                    filename += self.save_extension
                     self.save_image(self.received_data[remote_device]["data"], os.path.join(directory_path, filename))
                 
                 del self.received_data[remote_device]
+        
+    def get_image_metadata(self):
+        defaults_metadata_val = {
+            'sensorName': "sensor",
+            'eventID': f"sensor_{int(time.time())}",
+            'objClassID': 999,  # 999 indicates unknown class
+            'objClassName': 'unknown_object',
+            'imgSeq': 1,
+            'imgTotal': 1,
+            'imgExtension': ".png",
+            'eventSummary': '0-unknown'
+        }
+        
+        # obtain metadata and loop through default keys and fill missing ones
+        if os.path.exists(self.output_file):
+            metadata = extract_metadata(self.output_file)
+            for key, default_value in defaults_metadata_val.items():
+                if key not in metadata or not metadata[key]:
+                    metadata[key] = default_value
+                    print(metadata[key])
+        else:
+            print(f"metadata not found in {self.output_file}")
 
 class DataCleanupService(threading.Thread):
     """
@@ -335,7 +495,7 @@ class DataCleanupService(threading.Thread):
         running (bool): A flag indicating whether the service is running.
 
     Methods:
-        __init__(receiver, interval=10):
+        __init__(receiver, interval=10, timeout=10):
             Initializes the cleanup service with the specified interval.
         run():
             Continuously monitors and cleans up stale data in the receiver.
@@ -343,17 +503,18 @@ class DataCleanupService(threading.Thread):
             Stops the cleanup service.
     """
 
-    def __init__(self, receiver, interval=10):
+    def __init__(self, receiver, interval=10, timeout=10):
         super().__init__()
         self.receiver = receiver
         self.interval = interval
+        self.timeout = timeout
         self.running = True
 
     def run(self):
         while self.running:
             current_time = time.time()
             for remote_device in list(self.receiver.received_data.keys()):
-                if current_time - self.receiver.received_data[remote_device]["timestamp"] > self.receiver.timeout:
+                if current_time - self.receiver.received_data[remote_device]["timestamp"] > self.timeout:
                     print(f"Cleaning up data for {remote_device} due to timeout.")
                     del self.receiver.received_data[remote_device]
             time.sleep(self.interval)
@@ -379,16 +540,24 @@ class DataStoreService(threading.Thread):
             Stops the data storage service.
     """
 
-    def __init__(self, receiver, interval=5):
+    def __init__(self, receiver):
         super().__init__()
         self.receiver = receiver
-        self.interval = interval
         self.running = True
 
     def run(self):
         while self.running:
-            self.receiver.process_received_data()
-            time.sleep(self.interval)
+            # Wait for the event to be set, indicating that data is ready
+            self.receiver.data_ready_event.wait()
+
+            # Check if the thread is still running before processing data
+            if self.running:
+                # Process the received data when the event is triggered
+                self.receiver.process_received_data()
+
+            # Reset the event to wait for the next data reception
+            self.receiver.data_ready_event.clear()
 
     def stop(self):
         self.running = False
+        self.receiver.data_ready_event.set()

@@ -33,7 +33,6 @@ DEVICE_SYNC_OPS_TIMEOUT = int(appConfXbee.config['tx_device_sync_ops_timeout_sec
 
 # Create an instance of the XBeeTransmitter class
 TRANSMITTER = XBeeTransmitter(DEVICE, TX_TO_DEST_ADDR, CHUNK_SIZE, ACK_TIMEOUT, MAX_RETRY, DEVICE_SYNC_OPS_TIMEOUT)
-TRANSMITTER.test_open_device(ZPORT, ZBAUD_RATE)
 
 def send_xbee_payload(filepath):
     # Example usage for sending text and image
@@ -53,6 +52,7 @@ def send_xbee_payload(filepath):
         archive_img(filepath)
     else:
         print(f"Unsupported file type for {filepath}")
+    time.sleep(2)
 
 # Monitor directory for new payload data
 def monitor_directory(directory):
