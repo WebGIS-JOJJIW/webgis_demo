@@ -1,0 +1,20 @@
+{
+    "mode": "development",
+    "debug": true,
+    "tx_to_dest_addr": "0013A200422B127D",
+    "tx_port": "/dev/ttyUSB1",
+    "tx_baudrate": 9600,
+    "tx_ack_timeout_sec": 5,
+    "tx_max_retry_times": 3,
+    "tx_device_sync_ops_timeout_sec": 5,
+    "mon_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/output/",
+    "mon_extension": ".png",
+    "rx_from_src_addr": "0013A200423EC8C9",
+    "rx_port": "/dev/ttyUSB0",
+    "rx_baudrate": 115200,
+    "rx_output_dir": "/root/webgisAI/webgis_demo/src/device/YOLO/mon_input/",
+    "rx_write_extension": ".png",
+    "chunk_size_byte": 255,
+    "sensor_name": "sensor1",
+    "max_workers": 1
+}

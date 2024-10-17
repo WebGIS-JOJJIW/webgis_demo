@@ -1,0 +1,39 @@
+{
+    "selectedMode": "A",
+    "modeToScripts": {
+        "A": [
+            "sys_fileManager.py",
+            "imageOP.py",
+            "xBeeRx.py",
+            "xBeeTx.py"
+        ],
+        "POC2_CAM": [
+            "sys_fileManager.py",
+            "captureImage.py",
+            "imageOP.py",
+            "xBeeRx.py",
+            "xBeeTx.py"
+        ],
+        "POC2_NET": [
+            "sys_fileManager.py",
+            "xBeeRx.py",
+            "fileMon.py"
+        ],
+        "POC2_CAMNET": [
+            "sys_fileManager.py",
+            "captureImage.py",
+            "imageOP.py",
+            "fileMon.py"
+        ],
+        "X": [
+            "sys_fileManager.py",
+            "imageOP.py",
+            "fileMon.py"
+        ],
+        "Z": [
+            "sys_fileManager.py",
+            "imageOP.py",
+            "xBeeTx.py"
+        ]
+    }
+}
