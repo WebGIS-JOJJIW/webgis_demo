@@ -1,3 +1,14 @@
+#! /usr/bin/env python
+# ==========================================================================================
+# Script Name: autorun.py
+# Script Desc: A utility for automatically running selected scripts based on a predefined 
+#   mode configuration. The mode and corresponding scripts are defined in a configuration 
+#   file and executed as subprocesses.
+#
+# Dev by : Sutee C.
+# Version : 1.0
+# ==========================================================================================
+
 import subprocess
 import sys
 import os

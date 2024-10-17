@@ -21,6 +21,13 @@ WRITE_EXTENSION = (f"{appConfXbee.config['rx_write_extension']}")
 device = XBeeDevice(PORT, BAUD_RATE)
 
 if __name__ == "__main__":
+
+    print(f"""
+    ========
+    {os.path.basename(__file__)} Begin Rx monitoring..
+    ========
+    """)
+        
     try:
         # Initialize the XBeeReceiver with the device and the output directory
         xbee_receiver = XBeeReceiver(device, output_path=OUTPUT_IMAGE, sync_timeout=5, device_sync_ops_timeout=5, save_extension=WRITE_EXTENSION)

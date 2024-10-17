@@ -80,29 +80,6 @@ class XBeeTransmitter:
         finally:
             if self.device.is_open():
                 self.device.close()
-
-    def __read_image_to_bytes(self, image_path):
-        """
-        Reads an image and returns its byte array.
-        """
-        image = cv2.imread(image_path)
-        if image is None:
-            raise ValueError(f"Image at path {image_path} could not be read.")
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        downsampled_image = cv2.pyrDown(gray_image)
-        _, buffer = cv2.imencode('.jpg', downsampled_image)
-        return image.tobytes()
-    
-    def _read_image_to_bytes(self, image_path):
-        # Read the PNG image
-        image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Use IMREAD_UNCHANGED to preserve PNG's alpha channel if present
-
-        if image is None:
-            raise ValueError(f"Image at path {image_path} could not be read.")
-
-        # Encode image to bytes
-        _, buffer = cv2.imencode('.png', image)
-        return buffer.tobytes()
     
     def read_image_to_bytes(self, image_path):
         """
@@ -111,35 +88,13 @@ class XBeeTransmitter:
         # Determine the file extension
         file_extension = os.path.splitext(image_path)[1].lower()
 
-        # Read the image based on the file extension
-        if file_extension == ".jpg":
-            image = cv2.imread(image_path)
-            if image is None:
-                raise ValueError(f"Image at path {image_path} could not be read.")
-            # Convert to grayscale for JPG and downsample
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            downsampled_image = cv2.pyrDown(gray_image)
-            # Encode to JPG format
-            _, buffer = cv2.imencode('.jpg', downsampled_image)
-        
-        elif file_extension == ".png":
-            image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Preserve alpha channel for PNG
-            if image is None:
-                raise ValueError(f"Image at path {image_path} could not be read.")
-            # Encode to PNG format
-            _, buffer = cv2.imencode('.png', image)
-        
+        if file_extension == ".jpg" or file_extension == ".png":
+            with open (image_path, 'rb') as fdata:
+                data_bytes = fdata.read()
         else:
             raise ValueError(f"Unsupported file extension: {file_extension}. Supported: .jpg, .png")
-
-        return buffer.tobytes()
-
-    def _split_bytes(self, data):
-        """
-        Splits a byte array into chunks of the specified size minus the overhead.
-        """
-        overhead = self.calculate_overhead()
-        return [data[i : i + self.chunk_size - overhead] for i in range(0, len(data), self.chunk_size - overhead)]
+        
+        return data_bytes
 
     def split_bytes(self, data):
         overhead = self.calculate_overhead()
@@ -209,11 +164,12 @@ class XBeeTransmitter:
         chunk_count = len(chunks)
         while frame_counter < chunk_count:
             try:
+                # chunk = chunks[frame_counter]
+                # payload = struct.pack('B', payload_type) + struct.pack('>I', frame_counter) + struct.pack('>I', chunk_count) + chunk
                 chunk = chunks[frame_counter]
-                payload = struct.pack('B', payload_type) + struct.pack('>I', frame_counter) + struct.pack('>I', chunk_count) + chunk
+                header = struct.pack('B', payload_type) + struct.pack('>I', frame_counter) + struct.pack('>I', chunk_count)
+                payload = header + chunk
                 # print(f"{chunk[:]}")
-
-                # print(f"Raw payload data (first 9 bytes): {payload[:9]}")
 
                 for attempt in range(self.max_retries):
                     print(f"Sending {data_type} chunk {len(payload)} bytes {frame_counter + 1}/{chunk_count}")
@@ -291,44 +247,18 @@ class XBeeReceiver:
         print(f"Total data transfer time: {self.oper_time} seconds")
 
         # Determine how to decode based on file extension
-        if self.save_extension == ".jpg":
-            # Decode as a grayscale image for .jpg
-            image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
-        elif self.save_extension == ".png":
-            # Decode keeping the original format for .png (could have transparency)
-            image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+        if self.save_extension == ".jpg" or self.save_extension == ".png":
+            try:
+                with open (output_path, 'wb') as f:
+                    f.write(data)
+                print(f"Image saved successfully as {self.save_extension}: {output_path}")
+            except KeyboardInterrupt:
+                print(f"\n{os.path.basename(__file__)}: Interrupt autorun by user. Exiting...")
+            except Exception as e:
+                print(f"Save_image Error: {e}")
         else:
             print(f"Unsupported format: {self.save_extension}")
             return
-
-        if image is not None:
-            print(f"Image dimensions: {image.shape}")
-            if self.save_extension == ".jpg":
-                upsampled_image = cv2.resize(image, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
-                cv2.imwrite(output_path, upsampled_image)
-                print(f"Image saved successfully as JPG: {output_path}")
-            elif self.save_extension == ".png":
-                # For PNG, save directly without upsampling
-                cv2.imwrite(output_path, image)
-                print(f"Image saved successfully as PNG: {output_path}")
-            self.output_file = output_path
-        else:
-            print("Failed to decode image from byte data.")
-
-
-    def _save_image(self, data, output_path):
-        """
-        Saves the received byte data as an image.
-        """
-        nparr = np.frombuffer(data, np.uint8)
-        grey_image = cv2.imdecode(nparr, cv2.COLOR_BGR2GRAY)
-        upsampled_image = cv2.resize(grey_image, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
-
-        if upsampled_image is not None:
-            cv2.imwrite(output_path, upsampled_image)
-            print("Image saved successfully!")
-        else:
-            print("Failed to decode image from byte data.")
     
     def data_receive_callback(self, xbee_message):
         """
@@ -435,33 +365,6 @@ class XBeeReceiver:
             
             # Reset the event after processing
             self.data_ready_event.clear()
-
-    def _process_received_data(self):
-        """
-        Processes the received data and saves the file based on the payload type.
-        """
-        for remote_device in list(self.received_data.keys()):
-            if self.received_data[remote_device]["frame_counter"] == self.received_data[remote_device]["frame_counter_end"]:
-                directory_name = str(remote_device.get_64bit_addr())
-                directory_path = os.path.join(self.output_path, directory_name)
-                if not os.path.exists(directory_path):
-                    os.makedirs(directory_path)
-
-                payload_type = self.received_data[remote_device]["payload_type"]
-                filename = f"{time.strftime('%Y%m%d%H%M%S')}"
-                
-                # Handle different payload types
-                if payload_type == 0:  # Text
-                    filename += ".txt"
-                    with open(os.path.join(directory_path, filename), 'wb') as f:
-                        f.write(self.received_data[remote_device]["data"])
-                    print(f"Text saved successfully as {filename}!")
-                
-                elif payload_type == 1:  # Image
-                    filename += self.save_extension
-                    self.save_image(self.received_data[remote_device]["data"], os.path.join(directory_path, filename))
-                
-                del self.received_data[remote_device]
         
     def get_image_metadata(self):
         defaults_metadata_val = {
